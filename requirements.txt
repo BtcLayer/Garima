@@ -1,0 +1,12 @@
+python-binance
+python-dotenv
+rich
+questionary
+streamlit
+portalocker
+flask
+fastapi 
+uvicorn
+pytest 
+pytest-cov
+pytest-asyncio
