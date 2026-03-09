@@ -1,9 +1,3 @@
-A professional `README.md` acts as the face of your project. It explains **what** the project does, **why** it exists, and **how** it meets the specific [QBA] requirements.
-
-Copy the content below into a file named `README.md` in your root directory.
-
----
-
 # 📈 TradingView Strategy Hub
 
 A high-performance automated system for ingesting TradingView backtest data, generating comparative performance reports, and listening for live trade signals via Webhooks.
@@ -96,4 +90,3 @@ Now that you have your `README.md`, `RUNBOOK.md`, and `requirements.txt`:
 2. `git commit -m "docs: add professional README and Runbook"`
 3. `git push origin main`
 
-**Would you like me to generate a `LICENSE` file (like MIT) to make your repository truly open-source?**
