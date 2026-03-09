@@ -16,6 +16,54 @@ def clean_val(val):
         return 0.0
 
 def parse_tv_csv(file_path):
+    # 1. Load the CSV (TradingView 'List of Trades' is usually standard CSV)
+    # Using 'utf-8-sig' to handle potential Byte Order Marks (BOM)
+    df = pd.read_csv(file_path, encoding='utf-8-sig')
+
+    # 2. Identify the correct columns
+    # We use 'Net P&L USD' for profit and drawdown calculations
+    pnl_col = 'Net P&L USD'
+    
+    if pnl_col not in df.columns:
+        raise ValueError(f"Column '{pnl_col}' not found in {file_path}")
+
+    # 3. Calculate Metrics
+    net_profit = df[pnl_col].sum()
+    
+    # Profit Factor = (Sum of Wins) / |Sum of Losses|
+    wins = df[df[pnl_col] > 0][pnl_col].sum()
+    losses = abs(df[df[pnl_col] < 0][pnl_col].sum())
+    profit_factor = (wins / losses) if losses != 0 else (wins if wins > 0 else 0.0)
+
+    # Win Rate = (Number of winning trades / Total trades) * 100
+    total_trades = len(df)
+    win_rate = (len(df[df[pnl_col] > 0]) / total_trades * 100) if total_trades > 0 else 0.0
+
+    # Max Drawdown (using Cumulative P&L)
+    cum_pnl = df[pnl_col].cumsum()
+    running_max = cum_pnl.cummax()
+    drawdown = running_max - cum_pnl
+    max_dd = drawdown.max()
+
+    # Sharpe Ratio (Simplified: Mean / Std Dev)
+    # Note: This is a basic version; professional Sharpe uses risk-free rates
+    if total_trades > 1 and df[pnl_col].std() != 0:
+        sharpe = (df[pnl_col].mean() / df[pnl_col].std()) * (total_trades**0.5)
+    else:
+        sharpe = 0.0
+
+    # Clean the filename for the strategy name
+    raw_name = os.path.basename(file_path)
+    clean_name = raw_name.split('_BITSTAMP')[0].replace('_', ' ')
+
+    return {
+        "strategy_name": clean_name,
+        "net_profit": round(float(net_profit), 2),
+        "profit_factor": round(float(profit_factor), 2),
+        "win_rate": round(float(win_rate), 2),
+        "max_dd": round(float(max_dd), 2),
+        "sharpe": round(float(sharpe), 2)
+    }
     # Try multiple encodings because TradingView is inconsistent
     for enc in ['utf-8', 'utf-16', 'cp1252']:
         try:
