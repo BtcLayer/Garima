@@ -1,92 +1,84 @@
-# 📈 TradingView Strategy Hub
+# 🚀 Crypto Quant Trading Hub
 
-A high-performance automated system for ingesting TradingView backtest data, generating comparative performance reports, and listening for live trade signals via Webhooks.
-
-## 🚀 Features
-
-* **Multi-Tab Ingestion [QBA-005]:** Process "Performance Summary" and "List of Trades" CSV exports directly from TradingView.
-* **Database Persistence [QBA-006]:** Local SQLite storage for both historical backtests and live forward-test signals.
-* **Automated Reporting [QBA-007]:** Generates HTML leaderboards and CSV summaries, including a "Stability View" to analyze profit consistency.
-* **Live Webhook API [QBA-008]:** FastAPI-powered listener to catch and log real-time trade alerts from TradingView via ngrok.
-* **Production Ready [QBA-011]:** Modular structure with clean dependency management.
-
----
-
-## 🛠 Tech Stack
-
-* **Language:** Python 3.9+
-* **API Framework:** FastAPI & Uvicorn
-* **Data Science:** Pandas & NumPy
-* **Database:** SQLite3
-* **Tunneling:** ngrok
-
----
+This repository contains a modular quantitative trading system designed for **Bitcoin (BTC)**, **Ethereum (ETH)**, and **Solana (SOL)**. The project is organized into three distinct workflows to separate historical backtesting, live signal ingestion, and data refinement.
 
 ## 📂 Project Structure
 
 ```text
-├── app/
-│   └── main.py          # FastAPI Webhook Server [QBA-008]
-├── backtest_imports/    # Raw TradingView CSV exports
-├── reports/             # Generated HTML & CSV reports [QBA-007]
-├── ingest_csv.py        # CLI for data processing [QBA-005]
-├── report.py            # Report generation logic
-├── init_db.py           # Database schema initialization
-├── RUNBOOK.md           # Operational instructions
-└── requirements.txt     # Python dependencies
+Garima/
+├── db.sqlite3                 # Central Database (Shared across all workflows)
+├── core/                      # SYSTEM KERNEL
+│   ├── models.py              # SQLAlchemy Schema (Master Table Rules)
+│   ├── init_db.py             # Database Initialization Script
+│   └── check_table.py         # Table Diagnostics
+│
+├── Workflow_A_Leaderboard/    # WORKFLOW A: Historical Analysis
+│   ├── ingest_csv.py          # TradingView CSV -> DB Ingestor
+│   ├── report.py              # Performance Ranking Report
+│   └── backtest_imports/      # Folder for raw backtest CSVs
+│
+├── Workflow_B_Webhook/        # WORKFLOW B: Live Signal Listener
+│   ├── main.py                # FastAPI Webhook Server
+│   ├── test_webhook.py        # Connection Simulator
+│   └── test_schema.py         # JSON Validator
+│
+└── Workflow_C_Processor/      # WORKFLOW C: Data Refinement
+    └── process_events.py      # Raw JSON -> Clean Trade Logic
 
 ```
 
 ---
 
-## 🚦 Quick Start
+## 🛠 Workflow Usage
 
-### 1. Installation
+### **Workflow A: The "CSV Leaderboard"**
 
+*Process and rank historical backtest data from TradingView.*
+
+1. Place CSVs in `Workflow_A_Leaderboard/backtest_imports/`.
+2. Run Ingestion: `python Workflow_A_Leaderboard/ingest_csv.py`
+3. Generate Report: `python Workflow_A_Leaderboard/report.py`
+
+### **Workflow B: The "Live Webhook"**
+
+*Start the server to catch real-time alerts.*
+
+1. Start Server: `uvicorn Workflow_B_Webhook.main:app --reload`
+2. Test Endpoint: `python Workflow_B_Webhook/test_webhook.py`
+
+### **Workflow C: The "Event Processor"**
+
+*Clean and move raw alerts into actionable trade tables.*
+
+1. Run Processor: `python Workflow_C_Processor/process_events.py`
+
+---
+
+## 🚀 Setup for New Users
+
+1. **Install Dependencies:**
 ```bash
-pip install -r requirements.txt
-python init_db.py
+pip install fastapi uvicorn sqlalchemy pandas
 
 ```
 
-### 2. Import Data
 
+2. **Initialize Database:**
 ```bash
-python ingest_csv.py --run-id "BTC_4H_SMC" backtest_imports/Performance.csv
+# Run this from the root directory
+python core/init_db.py
 
 ```
 
-### 3. Launch Webhook
 
+3. **Verify Setup:**
 ```bash
-uvicorn app.main:app --reload --port 8000
+python core/check_table.py
 
 ```
 
----
+## 📊 Technical Capabilities
 
-## 📊 Sample Metrics (SuperTrend BTC 4H)
-
-Based on current data ingestion, the system is tracking:
-
-* **Net Profit:** $1,676.63 (167.66%)
-* **Profit Factor:** 1.412
-* **Win Rate:** 41.46%
-* **Total Trades:** 82
-
----
-
-## 📜 Documentation
-
-For detailed operational steps, refer to the [RUNBOOK.md](https://www.google.com/search?q=./RUNBOOK.md).
-
----
-
-### **Final GitHub Push Steps**
-
-Now that you have your `README.md`, `RUNBOOK.md`, and `requirements.txt`:
-
-1. `git add README.md RUNBOOK.md requirements.txt`
-2. `git commit -m "docs: add professional README and Runbook"`
-3. `git push origin main`
-
+* **Deduplication:** Uses SHA-256 idempotency keys to prevent double-trading.
+* **Architecture:** Decoupled design allows the API (Workflow B) to run independently of the Processor (Workflow C).
+* **Security:** Token-based header validation for all incoming TradingView webhooks.
