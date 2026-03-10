@@ -3,8 +3,10 @@ import os
 import sqlite3
 import re
 
-DB_PATH = 'db.sqlite3'
-INPUT_DIR = 'backtest_imports'
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_PATH = os.path.join(BASE_DIR, 'db.sqlite3')
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+INPUT_DIR = os.path.join(SCRIPT_DIR, 'backtest_imports')
 
 def clean_val(val):
     if pd.isna(val) or val == "0": return 0.0
