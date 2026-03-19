@@ -1,0 +1,65 @@
+//@version=5
+strategy("RSI Strategy BTCUSDT", overlay=true, default_qty_type=strategy.percent_of_equity, default_qty_value=10)
+
+// Input parameters
+symbol = "BTCUSDT"
+timeframe = "15m"
+
+// RSI Indicator
+rsiLength = input.int(14, minval=1, title="RSI Length")
+rsiOversold = input.int(30, title="RSI Oversold")
+rsiOverbought = input.int(70, title="RSI Overbought")
+
+rsi = ta.rsi(close, rsiLength)
+
+// Plot RSI
+plot(rsi, title="RSI", color=color.purple)
+hline(rsiOversold, "Oversold", color=color.green)
+hline(rsiOverbought, "Overbought", color=color.red)
+
+// EMA Trend Filter
+useTrendFilter = input.bool(true, title="Use EMA Trend Filter")
+ema200 = ta.ema(close, 200)
+plot(ema200, "EMA 200", color=color.orange)
+bullishTrend = close > ema200
+bearishTrend = close < ema200
+
+// Signals
+longCondition = ta.crossover(rsi, rsiOversold)
+shortCondition = ta.crossunder(rsi, rsiOverbought)
+
+// Apply trend filter
+if useTrendFilter
+    longCondition := longCondition and bullishTrend
+    shortCondition := shortCondition and bearishTrend
+
+// Entry and Exit
+if (longCondition)
+    strategy.entry("Long", strategy.long)
+
+if (shortCondition)
+    strategy.entry("Short", strategy.short)
+
+// Exit on opposite signal
+if (ta.crossunder(rsi, rsiOverbought))
+    strategy.close("Long")
+
+if (ta.crossover(rsi, rsiOversold))
+    strategy.close("Short")
+
+// Stop Loss and Take Profit
+useStopLoss = input.bool(true, title="Use Stop Loss")
+stopLossPercent = input.float(1.0, title="Stop Loss %") / 100
+takeProfitPercent = input.float(2.0, title="Take Profit %") / 100
+
+if (useStopLoss)
+    strategy.exit("SL/TP", "Long", stop=strategy.position_avg_price * (1 - stopLossPercent), limit=strategy.position_avg_price * (1 + takeProfitPercent))
+    strategy.exit("SL/TP", "Short", stop=strategy.position_avg_price * (1 + stopLossPercent), limit=strategy.position_avg_price * (1 - takeProfitPercent))
+
+// Plot shapes
+plotshape(longCondition, title="Buy Signal", location=location.belowbar, color=color.green, style=shape.triangleup, size=size.tiny, text="BUY")
+plotshape(shortCondition, title="Sell Signal", location=location.abovebar, color=color.red, style=shape.triangledown, size=size.tiny, text="SELL")
+
+// Alerts
+alertcondition(longCondition, title="RSI Buy", message="RSI Buy Signal on BTCUSDT")
+alertcondition(shortCondition, title="RSI Sell", message="RSI Sell Signal on BTCUSDT")

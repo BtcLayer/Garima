@@ -1,0 +1,10 @@
+# Environments and Credentials
+.env
+service_account.json
+.venv/
+__pycache__/
+
+# Local Trading Data (Don't sync private logs)
+storage/*.jsonl
+storage/*.json
+storage/*.csv

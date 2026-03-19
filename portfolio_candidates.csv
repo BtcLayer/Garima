@@ -1,0 +1,4 @@
+Portfolio_Rank,Strategy,Asset,Timeframe,roi,Win_Rate_Percent,Profit_Factor,Max_Drawdown,Total_Trades,mean_daily,opt_expected_daily,opt_sl,opt_tp,opt_ts,Parameters
+1,Breakout_Retest_Pro,DOTUSDT,4h,52.27,44.64,1.75,17.29,56,0.3149,1.3192,0.01,0.1,0.01,"SL:0.01, TP:0.07, TS:0.01"
+2,VWAP_Break_Entry,AVAXUSDT,4h,55.95,53.12,2.23,12.15,32,0.337,0.9336,0.01,0.1,0.02,"SL:0.018, TP:0.1, TS:0.018"
+3,Volume_Stochastic_MACD_ADX,BNBUSDT,4h,66.99,32.14,1.96,17.32,28,0.184,0.195,0.01,0.1,0.02,"SL:0.02, TP:0.12, TS:0.02"

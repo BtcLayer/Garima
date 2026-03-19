@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class BinanceClient:
-    def __init__(self):
+    def __init__(self, testnet=True):
         """Initialize Binance client with API credentials"""
         api_key = os.getenv('BINANCE_API_KEY')
         api_secret = os.getenv('BINANCE_API_SECRET')
@@ -18,8 +18,11 @@ class BinanceClient:
         if not api_key or not api_secret:
             raise ValueError("BINANCE_API_KEY and BINANCE_API_SECRET must be set in .env file")
         
-        # Initialize Binance client
-        self.client = Client(api_key=api_key, api_secret=api_secret)
+        # Initialize Binance client (testnet=True for testnet)
+        if testnet:
+            self.client = Client(api_key, api_secret, testnet=True)
+        else:
+            self.client = Client(api_key, api_secret)
     
     def get_account_info(self):
         """Fetch account information"""
@@ -100,17 +103,17 @@ if __name__ == '__main__':
     # Test connection
     try:
         client = BinanceClient()
-        print("✓ Successfully connected to Binance")
+        print("Successfully connected to Binance")
         
         # Fetch account info
         account = client.get_account_info()
         if account:
-            print(f"✓ Account connected: {len(account['balances'])} assets")
+            print(f"Account connected: {len(account['balances'])} assets")
         
         # Get USDT balance
         usdt_balance = client.get_balance('USDT')
         if usdt_balance:
-            print(f"✓ USDT Balance: {usdt_balance['free']}")
+            print(f"USDT Balance: {usdt_balance['free']}")
         
     except Exception as e:
-        print(f"✗ Connection failed: {e}")
+        print(f"Connection failed: {e}")

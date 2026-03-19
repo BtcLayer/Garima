@@ -10,3 +10,7 @@ uvicorn
 pytest 
 pytest-cov
 pytest-asyncio
+pyarrow
+requests
+pandas_ta
+anthropic
