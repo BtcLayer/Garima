@@ -1,13 +1,16 @@
-# Web Server & API
-fastapi==0.109.0
-uvicorn==0.27.0
-pydantic==2.5.3
-
-# Data Processing
-pandas==2.2.0
-numpy==1.26.3
-
-# Database & Utilities
-sqlite3
-python-multipart==0.0.6
-requests==2.31.0
+python-binance
+python-dotenv
+rich
+questionary
+streamlit
+portalocker
+flask
+fastapi 
+uvicorn
+pytest 
+pytest-cov
+pytest-asyncio
+pyarrow
+requests
+pandas_ta
+anthropic

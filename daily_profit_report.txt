@@ -1,0 +1,65 @@
+======================================================================
+DAILY PROFIT FRAMEWORK — 2% Daily Target Analysis
+Capital: $10,000  |  Target: 2.0%/day  |  Max Drawdown: 25.0%
+======================================================================
+
+Elite strategies analysed   : 3
+Deployable (DrawDown < 25.0%) : 3
+
+======================================================================
+PORTFOLIO SIMULATION (top N strategies combined)
+======================================================================
+  Top  1 strategies  →  Daily: +0.315%  Annualised: +114.9%  ❌ below target
+  Top  3 strategies  →  Daily: +0.836%  Annualised: +305.1%  ❌ below target
+
+======================================================================
+TOP 20 DEPLOYABLE STRATEGIES (optimised for 2%/day)
+======================================================================
+Rank  Strategy                            Asset      TF       ROI%     WR%     DD%   E.Daily  OptSL  OptTP
+------------------------------------------------------------------------------------------
+  1    Breakout_Retest_Pro                 DOTUSDT    4h       52.3%   44.6%   17.3%    1.319%   1.0%  10.0%
+  2    VWAP_Break_Entry                    AVAXUSDT   4h       56.0%   53.1%   12.2%    0.934%   1.0%  10.0%
+  3    Volume_Stochastic_MACD_ADX          BNBUSDT    4h       67.0%   32.1%   17.3%    0.195%   1.0%  10.0%
+
+======================================================================
+DEPLOYMENT PLAN — RECOMMENDED PARAMETER SETTINGS
+======================================================================
+
+  Strategy 1: Breakout_Retest_Pro — DOTUSDT 4h
+    Current params  : SL:0.01, TP:0.07, TS:0.01
+    Optimised SL    : 1.0%
+    Optimised TP    : 10.0%
+    Optimised TS    : 1.0%
+    Expected/trade  : +3.910%
+    Expected/day    : +1.3192%
+    Allocated capital: $3,333
+
+  Strategy 2: VWAP_Break_Entry — AVAXUSDT 4h
+    Current params  : SL:0.018, TP:0.1, TS:0.018
+    Optimised SL    : 1.0%
+    Optimised TP    : 10.0%
+    Optimised TS    : 2.0%
+    Expected/trade  : +4.843%
+    Expected/day    : +0.9336%
+    Allocated capital: $3,333
+
+  Strategy 3: Volume_Stochastic_MACD_ADX — BNBUSDT 4h
+    Current params  : SL:0.02, TP:0.12, TS:0.02
+    Optimised SL    : 1.0%
+    Optimised TP    : 10.0%
+    Optimised TS    : 2.0%
+    Expected/trade  : +2.535%
+    Expected/day    : +0.1950%
+    Allocated capital: $3,333
+
+======================================================================
+RISK NOTES
+======================================================================
+  1. Daily returns are estimates from backtest averages — live results vary.
+  2. Strategies optimised on historical data may overfit — validate on fresh data.
+  3. Max Drawdown shown is backtest max — live DD can exceed this in tail events.
+  4. 2% daily = ~600% annualised — realistic only with low-drawdown high-PF strategies.
+  5. Start with paper trading before committing real capital.
+  6. Hard stop: exit if total portfolio drawdown exceeds 25.0%.
+
+✅ Portfolio candidates saved to portfolio_candidates.csv

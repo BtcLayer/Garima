@@ -1,16 +1,10 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-venv/
+# Environments and Credentials
 .env
+service_account.json
+.venv/
+__pycache__/
 
-# Databases
-*.sqlite3
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# TradingView data (optional, depends if you want to share your raw CSVs)
-# backtest_imports/*.csv
+# Local Trading Data (Don't sync private logs)
+storage/*.jsonl
+storage/*.json
+storage/*.csv

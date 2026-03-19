@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc -l /c/Users/hp/Desktop/Internship/Trading_Bot/src/*.py /c/Users/hp/Desktop/Internship/Trading_Bot/*.py)",
+      "Bash(python -c \"import json; d=json.load\\(open\\(''c:/Users/hp/Desktop/Internship/Trading_Bot/storage/custom_strategies.json''\\)\\); print\\(list\\(d.keys\\(\\)\\)[:10]\\)\")"
+    ]
+  }
+}

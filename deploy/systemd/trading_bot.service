@@ -1,0 +1,12 @@
+[Unit]
+Description=Trading Bot Worker
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/new_trading_bot
+ExecStart=/home/ubuntu/new_trading_bot/.venv/bin/python bot/main.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

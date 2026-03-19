@@ -1,0 +1,8418 @@
+[
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 20,
+    "id": 229,
+    "name": "Momentum_Trade",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "EMA_Cross",
+      "MACD_Cross"
+    ],
+    "trades": 68,
+    "win_rate": 20.59,
+    "roi": 85.51,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 15,
+    "id": 180,
+    "name": "Volume_Trend_ADX",
+    "strategies": [
+      "Volume_Spike",
+      "Trend_MA50",
+      "ADX_Trend",
+      "EMA_Cross",
+      "MACD_Cross"
+    ],
+    "trades": 103,
+    "win_rate": 26.21,
+    "roi": 83.43,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 17,
+    "id": 193,
+    "name": "MACD_Trend_Strength",
+    "strategies": [
+      "MACD_Cross",
+      "Trend_MA50",
+      "ADX_Trend",
+      "EMA_Cross",
+      "Volume_Spike"
+    ],
+    "trades": 103,
+    "win_rate": 26.21,
+    "roi": 83.43,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 20,
+    "id": 223,
+    "name": "Aggressive_Entry",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "MACD_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 136,
+    "win_rate": 24.26,
+    "roi": 79.62,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 19,
+    "id": 213,
+    "name": "MACD_BB_Stochastic_ADX",
+    "strategies": [
+      "MACD_Cross",
+      "BB_Lower",
+      "Stochastic",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 71,
+    "win_rate": 18.31,
+    "roi": 75.76,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 15,
+    "id": 173,
+    "name": "MACD_Breakout",
+    "strategies": [
+      "MACD_Cross",
+      "Breakout_20",
+      "Volume_Spike",
+      "ADX_Trend"
+    ],
+    "trades": 108,
+    "win_rate": 23.15,
+    "roi": 75.61,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 19,
+    "id": 219,
+    "name": "Volume_Stochastic_MACD_ADX",
+    "strategies": [
+      "Volume_Spike",
+      "Stochastic",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Trend_MA50",
+      "Supertrend"
+    ],
+    "trades": 61,
+    "win_rate": 19.67,
+    "roi": 75.57,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 10,
+    "id": 124,
+    "name": "Breakout_Momentum",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "MACD_Cross"
+    ],
+    "trades": 116,
+    "win_rate": 22.41,
+    "roi": 66.0,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 3,
+    "id": 38,
+    "name": "Breakout_Momentum",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "MACD_Cross",
+      "Supertrend"
+    ],
+    "trades": 116,
+    "win_rate": 22.41,
+    "roi": 65.59,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 14,
+    "id": 161,
+    "name": "EMA_Break_Momentum",
+    "strategies": [
+      "EMA_Cross",
+      "Breakout_20",
+      "MACD_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 128,
+    "win_rate": 24.22,
+    "roi": 65.12,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 18,
+    "id": 210,
+    "name": "Mega_Confirmation",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "RSI_Oversold",
+      "Supertrend",
+      "ADX_Trend",
+      "VWAP",
+      "Trend_MA50"
+    ],
+    "trades": 45,
+    "win_rate": 17.78,
+    "roi": 64.87,
+    "sl": 0.025,
+    "tp": 0.15,
+    "ts": 0.025
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 20,
+    "id": 229,
+    "name": "Momentum_Trade",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "EMA_Cross",
+      "MACD_Cross"
+    ],
+    "trades": 107,
+    "win_rate": 24.3,
+    "roi": 63.93,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 15,
+    "id": 180,
+    "name": "Volume_Trend_ADX",
+    "strategies": [
+      "Volume_Spike",
+      "Trend_MA50",
+      "ADX_Trend",
+      "EMA_Cross",
+      "MACD_Cross"
+    ],
+    "trades": 65,
+    "win_rate": 21.54,
+    "roi": 61.81,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 17,
+    "id": 193,
+    "name": "MACD_Trend_Strength",
+    "strategies": [
+      "MACD_Cross",
+      "Trend_MA50",
+      "ADX_Trend",
+      "EMA_Cross",
+      "Volume_Spike"
+    ],
+    "trades": 65,
+    "win_rate": 21.54,
+    "roi": 61.81,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 1,
+    "id": 15,
+    "name": "Aggressive_Growth",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "Volume_Spike",
+      "Breakout_20",
+      "ADX_Trend",
+      "VWAP"
+    ],
+    "trades": 103,
+    "win_rate": 22.33,
+    "roi": 60.9,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 17,
+    "id": 200,
+    "name": "Volume_All_Confirm",
+    "strategies": [
+      "Volume_Spike",
+      "EMA_Cross",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Supertrend",
+      "VWAP"
+    ],
+    "trades": 103,
+    "win_rate": 22.33,
+    "roi": 60.5,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 1,
+    "id": 12,
+    "name": "EMA_Cloud_Strength",
+    "strategies": [
+      "EMA_Cross",
+      "Trend_MA50",
+      "ADX_Trend"
+    ],
+    "trades": 138,
+    "win_rate": 22.46,
+    "roi": 60.49,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 7,
+    "id": 91,
+    "name": "Trend_Follower_Pro",
+    "strategies": [
+      "EMA_Cross",
+      "Trend_MA50",
+      "ADX_Trend"
+    ],
+    "trades": 138,
+    "win_rate": 22.46,
+    "roi": 60.49,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 20,
+    "id": 225,
+    "name": "High_Profit_Trade",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Supertrend",
+      "VWAP",
+      "Trend_MA50"
+    ],
+    "trades": 45,
+    "win_rate": 17.78,
+    "roi": 60.04,
+    "sl": 0.025,
+    "tp": 0.15,
+    "ts": 0.025
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 1,
+    "id": 6,
+    "name": "Breakout_Hunter",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "MACD_Cross",
+      "Supertrend"
+    ],
+    "trades": 148,
+    "win_rate": 22.97,
+    "roi": 59.68,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 15,
+    "id": 178,
+    "name": "BB_EMA_VWAP",
+    "strategies": [
+      "BB_Lower",
+      "EMA_Cross",
+      "VWAP",
+      "Trend_MA50"
+    ],
+    "trades": 110,
+    "win_rate": 17.27,
+    "roi": 59.3,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 17,
+    "id": 196,
+    "name": "VWAP_MACD_ADX",
+    "strategies": [
+      "VWAP",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Trend_MA50",
+      "EMA_Cross"
+    ],
+    "trades": 71,
+    "win_rate": 19.72,
+    "roi": 59.09,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 18,
+    "id": 206,
+    "name": "VWAP_Trend_Entry",
+    "strategies": [
+      "VWAP",
+      "Trend_MA50",
+      "EMA_Cross",
+      "ADX_Trend",
+      "MACD_Cross"
+    ],
+    "trades": 71,
+    "win_rate": 19.72,
+    "roi": 59.09,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 1,
+    "id": 15,
+    "name": "Aggressive_Growth",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "Volume_Spike",
+      "Breakout_20",
+      "ADX_Trend",
+      "VWAP"
+    ],
+    "trades": 60,
+    "win_rate": 18.33,
+    "roi": 58.08,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 17,
+    "id": 200,
+    "name": "Volume_All_Confirm",
+    "strategies": [
+      "Volume_Spike",
+      "EMA_Cross",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Supertrend",
+      "VWAP"
+    ],
+    "trades": 60,
+    "win_rate": 18.33,
+    "roi": 58.08,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 1,
+    "id": 3,
+    "name": "Volume_Breakout_Pro",
+    "strategies": [
+      "Volume_Spike",
+      "Breakout_20",
+      "VWAP"
+    ],
+    "trades": 216,
+    "win_rate": 21.76,
+    "roi": 57.68,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 12,
+    "id": 144,
+    "name": "Breakout_Stochastic",
+    "strategies": [
+      "Breakout_20",
+      "Stochastic",
+      "Volume_Spike"
+    ],
+    "trades": 143,
+    "win_rate": 23.78,
+    "roi": 56.05,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 19,
+    "id": 220,
+    "name": "Ultimate_Entry",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "RSI_Oversold",
+      "Supertrend",
+      "ADX_Trend",
+      "VWAP",
+      "Trend_MA50",
+      "Volume_Spike"
+    ],
+    "trades": 40,
+    "win_rate": 17.5,
+    "roi": 55.94,
+    "sl": 0.025,
+    "tp": 0.15,
+    "ts": 0.025
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 6,
+    "id": 87,
+    "name": "Breakout_Retest_Pro",
+    "strategies": [
+      "Breakout_20",
+      "RSI_Oversold",
+      "MACD_Cross"
+    ],
+    "trades": 134,
+    "win_rate": 23.13,
+    "roi": 55.94,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 3,
+    "id": 32,
+    "name": "Volatility_Expansion",
+    "strategies": [
+      "BB_Lower",
+      "Volume_Spike",
+      "Breakout_20"
+    ],
+    "trades": 187,
+    "win_rate": 22.46,
+    "roi": 55.7,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 17,
+    "id": 199,
+    "name": "Stochastic_Trend_MACD",
+    "strategies": [
+      "Stochastic",
+      "Trend_MA50",
+      "MACD_Cross",
+      "EMA_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 71,
+    "win_rate": 19.72,
+    "roi": 54.43,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 17,
+    "id": 196,
+    "name": "VWAP_MACD_ADX",
+    "strategies": [
+      "VWAP",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Trend_MA50",
+      "EMA_Cross"
+    ],
+    "trades": 131,
+    "win_rate": 22.9,
+    "roi": 54.37,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 18,
+    "id": 206,
+    "name": "VWAP_Trend_Entry",
+    "strategies": [
+      "VWAP",
+      "Trend_MA50",
+      "EMA_Cross",
+      "ADX_Trend",
+      "MACD_Cross"
+    ],
+    "trades": 131,
+    "win_rate": 22.9,
+    "roi": 54.37,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 14,
+    "id": 167,
+    "name": "ADX_Volume_Break",
+    "strategies": [
+      "ADX_Trend",
+      "Volume_Spike",
+      "Breakout_20",
+      "EMA_Cross"
+    ],
+    "trades": 113,
+    "win_rate": 22.12,
+    "roi": 54.1,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 19,
+    "id": 211,
+    "name": "EMA_Breakout_ADX",
+    "strategies": [
+      "EMA_Cross",
+      "Breakout_20",
+      "ADX_Trend",
+      "Supertrend",
+      "Volume_Spike"
+    ],
+    "trades": 113,
+    "win_rate": 22.12,
+    "roi": 54.1,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 18,
+    "id": 205,
+    "name": "Supertrend_BB_Entry",
+    "strategies": [
+      "Supertrend",
+      "BB_Lower",
+      "EMA_Cross",
+      "MACD_Cross",
+      "RSI_Oversold"
+    ],
+    "trades": 70,
+    "win_rate": 24.29,
+    "roi": 53.52,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 10,
+    "id": 130,
+    "name": "Trend_Stochastic",
+    "strategies": [
+      "Trend_MA50",
+      "Stochastic",
+      "EMA_Cross"
+    ],
+    "trades": 223,
+    "win_rate": 21.08,
+    "roi": 53.08,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 5,
+    "id": 68,
+    "name": "Bollinger_Break_Upper",
+    "strategies": [
+      "BB_Upper",
+      "Volume_Spike",
+      "Breakout_20"
+    ],
+    "trades": 170,
+    "win_rate": 22.94,
+    "roi": 52.78,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 17,
+    "id": 199,
+    "name": "Stochastic_Trend_MACD",
+    "strategies": [
+      "Stochastic",
+      "Trend_MA50",
+      "MACD_Cross",
+      "EMA_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 118,
+    "win_rate": 22.88,
+    "roi": 51.81,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 5,
+    "id": 75,
+    "name": "High_Momentum_Entry",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "Volume_Spike",
+      "ADX_Trend",
+      "Breakout_20"
+    ],
+    "trades": 51,
+    "win_rate": 19.61,
+    "roi": 51.4,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 16,
+    "id": 184,
+    "name": "Breakout_ADX_Pro",
+    "strategies": [
+      "Breakout_20",
+      "ADX_Trend",
+      "Volume_Spike",
+      "EMA_Cross",
+      "MACD_Cross"
+    ],
+    "trades": 51,
+    "win_rate": 19.61,
+    "roi": 51.4,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 13,
+    "id": 154,
+    "name": "Breakout_VWAP",
+    "strategies": [
+      "Breakout_20",
+      "VWAP",
+      "Volume_Spike",
+      "MACD_Cross"
+    ],
+    "trades": 106,
+    "win_rate": 23.58,
+    "roi": 51.06,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 18,
+    "id": 203,
+    "name": "MACD_VWAP_Breakout",
+    "strategies": [
+      "MACD_Cross",
+      "VWAP",
+      "Breakout_20",
+      "Volume_Spike"
+    ],
+    "trades": 106,
+    "win_rate": 23.58,
+    "roi": 51.06,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 18,
+    "id": 207,
+    "name": "ADX_Stochastic_VWAP",
+    "strategies": [
+      "ADX_Trend",
+      "Stochastic",
+      "VWAP",
+      "BB_Lower",
+      "Volume_Spike"
+    ],
+    "trades": 86,
+    "win_rate": 18.6,
+    "roi": 50.59,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 18,
+    "id": 202,
+    "name": "RSI_BB_MACD_Stochastic",
+    "strategies": [
+      "RSI_Oversold",
+      "BB_Lower",
+      "MACD_Cross",
+      "Stochastic"
+    ],
+    "trades": 139,
+    "win_rate": 23.02,
+    "roi": 50.2,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 4,
+    "id": 59,
+    "name": "Breakout_Cluster",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "EMA_Cross",
+      "MACD_Cross"
+    ],
+    "trades": 93,
+    "win_rate": 23.66,
+    "roi": 49.38,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 3,
+    "id": 41,
+    "name": "VWAP_Break_Through",
+    "strategies": [
+      "VWAP",
+      "Breakout_20",
+      "Volume_Spike"
+    ],
+    "trades": 191,
+    "win_rate": 22.51,
+    "roi": 49.02,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 6,
+    "id": 78,
+    "name": "Volume_Profile",
+    "strategies": [
+      "Volume_Spike",
+      "VWAP",
+      "Breakout_20"
+    ],
+    "trades": 191,
+    "win_rate": 22.51,
+    "roi": 49.02,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 19,
+    "id": 214,
+    "name": "Breakout_EMA_ADX_VWAP",
+    "strategies": [
+      "Breakout_20",
+      "EMA_Cross",
+      "ADX_Trend",
+      "VWAP",
+      "Volume_Spike"
+    ],
+    "trades": 90,
+    "win_rate": 22.22,
+    "roi": 48.47,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 17,
+    "id": 194,
+    "name": "Breakout_Volume_ADX",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "ADX_Trend",
+      "Supertrend",
+      "VWAP"
+    ],
+    "trades": 120,
+    "win_rate": 21.67,
+    "roi": 46.96,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 16,
+    "id": 187,
+    "name": "ADX_EMA_BB",
+    "strategies": [
+      "ADX_Trend",
+      "EMA_Cross",
+      "BB_Lower",
+      "Stochastic"
+    ],
+    "trades": 214,
+    "win_rate": 21.5,
+    "roi": 46.78,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 18,
+    "id": 202,
+    "name": "RSI_BB_MACD_Stochastic",
+    "strategies": [
+      "RSI_Oversold",
+      "BB_Lower",
+      "MACD_Cross",
+      "Stochastic"
+    ],
+    "trades": 115,
+    "win_rate": 15.65,
+    "roi": 45.59,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 12,
+    "id": 146,
+    "name": "VWAP_Breakout",
+    "strategies": [
+      "VWAP",
+      "Breakout_20",
+      "MACD_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 142,
+    "win_rate": 23.24,
+    "roi": 44.45,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 14,
+    "id": 165,
+    "name": "Supertrend_Multi_Entry",
+    "strategies": [
+      "Supertrend",
+      "EMA_Cross",
+      "VWAP",
+      "ADX_Trend",
+      "Volume_Spike"
+    ],
+    "trades": 170,
+    "win_rate": 22.94,
+    "roi": 44.11,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 18,
+    "id": 202,
+    "name": "RSI_BB_MACD_Stochastic",
+    "strategies": [
+      "RSI_Oversold",
+      "BB_Lower",
+      "MACD_Cross",
+      "Stochastic"
+    ],
+    "trades": 100,
+    "win_rate": 23.0,
+    "roi": 43.99,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 4,
+    "id": 59,
+    "name": "Breakout_Cluster",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "EMA_Cross",
+      "MACD_Cross"
+    ],
+    "trades": 61,
+    "win_rate": 21.31,
+    "roi": 43.35,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 6,
+    "id": 81,
+    "name": "Breakout_Thermo",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 155,
+    "win_rate": 22.58,
+    "roi": 43.28,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 15,
+    "id": 176,
+    "name": "VWAP_Momentum_Pro",
+    "strategies": [
+      "VWAP",
+      "EMA_Cross",
+      "MACD_Cross",
+      "Volume_Spike"
+    ],
+    "trades": 88,
+    "win_rate": 18.18,
+    "roi": 41.7,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 16,
+    "id": 190,
+    "name": "Trend_All_Confirm",
+    "strategies": [
+      "Trend_MA50",
+      "EMA_Cross",
+      "ADX_Trend",
+      "Supertrend",
+      "MACD_Cross"
+    ],
+    "trades": 139,
+    "win_rate": 23.02,
+    "roi": 41.3,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 19,
+    "id": 220,
+    "name": "Ultimate_Entry",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "RSI_Oversold",
+      "Supertrend",
+      "ADX_Trend",
+      "VWAP",
+      "Trend_MA50",
+      "Volume_Spike"
+    ],
+    "trades": 64,
+    "win_rate": 21.88,
+    "roi": 41.25,
+    "sl": 0.025,
+    "tp": 0.15,
+    "ts": 0.025
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 19,
+    "id": 217,
+    "name": "ADX_EMA_VWAP_MACD",
+    "strategies": [
+      "ADX_Trend",
+      "EMA_Cross",
+      "VWAP",
+      "MACD_Cross",
+      "Supertrend"
+    ],
+    "trades": 156,
+    "win_rate": 23.08,
+    "roi": 40.7,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 13,
+    "id": 154,
+    "name": "Breakout_VWAP",
+    "strategies": [
+      "Breakout_20",
+      "VWAP",
+      "Volume_Spike",
+      "MACD_Cross"
+    ],
+    "trades": 66,
+    "win_rate": 19.7,
+    "roi": 40.0,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 18,
+    "id": 203,
+    "name": "MACD_VWAP_Breakout",
+    "strategies": [
+      "MACD_Cross",
+      "VWAP",
+      "Breakout_20",
+      "Volume_Spike"
+    ],
+    "trades": 66,
+    "win_rate": 19.7,
+    "roi": 40.0,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 14,
+    "id": 162,
+    "name": "RSI_Stochastic_Pro",
+    "strategies": [
+      "RSI_Oversold",
+      "Stochastic",
+      "BB_Lower",
+      "MACD_Cross"
+    ],
+    "trades": 110,
+    "win_rate": 22.73,
+    "roi": 39.54,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 15,
+    "id": 174,
+    "name": "Breakout_Multi_Signal",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "EMA_Cross",
+      "MACD_Cross",
+      "Supertrend"
+    ],
+    "trades": 60,
+    "win_rate": 18.33,
+    "roi": 39.18,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 18,
+    "id": 207,
+    "name": "ADX_Stochastic_VWAP",
+    "strategies": [
+      "ADX_Trend",
+      "Stochastic",
+      "VWAP",
+      "BB_Lower",
+      "Volume_Spike"
+    ],
+    "trades": 92,
+    "win_rate": 22.83,
+    "roi": 39.09,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 14,
+    "id": 162,
+    "name": "RSI_Stochastic_Pro",
+    "strategies": [
+      "RSI_Oversold",
+      "Stochastic",
+      "BB_Lower",
+      "MACD_Cross"
+    ],
+    "trades": 148,
+    "win_rate": 21.62,
+    "roi": 38.55,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 15,
+    "id": 178,
+    "name": "BB_EMA_VWAP",
+    "strategies": [
+      "BB_Lower",
+      "EMA_Cross",
+      "VWAP",
+      "Trend_MA50"
+    ],
+    "trades": 191,
+    "win_rate": 21.47,
+    "roi": 38.13,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 18,
+    "id": 209,
+    "name": "Volume_EMA_Stochastic_ADX",
+    "strategies": [
+      "Volume_Spike",
+      "EMA_Cross",
+      "Stochastic",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 63,
+    "win_rate": 19.05,
+    "roi": 36.06,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 20,
+    "id": 223,
+    "name": "Aggressive_Entry",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "MACD_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 82,
+    "win_rate": 23.17,
+    "roi": 34.58,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 9,
+    "id": 113,
+    "name": "Breakout_Volume_Pro",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "EMA_Cross"
+    ],
+    "trades": 83,
+    "win_rate": 24.1,
+    "roi": 34.46,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 10,
+    "id": 121,
+    "name": "EMA_Breakout_Pro",
+    "strategies": [
+      "EMA_Cross",
+      "Breakout_20",
+      "Volume_Spike"
+    ],
+    "trades": 83,
+    "win_rate": 24.1,
+    "roi": 34.46,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 18,
+    "id": 207,
+    "name": "ADX_Stochastic_VWAP",
+    "strategies": [
+      "ADX_Trend",
+      "Stochastic",
+      "VWAP",
+      "BB_Lower",
+      "Volume_Spike"
+    ],
+    "trades": 141,
+    "win_rate": 22.7,
+    "roi": 33.43,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 19,
+    "id": 216,
+    "name": "VWAP_BB_Stochastic_EMA",
+    "strategies": [
+      "VWAP",
+      "BB_Lower",
+      "Stochastic",
+      "EMA_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 88,
+    "win_rate": 18.18,
+    "roi": 32.94,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 17,
+    "id": 195,
+    "name": "Supertrend_Volume_ADX",
+    "strategies": [
+      "Supertrend",
+      "Volume_Spike",
+      "ADX_Trend",
+      "EMA_Cross",
+      "MACD_Cross"
+    ],
+    "trades": 163,
+    "win_rate": 22.09,
+    "roi": 32.49,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 16,
+    "id": 189,
+    "name": "Volume_MACD_ADX",
+    "strategies": [
+      "Volume_Spike",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Trend_MA50",
+      "Supertrend"
+    ],
+    "trades": 163,
+    "win_rate": 22.09,
+    "roi": 32.1,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 16,
+    "id": 183,
+    "name": "MACD_VWAP_Supertrend",
+    "strategies": [
+      "MACD_Cross",
+      "VWAP",
+      "Supertrend",
+      "Volume_Spike"
+    ],
+    "trades": 199,
+    "win_rate": 21.61,
+    "roi": 32.08,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 2,
+    "id": 20,
+    "name": "Trend_Acceleration",
+    "strategies": [
+      "EMA_Cross",
+      "ADX_Trend",
+      "Volume_Spike",
+      "Trend_MA50"
+    ],
+    "trades": 81,
+    "win_rate": 23.46,
+    "roi": 30.84,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 14,
+    "id": 168,
+    "name": "BB_Stochastic_ADX",
+    "strategies": [
+      "BB_Lower",
+      "Stochastic",
+      "ADX_Trend",
+      "VWAP"
+    ],
+    "trades": 276,
+    "win_rate": 21.01,
+    "roi": 29.66,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 6,
+    "id": 86,
+    "name": "EMA_Convergence_Pro",
+    "strategies": [
+      "EMA_Cross",
+      "Trend_MA50",
+      "VWAP",
+      "MACD_Cross"
+    ],
+    "trades": 178,
+    "win_rate": 21.35,
+    "roi": 29.57,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 20,
+    "id": 225,
+    "name": "High_Profit_Trade",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Supertrend",
+      "VWAP",
+      "Trend_MA50"
+    ],
+    "trades": 36,
+    "win_rate": 22.22,
+    "roi": 29.33,
+    "sl": 0.025,
+    "tp": 0.15,
+    "ts": 0.025
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 4,
+    "id": 46,
+    "name": "EMA_Rainbow_Stack",
+    "strategies": [
+      "EMA_Cross",
+      "Trend_MA50",
+      "ADX_Trend",
+      "VWAP"
+    ],
+    "trades": 196,
+    "win_rate": 20.92,
+    "roi": 28.82,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 19,
+    "id": 214,
+    "name": "Breakout_EMA_ADX_VWAP",
+    "strategies": [
+      "Breakout_20",
+      "EMA_Cross",
+      "ADX_Trend",
+      "VWAP",
+      "Volume_Spike"
+    ],
+    "trades": 61,
+    "win_rate": 16.39,
+    "roi": 28.73,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 16,
+    "id": 183,
+    "name": "MACD_VWAP_Supertrend",
+    "strategies": [
+      "MACD_Cross",
+      "VWAP",
+      "Supertrend",
+      "Volume_Spike"
+    ],
+    "trades": 106,
+    "win_rate": 21.7,
+    "roi": 28.59,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 18,
+    "id": 210,
+    "name": "Mega_Confirmation",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "RSI_Oversold",
+      "Supertrend",
+      "ADX_Trend",
+      "VWAP",
+      "Trend_MA50"
+    ],
+    "trades": 64,
+    "win_rate": 21.88,
+    "roi": 28.31,
+    "sl": 0.025,
+    "tp": 0.15,
+    "ts": 0.025
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 2,
+    "id": 20,
+    "name": "Trend_Acceleration",
+    "strategies": [
+      "EMA_Cross",
+      "ADX_Trend",
+      "Volume_Spike",
+      "Trend_MA50"
+    ],
+    "trades": 160,
+    "win_rate": 21.88,
+    "roi": 28.2,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 19,
+    "id": 217,
+    "name": "ADX_EMA_VWAP_MACD",
+    "strategies": [
+      "ADX_Trend",
+      "EMA_Cross",
+      "VWAP",
+      "MACD_Cross",
+      "Supertrend"
+    ],
+    "trades": 72,
+    "win_rate": 20.83,
+    "roi": 28.03,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 6,
+    "id": 81,
+    "name": "Breakout_Thermo",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 78,
+    "win_rate": 23.08,
+    "roi": 27.35,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 17,
+    "id": 197,
+    "name": "ADX_BB_MACD",
+    "strategies": [
+      "ADX_Trend",
+      "BB_Lower",
+      "MACD_Cross",
+      "Stochastic"
+    ],
+    "trades": 123,
+    "win_rate": 21.95,
+    "roi": 27.3,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 17,
+    "id": 195,
+    "name": "Supertrend_Volume_ADX",
+    "strategies": [
+      "Supertrend",
+      "Volume_Spike",
+      "ADX_Trend",
+      "EMA_Cross",
+      "MACD_Cross"
+    ],
+    "trades": 85,
+    "win_rate": 22.35,
+    "roi": 27.24,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 15,
+    "id": 177,
+    "name": "ADX_Stochastic_BB",
+    "strategies": [
+      "ADX_Trend",
+      "Stochastic",
+      "BB_Lower",
+      "RSI_Oversold"
+    ],
+    "trades": 146,
+    "win_rate": 21.23,
+    "roi": 26.98,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 14,
+    "id": 169,
+    "name": "Volume_EMA_ADX",
+    "strategies": [
+      "Volume_Spike",
+      "EMA_Cross",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 187,
+    "win_rate": 21.39,
+    "roi": 26.83,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 12,
+    "id": 144,
+    "name": "Breakout_Stochastic",
+    "strategies": [
+      "Breakout_20",
+      "Stochastic",
+      "Volume_Spike"
+    ],
+    "trades": 67,
+    "win_rate": 20.9,
+    "roi": 26.73,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 12,
+    "id": 146,
+    "name": "VWAP_Breakout",
+    "strategies": [
+      "VWAP",
+      "Breakout_20",
+      "MACD_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 72,
+    "win_rate": 20.83,
+    "roi": 26.6,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 3,
+    "id": 41,
+    "name": "VWAP_Break_Through",
+    "strategies": [
+      "VWAP",
+      "Breakout_20",
+      "Volume_Spike"
+    ],
+    "trades": 108,
+    "win_rate": 21.3,
+    "roi": 26.16,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 6,
+    "id": 78,
+    "name": "Volume_Profile",
+    "strategies": [
+      "Volume_Spike",
+      "VWAP",
+      "Breakout_20"
+    ],
+    "trades": 108,
+    "win_rate": 21.3,
+    "roi": 26.16,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 16,
+    "id": 181,
+    "name": "EMA_BB_Stochastic",
+    "strategies": [
+      "EMA_Cross",
+      "BB_Lower",
+      "Stochastic",
+      "VWAP"
+    ],
+    "trades": 132,
+    "win_rate": 15.15,
+    "roi": 25.98,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 16,
+    "id": 188,
+    "name": "BB_Stochastic_VWAP",
+    "strategies": [
+      "BB_Lower",
+      "Stochastic",
+      "VWAP",
+      "EMA_Cross"
+    ],
+    "trades": 132,
+    "win_rate": 15.15,
+    "roi": 25.98,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 14,
+    "id": 161,
+    "name": "EMA_Break_Momentum",
+    "strategies": [
+      "EMA_Cross",
+      "Breakout_20",
+      "MACD_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 80,
+    "win_rate": 21.25,
+    "roi": 25.93,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 13,
+    "id": 159,
+    "name": "Stochastic_Trend_ADX",
+    "strategies": [
+      "Stochastic",
+      "Trend_MA50",
+      "ADX_Trend",
+      "EMA_Cross"
+    ],
+    "trades": 225,
+    "win_rate": 20.44,
+    "roi": 25.68,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 16,
+    "id": 190,
+    "name": "Trend_All_Confirm",
+    "strategies": [
+      "Trend_MA50",
+      "EMA_Cross",
+      "ADX_Trend",
+      "Supertrend",
+      "MACD_Cross"
+    ],
+    "trades": 81,
+    "win_rate": 20.99,
+    "roi": 25.46,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 5,
+    "id": 75,
+    "name": "High_Momentum_Entry",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "Volume_Spike",
+      "ADX_Trend",
+      "Breakout_20"
+    ],
+    "trades": 70,
+    "win_rate": 21.43,
+    "roi": 25.3,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 16,
+    "id": 184,
+    "name": "Breakout_ADX_Pro",
+    "strategies": [
+      "Breakout_20",
+      "ADX_Trend",
+      "Volume_Spike",
+      "EMA_Cross",
+      "MACD_Cross"
+    ],
+    "trades": 70,
+    "win_rate": 21.43,
+    "roi": 25.3,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 19,
+    "id": 218,
+    "name": "BB_Stochastic_ADX_Trend",
+    "strategies": [
+      "BB_Lower",
+      "Stochastic",
+      "ADX_Trend",
+      "Trend_MA50",
+      "EMA_Cross"
+    ],
+    "trades": 80,
+    "win_rate": 17.5,
+    "roi": 24.24,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 20,
+    "id": 225,
+    "name": "High_Profit_Trade",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Supertrend",
+      "VWAP",
+      "Trend_MA50"
+    ],
+    "trades": 64,
+    "win_rate": 21.88,
+    "roi": 23.85,
+    "sl": 0.025,
+    "tp": 0.15,
+    "ts": 0.025
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 1,
+    "id": 6,
+    "name": "Breakout_Hunter",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "MACD_Cross",
+      "Supertrend"
+    ],
+    "trades": 85,
+    "win_rate": 22.35,
+    "roi": 23.83,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 15,
+    "id": 176,
+    "name": "VWAP_Momentum_Pro",
+    "strategies": [
+      "VWAP",
+      "EMA_Cross",
+      "MACD_Cross",
+      "Volume_Spike"
+    ],
+    "trades": 153,
+    "win_rate": 21.57,
+    "roi": 23.58,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 12,
+    "id": 144,
+    "name": "Breakout_Stochastic",
+    "strategies": [
+      "Breakout_20",
+      "Stochastic",
+      "Volume_Spike"
+    ],
+    "trades": 88,
+    "win_rate": 22.73,
+    "roi": 23.23,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 16,
+    "id": 183,
+    "name": "MACD_VWAP_Supertrend",
+    "strategies": [
+      "MACD_Cross",
+      "VWAP",
+      "Supertrend",
+      "Volume_Spike"
+    ],
+    "trades": 100,
+    "win_rate": 19.0,
+    "roi": 23.17,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 3,
+    "id": 41,
+    "name": "VWAP_Break_Through",
+    "strategies": [
+      "VWAP",
+      "Breakout_20",
+      "Volume_Spike"
+    ],
+    "trades": 95,
+    "win_rate": 18.95,
+    "roi": 23.08,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 6,
+    "id": 78,
+    "name": "Volume_Profile",
+    "strategies": [
+      "Volume_Spike",
+      "VWAP",
+      "Breakout_20"
+    ],
+    "trades": 95,
+    "win_rate": 18.95,
+    "roi": 23.08,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 5,
+    "id": 74,
+    "name": "VWAP_Trend_Pro",
+    "strategies": [
+      "VWAP",
+      "EMA_Cross",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 174,
+    "win_rate": 21.26,
+    "roi": 23.03,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 19,
+    "id": 219,
+    "name": "Volume_Stochastic_MACD_ADX",
+    "strategies": [
+      "Volume_Spike",
+      "Stochastic",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Trend_MA50",
+      "Supertrend"
+    ],
+    "trades": 52,
+    "win_rate": 21.15,
+    "roi": 22.87,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 5,
+    "id": 62,
+    "name": "RSI_Extreme_Reversal",
+    "strategies": [
+      "RSI_Oversold",
+      "Stochastic",
+      "BB_Lower",
+      "VWAP"
+    ],
+    "trades": 218,
+    "win_rate": 12.39,
+    "roi": 22.74,
+    "sl": 0.005,
+    "tp": 0.05,
+    "ts": 0.005
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 7,
+    "id": 96,
+    "name": "VWAP_Momentum",
+    "strategies": [
+      "VWAP",
+      "EMA_Cross",
+      "MACD_Cross"
+    ],
+    "trades": 108,
+    "win_rate": 17.59,
+    "roi": 22.59,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 16,
+    "id": 189,
+    "name": "Volume_MACD_ADX",
+    "strategies": [
+      "Volume_Spike",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Trend_MA50",
+      "Supertrend"
+    ],
+    "trades": 87,
+    "win_rate": 21.84,
+    "roi": 22.53,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 17,
+    "id": 192,
+    "name": "RSI_Stochastic_ADX",
+    "strategies": [
+      "RSI_Oversold",
+      "Stochastic",
+      "ADX_Trend",
+      "MACD_Cross"
+    ],
+    "trades": 124,
+    "win_rate": 20.97,
+    "roi": 22.48,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 10,
+    "id": 124,
+    "name": "Breakout_Momentum",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "MACD_Cross"
+    ],
+    "trades": 67,
+    "win_rate": 19.4,
+    "roi": 22.47,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 5,
+    "id": 68,
+    "name": "Bollinger_Break_Upper",
+    "strategies": [
+      "BB_Upper",
+      "Volume_Spike",
+      "Breakout_20"
+    ],
+    "trades": 93,
+    "win_rate": 18.28,
+    "roi": 22.46,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 1,
+    "id": 4,
+    "name": "Bollinger_Bounce",
+    "strategies": [
+      "BB_Lower",
+      "RSI_Oversold",
+      "Stochastic"
+    ],
+    "trades": 267,
+    "win_rate": 18.73,
+    "roi": 22.34,
+    "sl": 0.005,
+    "tp": 0.05,
+    "ts": 0.005
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 1,
+    "id": 9,
+    "name": "Stochastic_Reversal",
+    "strategies": [
+      "Stochastic",
+      "RSI_Oversold",
+      "BB_Lower"
+    ],
+    "trades": 267,
+    "win_rate": 18.73,
+    "roi": 22.34,
+    "sl": 0.005,
+    "tp": 0.05,
+    "ts": 0.005
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 14,
+    "id": 164,
+    "name": "Breakout_Confirmation",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "EMA_Cross",
+      "Supertrend"
+    ],
+    "trades": 120,
+    "win_rate": 20.83,
+    "roi": 22.28,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 3,
+    "id": 38,
+    "name": "Breakout_Momentum",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "MACD_Cross",
+      "Supertrend"
+    ],
+    "trades": 67,
+    "win_rate": 19.4,
+    "roi": 22.27,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 2,
+    "id": 28,
+    "name": "Breakout_Pullback",
+    "strategies": [
+      "Breakout_20",
+      "RSI_Oversold",
+      "BB_Lower"
+    ],
+    "trades": 207,
+    "win_rate": 21.74,
+    "roi": 22.27,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 14,
+    "id": 161,
+    "name": "EMA_Break_Momentum",
+    "strategies": [
+      "EMA_Cross",
+      "Breakout_20",
+      "MACD_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 66,
+    "win_rate": 21.21,
+    "roi": 22.2,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 3,
+    "id": 35,
+    "name": "RSI_Momentum_Burst",
+    "strategies": [
+      "RSI_Oversold",
+      "MACD_Cross",
+      "Volume_Spike"
+    ],
+    "trades": 212,
+    "win_rate": 20.28,
+    "roi": 21.96,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 18,
+    "id": 209,
+    "name": "Volume_EMA_Stochastic_ADX",
+    "strategies": [
+      "Volume_Spike",
+      "EMA_Cross",
+      "Stochastic",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 116,
+    "win_rate": 22.41,
+    "roi": 21.72,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 19,
+    "id": 218,
+    "name": "BB_Stochastic_ADX_Trend",
+    "strategies": [
+      "BB_Lower",
+      "Stochastic",
+      "ADX_Trend",
+      "Trend_MA50",
+      "EMA_Cross"
+    ],
+    "trades": 151,
+    "win_rate": 21.85,
+    "roi": 21.53,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 18,
+    "id": 210,
+    "name": "Mega_Confirmation",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "RSI_Oversold",
+      "Supertrend",
+      "ADX_Trend",
+      "VWAP",
+      "Trend_MA50"
+    ],
+    "trades": 42,
+    "win_rate": 21.43,
+    "roi": 21.46,
+    "sl": 0.025,
+    "tp": 0.15,
+    "ts": 0.025
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 18,
+    "id": 205,
+    "name": "Supertrend_BB_Entry",
+    "strategies": [
+      "Supertrend",
+      "BB_Lower",
+      "EMA_Cross",
+      "MACD_Cross",
+      "RSI_Oversold"
+    ],
+    "trades": 104,
+    "win_rate": 21.15,
+    "roi": 20.84,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 14,
+    "id": 166,
+    "name": "VWAP_ADX_Strength",
+    "strategies": [
+      "VWAP",
+      "ADX_Trend",
+      "EMA_Cross",
+      "MACD_Cross"
+    ],
+    "trades": 95,
+    "win_rate": 18.95,
+    "roi": 20.5,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 1,
+    "id": 7,
+    "name": "Mean_Reversion_Pro",
+    "strategies": [
+      "BB_Lower",
+      "RSI_Oversold",
+      "Stochastic",
+      "VWAP"
+    ],
+    "trades": 165,
+    "win_rate": 13.33,
+    "roi": 20.27,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 3,
+    "id": 37,
+    "name": "Oversold_Recovery",
+    "strategies": [
+      "RSI_Oversold",
+      "Stochastic",
+      "BB_Lower",
+      "VWAP"
+    ],
+    "trades": 165,
+    "win_rate": 13.33,
+    "roi": 20.27,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 4,
+    "id": 55,
+    "name": "Double_Bottom_Formation",
+    "strategies": [
+      "BB_Lower",
+      "RSI_Oversold",
+      "Stochastic",
+      "VWAP"
+    ],
+    "trades": 165,
+    "win_rate": 13.33,
+    "roi": 20.27,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 12,
+    "id": 148,
+    "name": "BB_Stochastic_Trade",
+    "strategies": [
+      "BB_Lower",
+      "Stochastic",
+      "RSI_Oversold",
+      "VWAP"
+    ],
+    "trades": 165,
+    "win_rate": 13.33,
+    "roi": 20.27,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 13,
+    "id": 152,
+    "name": "RSI_Confirmation",
+    "strategies": [
+      "RSI_Oversold",
+      "Stochastic",
+      "BB_Lower",
+      "VWAP"
+    ],
+    "trades": 165,
+    "win_rate": 13.33,
+    "roi": 20.27,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 14,
+    "id": 165,
+    "name": "Supertrend_Multi_Entry",
+    "strategies": [
+      "Supertrend",
+      "EMA_Cross",
+      "VWAP",
+      "ADX_Trend",
+      "Volume_Spike"
+    ],
+    "trades": 95,
+    "win_rate": 22.11,
+    "roi": 20.25,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 1,
+    "id": 3,
+    "name": "Volume_Breakout_Pro",
+    "strategies": [
+      "Volume_Spike",
+      "Breakout_20",
+      "VWAP"
+    ],
+    "trades": 110,
+    "win_rate": 17.27,
+    "roi": 19.67,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 15,
+    "id": 174,
+    "name": "Breakout_Multi_Signal",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "EMA_Cross",
+      "MACD_Cross",
+      "Supertrend"
+    ],
+    "trades": 82,
+    "win_rate": 20.73,
+    "roi": 19.56,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 1,
+    "id": 5,
+    "name": "Trend_Follower_Multi",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 155,
+    "win_rate": 20.65,
+    "roi": 19.5,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 3,
+    "id": 36,
+    "name": "Golden_Cross_Pro",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 155,
+    "win_rate": 20.65,
+    "roi": 19.5,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 12,
+    "id": 150,
+    "name": "Multi_Trend_Entry",
+    "strategies": [
+      "Trend_MA50",
+      "EMA_Cross",
+      "MACD_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 155,
+    "win_rate": 20.65,
+    "roi": 19.5,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 16,
+    "id": 185,
+    "name": "Supertrend_Multi_Pro",
+    "strategies": [
+      "Supertrend",
+      "EMA_Cross",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 155,
+    "win_rate": 20.65,
+    "roi": 19.5,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 9,
+    "id": 118,
+    "name": "Trend_Volume",
+    "strategies": [
+      "Trend_MA50",
+      "Volume_Spike",
+      "EMA_Cross"
+    ],
+    "trades": 192,
+    "win_rate": 21.35,
+    "roi": 19.48,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 12,
+    "id": 149,
+    "name": "Volume_Trend_Pro",
+    "strategies": [
+      "Volume_Spike",
+      "Trend_MA50",
+      "EMA_Cross"
+    ],
+    "trades": 192,
+    "win_rate": 21.35,
+    "roi": 19.48,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 15,
+    "id": 173,
+    "name": "MACD_Breakout",
+    "strategies": [
+      "MACD_Cross",
+      "Breakout_20",
+      "Volume_Spike",
+      "ADX_Trend"
+    ],
+    "trades": 66,
+    "win_rate": 18.18,
+    "roi": 19.46,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 9,
+    "id": 120,
+    "name": "Multi_Indicator",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "RSI_Oversold",
+      "ADX_Trend"
+    ],
+    "trades": 107,
+    "win_rate": 21.5,
+    "roi": 19.44,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 18,
+    "id": 201,
+    "name": "EMA_RSI_MACD_ADX",
+    "strategies": [
+      "EMA_Cross",
+      "RSI_Oversold",
+      "MACD_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 107,
+    "win_rate": 21.5,
+    "roi": 19.44,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 18,
+    "id": 208,
+    "name": "BB_Stochastic_MACD_ADX",
+    "strategies": [
+      "BB_Lower",
+      "Stochastic",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Supertrend"
+    ],
+    "trades": 92,
+    "win_rate": 18.48,
+    "roi": 19.35,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 14,
+    "id": 162,
+    "name": "RSI_Stochastic_Pro",
+    "strategies": [
+      "RSI_Oversold",
+      "Stochastic",
+      "BB_Lower",
+      "MACD_Cross"
+    ],
+    "trades": 126,
+    "win_rate": 13.49,
+    "roi": 19.26,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 16,
+    "id": 186,
+    "name": "VWAP_Break_Entry",
+    "strategies": [
+      "VWAP",
+      "Breakout_20",
+      "ADX_Trend",
+      "RSI_Oversold"
+    ],
+    "trades": 155,
+    "win_rate": 21.94,
+    "roi": 19.1,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 18,
+    "id": 205,
+    "name": "Supertrend_BB_Entry",
+    "strategies": [
+      "Supertrend",
+      "BB_Lower",
+      "EMA_Cross",
+      "MACD_Cross",
+      "RSI_Oversold"
+    ],
+    "trades": 83,
+    "win_rate": 14.46,
+    "roi": 18.16,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 20,
+    "id": 230,
+    "name": "Scalp_Trade",
+    "strategies": [
+      "RSI_Oversold",
+      "BB_Lower",
+      "VWAP",
+      "Stochastic"
+    ],
+    "trades": 329,
+    "win_rate": 20.67,
+    "roi": 17.92,
+    "sl": 0.004,
+    "tp": 0.025,
+    "ts": 0.004
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 16,
+    "id": 185,
+    "name": "Supertrend_Multi_Pro",
+    "strategies": [
+      "Supertrend",
+      "EMA_Cross",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 84,
+    "win_rate": 19.05,
+    "roi": 17.86,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 1,
+    "id": 5,
+    "name": "Trend_Follower_Multi",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 84,
+    "win_rate": 19.05,
+    "roi": 17.85,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 3,
+    "id": 36,
+    "name": "Golden_Cross_Pro",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 84,
+    "win_rate": 19.05,
+    "roi": 17.85,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 12,
+    "id": 150,
+    "name": "Multi_Trend_Entry",
+    "strategies": [
+      "Trend_MA50",
+      "EMA_Cross",
+      "MACD_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 84,
+    "win_rate": 19.05,
+    "roi": 17.85,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 17,
+    "id": 194,
+    "name": "Breakout_Volume_ADX",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "ADX_Trend",
+      "Supertrend",
+      "VWAP"
+    ],
+    "trades": 67,
+    "win_rate": 17.91,
+    "roi": 17.44,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 2,
+    "id": 18,
+    "name": "Channel_Breakout",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "Supertrend"
+    ],
+    "trades": 105,
+    "win_rate": 18.1,
+    "roi": 17.42,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 4,
+    "id": 50,
+    "name": "BB_Squeeze_Exit",
+    "strategies": [
+      "BB_Lower",
+      "Volume_Spike",
+      "Supertrend"
+    ],
+    "trades": 105,
+    "win_rate": 18.1,
+    "roi": 17.42,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 5,
+    "id": 66,
+    "name": "Volume_Surge_Breakout",
+    "strategies": [
+      "Volume_Spike",
+      "Breakout_20",
+      "Supertrend"
+    ],
+    "trades": 105,
+    "win_rate": 18.1,
+    "roi": 17.42,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 15,
+    "id": 171,
+    "name": "EMA_MACD_Stochastic",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "Stochastic",
+      "ADX_Trend"
+    ],
+    "trades": 199,
+    "win_rate": 21.11,
+    "roi": 17.33,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 8,
+    "id": 105,
+    "name": "Supertrend_Alpha",
+    "strategies": [
+      "Supertrend",
+      "EMA_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 105,
+    "win_rate": 18.1,
+    "roi": 17.31,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 10,
+    "id": 125,
+    "name": "Supertrend_Volume",
+    "strategies": [
+      "Supertrend",
+      "Volume_Spike",
+      "EMA_Cross"
+    ],
+    "trades": 105,
+    "win_rate": 18.1,
+    "roi": 17.31,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 3,
+    "id": 33,
+    "name": "Trend_Line_Break",
+    "strategies": [
+      "Breakout_20",
+      "Supertrend",
+      "ADX_Trend"
+    ],
+    "trades": 77,
+    "win_rate": 19.48,
+    "roi": 17.03,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 7,
+    "id": 94,
+    "name": "Breakout_Alert",
+    "strategies": [
+      "Breakout_20",
+      "Supertrend",
+      "Volume_Spike"
+    ],
+    "trades": 77,
+    "win_rate": 19.48,
+    "roi": 17.03,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 8,
+    "id": 110,
+    "name": "Trend_Break_Pro",
+    "strategies": [
+      "Trend_MA50",
+      "Breakout_20",
+      "Supertrend"
+    ],
+    "trades": 77,
+    "win_rate": 19.48,
+    "roi": 17.01,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 9,
+    "id": 119,
+    "name": "Breakout_Confirmation",
+    "strategies": [
+      "Breakout_20",
+      "Supertrend",
+      "MACD_Cross"
+    ],
+    "trades": 77,
+    "win_rate": 19.48,
+    "roi": 17.01,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 17,
+    "id": 191,
+    "name": "EMA_BB_ADX",
+    "strategies": [
+      "EMA_Cross",
+      "BB_Lower",
+      "ADX_Trend",
+      "Supertrend"
+    ],
+    "trades": 105,
+    "win_rate": 18.1,
+    "roi": 16.93,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 9,
+    "id": 113,
+    "name": "Breakout_Volume_Pro",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "EMA_Cross"
+    ],
+    "trades": 161,
+    "win_rate": 21.74,
+    "roi": 16.81,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 10,
+    "id": 121,
+    "name": "EMA_Breakout_Pro",
+    "strategies": [
+      "EMA_Cross",
+      "Breakout_20",
+      "Volume_Spike"
+    ],
+    "trades": 161,
+    "win_rate": 21.74,
+    "roi": 16.81,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 4,
+    "id": 51,
+    "name": "Trend_Pullback_Entry",
+    "strategies": [
+      "EMA_Cross",
+      "BB_Lower",
+      "Trend_MA50"
+    ],
+    "trades": 136,
+    "win_rate": 18.38,
+    "roi": 16.65,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 16,
+    "id": 190,
+    "name": "Trend_All_Confirm",
+    "strategies": [
+      "Trend_MA50",
+      "EMA_Cross",
+      "ADX_Trend",
+      "Supertrend",
+      "MACD_Cross"
+    ],
+    "trades": 68,
+    "win_rate": 20.59,
+    "roi": 16.3,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 12,
+    "id": 146,
+    "name": "VWAP_Breakout",
+    "strategies": [
+      "VWAP",
+      "Breakout_20",
+      "MACD_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 91,
+    "win_rate": 20.88,
+    "roi": 16.29,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 3,
+    "id": 32,
+    "name": "Volatility_Expansion",
+    "strategies": [
+      "BB_Lower",
+      "Volume_Spike",
+      "Breakout_20"
+    ],
+    "trades": 100,
+    "win_rate": 18.0,
+    "roi": 16.13,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 4,
+    "id": 48,
+    "name": "Breakout_Retest",
+    "strategies": [
+      "Breakout_20",
+      "RSI_Oversold",
+      "BB_Lower"
+    ],
+    "trades": 129,
+    "win_rate": 19.38,
+    "roi": 16.11,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 11,
+    "id": 140,
+    "name": "Trend_BB_Trade",
+    "strategies": [
+      "Trend_MA50",
+      "BB_Lower",
+      "ADX_Trend"
+    ],
+    "trades": 105,
+    "win_rate": 18.1,
+    "roi": 16.07,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 5,
+    "id": 74,
+    "name": "VWAP_Trend_Pro",
+    "strategies": [
+      "VWAP",
+      "EMA_Cross",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 89,
+    "win_rate": 19.1,
+    "roi": 15.9,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 8,
+    "id": 106,
+    "name": "VWAP_Break_Pro",
+    "strategies": [
+      "VWAP",
+      "Breakout_20",
+      "MACD_Cross"
+    ],
+    "trades": 91,
+    "win_rate": 18.68,
+    "roi": 15.81,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 11,
+    "id": 134,
+    "name": "Breakout_ADX",
+    "strategies": [
+      "Breakout_20",
+      "ADX_Trend",
+      "Supertrend"
+    ],
+    "trades": 70,
+    "win_rate": 18.57,
+    "roi": 15.7,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 4,
+    "id": 60,
+    "name": "Consolidation_Break",
+    "strategies": [
+      "Breakout_20",
+      "Supertrend",
+      "ADX_Trend",
+      "Volume_Spike"
+    ],
+    "trades": 130,
+    "win_rate": 20.77,
+    "roi": 15.52,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 13,
+    "id": 160,
+    "name": "Volume_Break_Pro",
+    "strategies": [
+      "Volume_Spike",
+      "Breakout_20",
+      "Supertrend",
+      "ADX_Trend"
+    ],
+    "trades": 130,
+    "win_rate": 20.77,
+    "roi": 15.52,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 14,
+    "id": 167,
+    "name": "ADX_Volume_Break",
+    "strategies": [
+      "ADX_Trend",
+      "Volume_Spike",
+      "Breakout_20",
+      "EMA_Cross"
+    ],
+    "trades": 67,
+    "win_rate": 20.9,
+    "roi": 15.45,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 19,
+    "id": 211,
+    "name": "EMA_Breakout_ADX",
+    "strategies": [
+      "EMA_Cross",
+      "Breakout_20",
+      "ADX_Trend",
+      "Supertrend",
+      "Volume_Spike"
+    ],
+    "trades": 67,
+    "win_rate": 20.9,
+    "roi": 15.45,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 4,
+    "id": 58,
+    "name": "RSI_Bullish_Divergence",
+    "strategies": [
+      "RSI_Oversold",
+      "MACD_Cross",
+      "BB_Lower"
+    ],
+    "trades": 139,
+    "win_rate": 18.71,
+    "roi": 15.14,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 8,
+    "id": 102,
+    "name": "RSI_Divergence_Pro",
+    "strategies": [
+      "RSI_Oversold",
+      "MACD_Cross",
+      "BB_Lower"
+    ],
+    "trades": 139,
+    "win_rate": 18.71,
+    "roi": 15.14,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 11,
+    "id": 132,
+    "name": "RSI_BB_Combo",
+    "strategies": [
+      "RSI_Oversold",
+      "BB_Lower",
+      "MACD_Cross"
+    ],
+    "trades": 139,
+    "win_rate": 18.71,
+    "roi": 15.14,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "BTCUSDT_15m",
+    "batch": 19,
+    "id": 212,
+    "name": "RSI_Stochastic_VWAP_ADX",
+    "strategies": [
+      "RSI_Oversold",
+      "Stochastic",
+      "VWAP",
+      "ADX_Trend",
+      "MACD_Cross"
+    ],
+    "trades": 35,
+    "win_rate": 17.14,
+    "roi": 15.09,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 15,
+    "id": 179,
+    "name": "Stochastic_Pro_Trade",
+    "strategies": [
+      "Stochastic",
+      "EMA_Cross",
+      "MACD_Cross",
+      "Supertrend",
+      "ADX_Trend"
+    ],
+    "trades": 200,
+    "win_rate": 21.0,
+    "roi": 14.99,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 14,
+    "id": 168,
+    "name": "BB_Stochastic_ADX",
+    "strategies": [
+      "BB_Lower",
+      "Stochastic",
+      "ADX_Trend",
+      "VWAP"
+    ],
+    "trades": 148,
+    "win_rate": 16.22,
+    "roi": 14.65,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 15,
+    "id": 175,
+    "name": "Supertrend_Confirm",
+    "strategies": [
+      "Supertrend",
+      "EMA_Cross",
+      "ADX_Trend",
+      "RSI_Oversold",
+      "MACD_Cross"
+    ],
+    "trades": 109,
+    "win_rate": 21.1,
+    "roi": 14.41,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 19,
+    "id": 215,
+    "name": "Supertrend_RSI_MACD_ADX",
+    "strategies": [
+      "Supertrend",
+      "RSI_Oversold",
+      "MACD_Cross",
+      "ADX_Trend",
+      "EMA_Cross"
+    ],
+    "trades": 109,
+    "win_rate": 21.1,
+    "roi": 14.41,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 20,
+    "id": 227,
+    "name": "Swing_Trade",
+    "strategies": [
+      "EMA_Cross",
+      "Trend_MA50",
+      "ADX_Trend",
+      "Supertrend"
+    ],
+    "trades": 102,
+    "win_rate": 18.63,
+    "roi": 14.38,
+    "sl": 0.015,
+    "tp": 0.08,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 4,
+    "id": 52,
+    "name": "MACD_Histogram_Trade",
+    "strategies": [
+      "MACD_Cross",
+      "RSI_Oversold",
+      "VWAP"
+    ],
+    "trades": 187,
+    "win_rate": 20.32,
+    "roi": 14.36,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 16,
+    "id": 181,
+    "name": "EMA_BB_Stochastic",
+    "strategies": [
+      "EMA_Cross",
+      "BB_Lower",
+      "Stochastic",
+      "VWAP"
+    ],
+    "trades": 227,
+    "win_rate": 19.82,
+    "roi": 13.83,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 16,
+    "id": 188,
+    "name": "BB_Stochastic_VWAP",
+    "strategies": [
+      "BB_Lower",
+      "Stochastic",
+      "VWAP",
+      "EMA_Cross"
+    ],
+    "trades": 227,
+    "win_rate": 19.82,
+    "roi": 13.83,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 9,
+    "id": 117,
+    "name": "BB_Stochastic_Pro",
+    "strategies": [
+      "BB_Lower",
+      "Stochastic",
+      "MACD_Cross"
+    ],
+    "trades": 139,
+    "win_rate": 18.71,
+    "roi": 13.73,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 14,
+    "id": 164,
+    "name": "Breakout_Confirmation",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "EMA_Cross",
+      "Supertrend"
+    ],
+    "trades": 65,
+    "win_rate": 21.54,
+    "roi": 13.72,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 8,
+    "id": 101,
+    "name": "EMA_Cloud_Strategy",
+    "strategies": [
+      "EMA_Cross",
+      "Trend_MA50",
+      "VWAP"
+    ],
+    "trades": 209,
+    "win_rate": 20.1,
+    "roi": 13.4,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 11,
+    "id": 131,
+    "name": "EMA_Cluster",
+    "strategies": [
+      "EMA_Cross",
+      "Trend_MA50",
+      "VWAP"
+    ],
+    "trades": 209,
+    "win_rate": 20.1,
+    "roi": 13.4,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 9,
+    "id": 111,
+    "name": "EMA_Acceleration",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "Volume_Spike"
+    ],
+    "trades": 197,
+    "win_rate": 20.81,
+    "roi": 13.34,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 15,
+    "id": 171,
+    "name": "EMA_MACD_Stochastic",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "Stochastic",
+      "ADX_Trend"
+    ],
+    "trades": 99,
+    "win_rate": 18.18,
+    "roi": 13.21,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 15,
+    "id": 179,
+    "name": "Stochastic_Pro_Trade",
+    "strategies": [
+      "Stochastic",
+      "EMA_Cross",
+      "MACD_Cross",
+      "Supertrend",
+      "ADX_Trend"
+    ],
+    "trades": 99,
+    "win_rate": 18.18,
+    "roi": 13.21,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 6,
+    "id": 88,
+    "name": "Volume_Spike_Pro",
+    "strategies": [
+      "Volume_Spike",
+      "EMA_Cross",
+      "Stochastic"
+    ],
+    "trades": 289,
+    "win_rate": 19.72,
+    "roi": 13.19,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 14,
+    "id": 165,
+    "name": "Supertrend_Multi_Entry",
+    "strategies": [
+      "Supertrend",
+      "EMA_Cross",
+      "VWAP",
+      "ADX_Trend",
+      "Volume_Spike"
+    ],
+    "trades": 76,
+    "win_rate": 19.74,
+    "roi": 13.17,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 7,
+    "id": 98,
+    "name": "BB_Recovery",
+    "strategies": [
+      "BB_Lower",
+      "RSI_Oversold",
+      "Stochastic"
+    ],
+    "trades": 139,
+    "win_rate": 18.71,
+    "roi": 13.15,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 18,
+    "id": 204,
+    "name": "Breakout_Stochastic_ADX",
+    "strategies": [
+      "Breakout_20",
+      "Stochastic",
+      "ADX_Trend",
+      "Supertrend",
+      "EMA_Cross"
+    ],
+    "trades": 110,
+    "win_rate": 20.91,
+    "roi": 12.99,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 18,
+    "id": 208,
+    "name": "BB_Stochastic_MACD_ADX",
+    "strategies": [
+      "BB_Lower",
+      "Stochastic",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Supertrend"
+    ],
+    "trades": 96,
+    "win_rate": 21.88,
+    "roi": 12.9,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 2,
+    "id": 17,
+    "name": "MACD_Divergence",
+    "strategies": [
+      "MACD_Cross",
+      "EMA_Cross",
+      "BB_Lower"
+    ],
+    "trades": 135,
+    "win_rate": 17.78,
+    "roi": 12.66,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 9,
+    "id": 116,
+    "name": "ADX_Volume_Trade",
+    "strategies": [
+      "ADX_Trend",
+      "Volume_Spike",
+      "MACD_Cross"
+    ],
+    "trades": 107,
+    "win_rate": 17.76,
+    "roi": 12.62,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 11,
+    "id": 133,
+    "name": "MACD_Volume",
+    "strategies": [
+      "MACD_Cross",
+      "Volume_Spike",
+      "ADX_Trend"
+    ],
+    "trades": 107,
+    "win_rate": 17.76,
+    "roi": 12.62,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 15,
+    "id": 180,
+    "name": "Volume_Trend_ADX",
+    "strategies": [
+      "Volume_Spike",
+      "Trend_MA50",
+      "ADX_Trend",
+      "EMA_Cross",
+      "MACD_Cross"
+    ],
+    "trades": 68,
+    "win_rate": 20.59,
+    "roi": 12.61,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 17,
+    "id": 193,
+    "name": "MACD_Trend_Strength",
+    "strategies": [
+      "MACD_Cross",
+      "Trend_MA50",
+      "ADX_Trend",
+      "EMA_Cross",
+      "Volume_Spike"
+    ],
+    "trades": 68,
+    "win_rate": 20.59,
+    "roi": 12.61,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 2,
+    "id": 23,
+    "name": "Multi_Timeframe_Entry",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "Supertrend",
+      "ADX_Trend"
+    ],
+    "trades": 102,
+    "win_rate": 17.65,
+    "roi": 12.59,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 2,
+    "id": 23,
+    "name": "Multi_Timeframe_Entry",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "Supertrend",
+      "ADX_Trend"
+    ],
+    "trades": 121,
+    "win_rate": 20.66,
+    "roi": 12.59,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 11,
+    "id": 137,
+    "name": "ADX_EMA_Trade",
+    "strategies": [
+      "ADX_Trend",
+      "EMA_Cross",
+      "MACD_Cross"
+    ],
+    "trades": 121,
+    "win_rate": 20.66,
+    "roi": 12.59,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 11,
+    "id": 137,
+    "name": "ADX_EMA_Trade",
+    "strategies": [
+      "ADX_Trend",
+      "EMA_Cross",
+      "MACD_Cross"
+    ],
+    "trades": 102,
+    "win_rate": 17.65,
+    "roi": 12.57,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 10,
+    "id": 129,
+    "name": "Stochastic_ADX",
+    "strategies": [
+      "Stochastic",
+      "ADX_Trend",
+      "Supertrend"
+    ],
+    "trades": 118,
+    "win_rate": 16.1,
+    "roi": 12.51,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 4,
+    "id": 54,
+    "name": "Supertrend_VWAP_Combo",
+    "strategies": [
+      "Supertrend",
+      "VWAP",
+      "EMA_Cross"
+    ],
+    "trades": 118,
+    "win_rate": 16.1,
+    "roi": 12.5,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 6,
+    "id": 77,
+    "name": "MACD_Confirmation",
+    "strategies": [
+      "MACD_Cross",
+      "Supertrend",
+      "ADX_Trend"
+    ],
+    "trades": 118,
+    "win_rate": 16.1,
+    "roi": 12.5,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 9,
+    "id": 114,
+    "name": "Supertrend_ADX",
+    "strategies": [
+      "Supertrend",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 118,
+    "win_rate": 16.1,
+    "roi": 12.5,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 10,
+    "id": 123,
+    "name": "MACD_Supertrend",
+    "strategies": [
+      "MACD_Cross",
+      "Supertrend",
+      "VWAP"
+    ],
+    "trades": 118,
+    "win_rate": 16.1,
+    "roi": 12.5,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 11,
+    "id": 139,
+    "name": "Stochastic_MACD",
+    "strategies": [
+      "Stochastic",
+      "MACD_Cross",
+      "Supertrend"
+    ],
+    "trades": 118,
+    "win_rate": 16.1,
+    "roi": 12.5,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 12,
+    "id": 143,
+    "name": "MACD_BB_Strategy",
+    "strategies": [
+      "MACD_Cross",
+      "BB_Lower",
+      "Supertrend"
+    ],
+    "trades": 118,
+    "win_rate": 16.1,
+    "roi": 12.5,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 6,
+    "id": 81,
+    "name": "Breakout_Thermo",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 68,
+    "win_rate": 19.12,
+    "roi": 12.43,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 2,
+    "id": 26,
+    "name": "ADX_Strength_Entry",
+    "strategies": [
+      "ADX_Trend",
+      "EMA_Cross",
+      "Supertrend"
+    ],
+    "trades": 118,
+    "win_rate": 16.1,
+    "roi": 12.41,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 3,
+    "id": 40,
+    "name": "Supertrend_Cluster_Pro",
+    "strategies": [
+      "Supertrend",
+      "EMA_Cross",
+      "Volume_Spike"
+    ],
+    "trades": 118,
+    "win_rate": 16.1,
+    "roi": 12.41,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 5,
+    "id": 61,
+    "name": "EMA_Cross_Trend",
+    "strategies": [
+      "EMA_Cross",
+      "ADX_Trend",
+      "Supertrend"
+    ],
+    "trades": 118,
+    "win_rate": 16.1,
+    "roi": 12.41,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 3,
+    "id": 43,
+    "name": "Channel_Trend_Follow",
+    "strategies": [
+      "Breakout_20",
+      "EMA_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 121,
+    "win_rate": 20.66,
+    "roi": 12.24,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 7,
+    "id": 97,
+    "name": "ADX_Breakout",
+    "strategies": [
+      "ADX_Trend",
+      "Breakout_20",
+      "EMA_Cross"
+    ],
+    "trades": 121,
+    "win_rate": 20.66,
+    "roi": 12.24,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 4,
+    "id": 60,
+    "name": "Consolidation_Break",
+    "strategies": [
+      "Breakout_20",
+      "Supertrend",
+      "ADX_Trend",
+      "Volume_Spike"
+    ],
+    "trades": 71,
+    "win_rate": 18.31,
+    "roi": 12.18,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 13,
+    "id": 160,
+    "name": "Volume_Break_Pro",
+    "strategies": [
+      "Volume_Spike",
+      "Breakout_20",
+      "Supertrend",
+      "ADX_Trend"
+    ],
+    "trades": 71,
+    "win_rate": 18.31,
+    "roi": 12.18,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 13,
+    "id": 155,
+    "name": "Supertrend_ADX_Pro",
+    "strategies": [
+      "Supertrend",
+      "ADX_Trend",
+      "EMA_Cross",
+      "Volume_Spike"
+    ],
+    "trades": 107,
+    "win_rate": 17.76,
+    "roi": 12.12,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 6,
+    "id": 89,
+    "name": "MACD_ADX_Combo",
+    "strategies": [
+      "MACD_Cross",
+      "ADX_Trend",
+      "Supertrend",
+      "Trend_MA50"
+    ],
+    "trades": 102,
+    "win_rate": 17.65,
+    "roi": 12.08,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 13,
+    "id": 153,
+    "name": "MACD_Trend_Follow",
+    "strategies": [
+      "MACD_Cross",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 102,
+    "win_rate": 17.65,
+    "roi": 12.08,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 14,
+    "id": 163,
+    "name": "MACD_Supertrend_ADX",
+    "strategies": [
+      "MACD_Cross",
+      "Supertrend",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 102,
+    "win_rate": 17.65,
+    "roi": 12.08,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 3,
+    "id": 43,
+    "name": "Channel_Trend_Follow",
+    "strategies": [
+      "Breakout_20",
+      "EMA_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 102,
+    "win_rate": 17.65,
+    "roi": 12.06,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 7,
+    "id": 97,
+    "name": "ADX_Breakout",
+    "strategies": [
+      "ADX_Trend",
+      "Breakout_20",
+      "EMA_Cross"
+    ],
+    "trades": 102,
+    "win_rate": 17.65,
+    "roi": 12.06,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 4,
+    "id": 57,
+    "name": "Volume_Spike_Trend",
+    "strategies": [
+      "Volume_Spike",
+      "EMA_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 107,
+    "win_rate": 17.76,
+    "roi": 12.02,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 6,
+    "id": 83,
+    "name": "ADX_Strength_Pro",
+    "strategies": [
+      "ADX_Trend",
+      "EMA_Cross",
+      "Volume_Spike"
+    ],
+    "trades": 107,
+    "win_rate": 17.76,
+    "roi": 12.02,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 8,
+    "id": 109,
+    "name": "Volume_EMA_Trade",
+    "strategies": [
+      "Volume_Spike",
+      "EMA_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 107,
+    "win_rate": 17.76,
+    "roi": 12.02,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 12,
+    "id": 141,
+    "name": "EMA_ADX_Pro",
+    "strategies": [
+      "EMA_Cross",
+      "ADX_Trend",
+      "Volume_Spike"
+    ],
+    "trades": 107,
+    "win_rate": 17.76,
+    "roi": 12.02,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 19,
+    "id": 217,
+    "name": "ADX_EMA_VWAP_MACD",
+    "strategies": [
+      "ADX_Trend",
+      "EMA_Cross",
+      "VWAP",
+      "MACD_Cross",
+      "Supertrend"
+    ],
+    "trades": 97,
+    "win_rate": 20.62,
+    "roi": 11.92,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 16,
+    "id": 186,
+    "name": "VWAP_Break_Entry",
+    "strategies": [
+      "VWAP",
+      "Breakout_20",
+      "ADX_Trend",
+      "RSI_Oversold"
+    ],
+    "trades": 74,
+    "win_rate": 18.92,
+    "roi": 11.9,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 1,
+    "id": 6,
+    "name": "Breakout_Hunter",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "MACD_Cross",
+      "Supertrend"
+    ],
+    "trades": 71,
+    "win_rate": 19.72,
+    "roi": 11.77,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 14,
+    "id": 170,
+    "name": "Trend_Strength_Entry",
+    "strategies": [
+      "Trend_MA50",
+      "EMA_Cross",
+      "ADX_Trend",
+      "Supertrend"
+    ],
+    "trades": 102,
+    "win_rate": 17.65,
+    "roi": 11.65,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 10,
+    "id": 124,
+    "name": "Breakout_Momentum",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "MACD_Cross"
+    ],
+    "trades": 66,
+    "win_rate": 19.7,
+    "roi": 11.55,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 16,
+    "id": 189,
+    "name": "Volume_MACD_ADX",
+    "strategies": [
+      "Volume_Spike",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Trend_MA50",
+      "Supertrend"
+    ],
+    "trades": 72,
+    "win_rate": 19.44,
+    "roi": 11.49,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 17,
+    "id": 194,
+    "name": "Breakout_Volume_ADX",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "ADX_Trend",
+      "Supertrend",
+      "VWAP"
+    ],
+    "trades": 81,
+    "win_rate": 19.75,
+    "roi": 11.39,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 1,
+    "id": 13,
+    "name": "Volume_Profile_Breakout",
+    "strategies": [
+      "Volume_Spike",
+      "Breakout_20",
+      "ADX_Trend"
+    ],
+    "trades": 75,
+    "win_rate": 18.67,
+    "roi": 11.35,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 4,
+    "id": 53,
+    "name": "ADX_Breakout_Pro",
+    "strategies": [
+      "ADX_Trend",
+      "Breakout_20",
+      "Volume_Spike"
+    ],
+    "trades": 75,
+    "win_rate": 18.67,
+    "roi": 11.35,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 5,
+    "id": 72,
+    "name": "Breakout_Volume_Confirm",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "ADX_Trend"
+    ],
+    "trades": 75,
+    "win_rate": 18.67,
+    "roi": 11.35,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 7,
+    "id": 100,
+    "name": "Volume_Confirm",
+    "strategies": [
+      "Volume_Spike",
+      "Breakout_20",
+      "Supertrend",
+      "ADX_Trend"
+    ],
+    "trades": 75,
+    "win_rate": 18.67,
+    "roi": 11.35,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 8,
+    "id": 104,
+    "name": "Breakout_Success",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "ADX_Trend"
+    ],
+    "trades": 75,
+    "win_rate": 18.67,
+    "roi": 11.35,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 15,
+    "id": 177,
+    "name": "ADX_Stochastic_BB",
+    "strategies": [
+      "ADX_Trend",
+      "Stochastic",
+      "BB_Lower",
+      "RSI_Oversold"
+    ],
+    "trades": 211,
+    "win_rate": 20.85,
+    "roi": 11.27,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 9,
+    "id": 115,
+    "name": "VWAP_EMA_Strength",
+    "strategies": [
+      "VWAP",
+      "EMA_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 122,
+    "win_rate": 20.49,
+    "roi": 11.09,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 10,
+    "id": 126,
+    "name": "VWAP_ADX_Trade",
+    "strategies": [
+      "VWAP",
+      "ADX_Trend",
+      "MACD_Cross"
+    ],
+    "trades": 122,
+    "win_rate": 20.49,
+    "roi": 11.09,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 12,
+    "id": 145,
+    "name": "Supertrend_Cluster",
+    "strategies": [
+      "Supertrend",
+      "EMA_Cross",
+      "VWAP",
+      "ADX_Trend"
+    ],
+    "trades": 122,
+    "win_rate": 20.49,
+    "roi": 11.09,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 13,
+    "id": 156,
+    "name": "VWAP_Trend_Strength",
+    "strategies": [
+      "VWAP",
+      "Trend_MA50",
+      "ADX_Trend"
+    ],
+    "trades": 122,
+    "win_rate": 20.49,
+    "roi": 11.09,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 15,
+    "id": 171,
+    "name": "EMA_MACD_Stochastic",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "Stochastic",
+      "ADX_Trend"
+    ],
+    "trades": 111,
+    "win_rate": 20.72,
+    "roi": 11.06,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 2,
+    "id": 27,
+    "name": "EMA_Retracement",
+    "strategies": [
+      "EMA_Cross",
+      "BB_Lower",
+      "RSI_Oversold"
+    ],
+    "trades": 142,
+    "win_rate": 18.31,
+    "roi": 11.02,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 6,
+    "id": 76,
+    "name": "EMA_Divergence",
+    "strategies": [
+      "EMA_Cross",
+      "RSI_Oversold",
+      "BB_Lower"
+    ],
+    "trades": 142,
+    "win_rate": 18.31,
+    "roi": 11.02,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 10,
+    "id": 126,
+    "name": "VWAP_ADX_Trade",
+    "strategies": [
+      "VWAP",
+      "ADX_Trend",
+      "MACD_Cross"
+    ],
+    "trades": 107,
+    "win_rate": 17.76,
+    "roi": 10.73,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 17,
+    "id": 198,
+    "name": "BB_VWAP_ADX",
+    "strategies": [
+      "BB_Lower",
+      "VWAP",
+      "ADX_Trend",
+      "EMA_Cross"
+    ],
+    "trades": 111,
+    "win_rate": 20.72,
+    "roi": 10.72,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 8,
+    "id": 105,
+    "name": "Supertrend_Alpha",
+    "strategies": [
+      "Supertrend",
+      "EMA_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 122,
+    "win_rate": 20.49,
+    "roi": 10.67,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 10,
+    "id": 125,
+    "name": "Supertrend_Volume",
+    "strategies": [
+      "Supertrend",
+      "Volume_Spike",
+      "EMA_Cross"
+    ],
+    "trades": 122,
+    "win_rate": 20.49,
+    "roi": 10.67,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 17,
+    "id": 195,
+    "name": "Supertrend_Volume_ADX",
+    "strategies": [
+      "Supertrend",
+      "Volume_Spike",
+      "ADX_Trend",
+      "EMA_Cross",
+      "MACD_Cross"
+    ],
+    "trades": 48,
+    "win_rate": 22.92,
+    "roi": 10.55,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 2,
+    "id": 28,
+    "name": "Breakout_Pullback",
+    "strategies": [
+      "Breakout_20",
+      "RSI_Oversold",
+      "BB_Lower"
+    ],
+    "trades": 141,
+    "win_rate": 20.57,
+    "roi": 10.41,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 13,
+    "id": 156,
+    "name": "VWAP_Trend_Strength",
+    "strategies": [
+      "VWAP",
+      "Trend_MA50",
+      "ADX_Trend"
+    ],
+    "trades": 107,
+    "win_rate": 17.76,
+    "roi": 10.37,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 1,
+    "id": 13,
+    "name": "Volume_Profile_Breakout",
+    "strategies": [
+      "Volume_Spike",
+      "Breakout_20",
+      "ADX_Trend"
+    ],
+    "trades": 184,
+    "win_rate": 21.74,
+    "roi": 10.35,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 4,
+    "id": 53,
+    "name": "ADX_Breakout_Pro",
+    "strategies": [
+      "ADX_Trend",
+      "Breakout_20",
+      "Volume_Spike"
+    ],
+    "trades": 184,
+    "win_rate": 21.74,
+    "roi": 10.35,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 5,
+    "id": 72,
+    "name": "Breakout_Volume_Confirm",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "ADX_Trend"
+    ],
+    "trades": 184,
+    "win_rate": 21.74,
+    "roi": 10.35,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 7,
+    "id": 100,
+    "name": "Volume_Confirm",
+    "strategies": [
+      "Volume_Spike",
+      "Breakout_20",
+      "Supertrend",
+      "ADX_Trend"
+    ],
+    "trades": 184,
+    "win_rate": 21.74,
+    "roi": 10.35,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 8,
+    "id": 104,
+    "name": "Breakout_Success",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "ADX_Trend"
+    ],
+    "trades": 184,
+    "win_rate": 21.74,
+    "roi": 10.35,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 9,
+    "id": 115,
+    "name": "VWAP_EMA_Strength",
+    "strategies": [
+      "VWAP",
+      "EMA_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 107,
+    "win_rate": 17.76,
+    "roi": 10.29,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 16,
+    "id": 189,
+    "name": "Volume_MACD_ADX",
+    "strategies": [
+      "Volume_Spike",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Trend_MA50",
+      "Supertrend"
+    ],
+    "trades": 48,
+    "win_rate": 22.92,
+    "roi": 10.25,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 12,
+    "id": 145,
+    "name": "Supertrend_Cluster",
+    "strategies": [
+      "Supertrend",
+      "EMA_Cross",
+      "VWAP",
+      "ADX_Trend"
+    ],
+    "trades": 107,
+    "win_rate": 17.76,
+    "roi": 10.21,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 2,
+    "id": 21,
+    "name": "Bollinger_Squeeze_Entry",
+    "strategies": [
+      "BB_Lower",
+      "MACD_Cross",
+      "Stochastic"
+    ],
+    "trades": 147,
+    "win_rate": 15.65,
+    "roi": 10.15,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 13,
+    "id": 158,
+    "name": "BB_MACD_Trade",
+    "strategies": [
+      "BB_Lower",
+      "MACD_Cross",
+      "Stochastic"
+    ],
+    "trades": 147,
+    "win_rate": 15.65,
+    "roi": 10.15,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 17,
+    "id": 196,
+    "name": "VWAP_MACD_ADX",
+    "strategies": [
+      "VWAP",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Trend_MA50",
+      "EMA_Cross"
+    ],
+    "trades": 97,
+    "win_rate": 19.59,
+    "roi": 10.15,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 18,
+    "id": 206,
+    "name": "VWAP_Trend_Entry",
+    "strategies": [
+      "VWAP",
+      "Trend_MA50",
+      "EMA_Cross",
+      "ADX_Trend",
+      "MACD_Cross"
+    ],
+    "trades": 97,
+    "win_rate": 19.59,
+    "roi": 10.15,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 14,
+    "id": 164,
+    "name": "Breakout_Confirmation",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "EMA_Cross",
+      "Supertrend"
+    ],
+    "trades": 72,
+    "win_rate": 18.06,
+    "roi": 9.96,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 13,
+    "id": 157,
+    "name": "ADX_BB_Entry",
+    "strategies": [
+      "ADX_Trend",
+      "BB_Lower",
+      "EMA_Cross"
+    ],
+    "trades": 122,
+    "win_rate": 15.57,
+    "roi": 9.92,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 4,
+    "id": 57,
+    "name": "Volume_Spike_Trend",
+    "strategies": [
+      "Volume_Spike",
+      "EMA_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 122,
+    "win_rate": 20.49,
+    "roi": 9.81,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 6,
+    "id": 83,
+    "name": "ADX_Strength_Pro",
+    "strategies": [
+      "ADX_Trend",
+      "EMA_Cross",
+      "Volume_Spike"
+    ],
+    "trades": 122,
+    "win_rate": 20.49,
+    "roi": 9.81,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 8,
+    "id": 109,
+    "name": "Volume_EMA_Trade",
+    "strategies": [
+      "Volume_Spike",
+      "EMA_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 122,
+    "win_rate": 20.49,
+    "roi": 9.81,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 12,
+    "id": 141,
+    "name": "EMA_ADX_Pro",
+    "strategies": [
+      "EMA_Cross",
+      "ADX_Trend",
+      "Volume_Spike"
+    ],
+    "trades": 122,
+    "win_rate": 20.49,
+    "roi": 9.81,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 12,
+    "id": 146,
+    "name": "VWAP_Breakout",
+    "strategies": [
+      "VWAP",
+      "Breakout_20",
+      "MACD_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 54,
+    "win_rate": 22.22,
+    "roi": 9.71,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 7,
+    "id": 96,
+    "name": "VWAP_Momentum",
+    "strategies": [
+      "VWAP",
+      "EMA_Cross",
+      "MACD_Cross"
+    ],
+    "trades": 66,
+    "win_rate": 19.7,
+    "roi": 9.54,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 6,
+    "id": 81,
+    "name": "Breakout_Thermo",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 49,
+    "win_rate": 22.45,
+    "roi": 9.53,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 2,
+    "id": 20,
+    "name": "Trend_Acceleration",
+    "strategies": [
+      "EMA_Cross",
+      "ADX_Trend",
+      "Volume_Spike",
+      "Trend_MA50"
+    ],
+    "trades": 73,
+    "win_rate": 19.18,
+    "roi": 9.46,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 14,
+    "id": 167,
+    "name": "ADX_Volume_Break",
+    "strategies": [
+      "ADX_Trend",
+      "Volume_Spike",
+      "Breakout_20",
+      "EMA_Cross"
+    ],
+    "trades": 69,
+    "win_rate": 17.39,
+    "roi": 9.4,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 19,
+    "id": 211,
+    "name": "EMA_Breakout_ADX",
+    "strategies": [
+      "EMA_Cross",
+      "Breakout_20",
+      "ADX_Trend",
+      "Supertrend",
+      "Volume_Spike"
+    ],
+    "trades": 69,
+    "win_rate": 17.39,
+    "roi": 9.4,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 20,
+    "id": 223,
+    "name": "Aggressive_Entry",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "MACD_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 49,
+    "win_rate": 22.45,
+    "roi": 9.32,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 2,
+    "id": 28,
+    "name": "Breakout_Pullback",
+    "strategies": [
+      "Breakout_20",
+      "RSI_Oversold",
+      "BB_Lower"
+    ],
+    "trades": 139,
+    "win_rate": 15.83,
+    "roi": 9.22,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 9,
+    "id": 116,
+    "name": "ADX_Volume_Trade",
+    "strategies": [
+      "ADX_Trend",
+      "Volume_Spike",
+      "MACD_Cross"
+    ],
+    "trades": 123,
+    "win_rate": 20.33,
+    "roi": 9.22,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 11,
+    "id": 133,
+    "name": "MACD_Volume",
+    "strategies": [
+      "MACD_Cross",
+      "Volume_Spike",
+      "ADX_Trend"
+    ],
+    "trades": 123,
+    "win_rate": 20.33,
+    "roi": 9.22,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 4,
+    "id": 47,
+    "name": "Volume_Weighted_Entry",
+    "strategies": [
+      "Volume_Spike",
+      "VWAP",
+      "EMA_Cross"
+    ],
+    "trades": 190,
+    "win_rate": 20.0,
+    "roi": 9.19,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 4,
+    "id": 59,
+    "name": "Breakout_Cluster",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "EMA_Cross",
+      "MACD_Cross"
+    ],
+    "trades": 38,
+    "win_rate": 21.05,
+    "roi": 8.88,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 8,
+    "id": 106,
+    "name": "VWAP_Break_Pro",
+    "strategies": [
+      "VWAP",
+      "Breakout_20",
+      "MACD_Cross"
+    ],
+    "trades": 110,
+    "win_rate": 20.0,
+    "roi": 8.88,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 5,
+    "id": 71,
+    "name": "Trend_Channel_Bounce",
+    "strategies": [
+      "BB_Lower",
+      "Trend_MA50",
+      "VWAP"
+    ],
+    "trades": 161,
+    "win_rate": 15.53,
+    "roi": 8.84,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 20,
+    "id": 226,
+    "name": "Quick_Profit",
+    "strategies": [
+      "RSI_Oversold",
+      "Stochastic",
+      "BB_Lower"
+    ],
+    "trades": 303,
+    "win_rate": 23.76,
+    "roi": 8.76,
+    "sl": 0.005,
+    "tp": 0.035,
+    "ts": 0.005
+  },
+  {
+    "asset": "BTCUSDT_15m",
+    "batch": 1,
+    "id": 7,
+    "name": "Mean_Reversion_Pro",
+    "strategies": [
+      "BB_Lower",
+      "RSI_Oversold",
+      "Stochastic",
+      "VWAP"
+    ],
+    "trades": 91,
+    "win_rate": 15.38,
+    "roi": 8.69,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "BTCUSDT_15m",
+    "batch": 3,
+    "id": 37,
+    "name": "Oversold_Recovery",
+    "strategies": [
+      "RSI_Oversold",
+      "Stochastic",
+      "BB_Lower",
+      "VWAP"
+    ],
+    "trades": 91,
+    "win_rate": 15.38,
+    "roi": 8.69,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "BTCUSDT_15m",
+    "batch": 4,
+    "id": 55,
+    "name": "Double_Bottom_Formation",
+    "strategies": [
+      "BB_Lower",
+      "RSI_Oversold",
+      "Stochastic",
+      "VWAP"
+    ],
+    "trades": 91,
+    "win_rate": 15.38,
+    "roi": 8.69,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "BTCUSDT_15m",
+    "batch": 12,
+    "id": 148,
+    "name": "BB_Stochastic_Trade",
+    "strategies": [
+      "BB_Lower",
+      "Stochastic",
+      "RSI_Oversold",
+      "VWAP"
+    ],
+    "trades": 91,
+    "win_rate": 15.38,
+    "roi": 8.69,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "BTCUSDT_15m",
+    "batch": 13,
+    "id": 152,
+    "name": "RSI_Confirmation",
+    "strategies": [
+      "RSI_Oversold",
+      "Stochastic",
+      "BB_Lower",
+      "VWAP"
+    ],
+    "trades": 91,
+    "win_rate": 15.38,
+    "roi": 8.69,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 1,
+    "id": 8,
+    "name": "Momentum_Burst",
+    "strategies": [
+      "EMA_Cross",
+      "Volume_Spike",
+      "MACD_Cross"
+    ],
+    "trades": 113,
+    "win_rate": 15.93,
+    "roi": 8.63,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 5,
+    "id": 70,
+    "name": "EMA_Momentum_Entry",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "Volume_Spike"
+    ],
+    "trades": 113,
+    "win_rate": 15.93,
+    "roi": 8.63,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 1,
+    "id": 8,
+    "name": "Momentum_Burst",
+    "strategies": [
+      "EMA_Cross",
+      "Volume_Spike",
+      "MACD_Cross"
+    ],
+    "trades": 237,
+    "win_rate": 19.41,
+    "roi": 8.49,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 5,
+    "id": 70,
+    "name": "EMA_Momentum_Entry",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "Volume_Spike"
+    ],
+    "trades": 237,
+    "win_rate": 19.41,
+    "roi": 8.49,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 2,
+    "id": 28,
+    "name": "Breakout_Pullback",
+    "strategies": [
+      "Breakout_20",
+      "RSI_Oversold",
+      "BB_Lower"
+    ],
+    "trades": 98,
+    "win_rate": 18.37,
+    "roi": 8.37,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 19,
+    "id": 220,
+    "name": "Ultimate_Entry",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "RSI_Oversold",
+      "Supertrend",
+      "ADX_Trend",
+      "VWAP",
+      "Trend_MA50",
+      "Volume_Spike"
+    ],
+    "trades": 47,
+    "win_rate": 19.15,
+    "roi": 8.35,
+    "sl": 0.025,
+    "tp": 0.15,
+    "ts": 0.025
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 20,
+    "id": 223,
+    "name": "Aggressive_Entry",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "MACD_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 72,
+    "win_rate": 19.44,
+    "roi": 8.33,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 9,
+    "id": 120,
+    "name": "Multi_Indicator",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "RSI_Oversold",
+      "ADX_Trend"
+    ],
+    "trades": 96,
+    "win_rate": 17.71,
+    "roi": 8.24,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 15,
+    "id": 175,
+    "name": "Supertrend_Confirm",
+    "strategies": [
+      "Supertrend",
+      "EMA_Cross",
+      "ADX_Trend",
+      "RSI_Oversold",
+      "MACD_Cross"
+    ],
+    "trades": 96,
+    "win_rate": 17.71,
+    "roi": 8.24,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 18,
+    "id": 201,
+    "name": "EMA_RSI_MACD_ADX",
+    "strategies": [
+      "EMA_Cross",
+      "RSI_Oversold",
+      "MACD_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 96,
+    "win_rate": 17.71,
+    "roi": 8.24,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 19,
+    "id": 215,
+    "name": "Supertrend_RSI_MACD_ADX",
+    "strategies": [
+      "Supertrend",
+      "RSI_Oversold",
+      "MACD_Cross",
+      "ADX_Trend",
+      "EMA_Cross"
+    ],
+    "trades": 96,
+    "win_rate": 17.71,
+    "roi": 8.24,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 2,
+    "id": 25,
+    "name": "Stochastic_Cross_Pro",
+    "strategies": [
+      "Stochastic",
+      "MACD_Cross",
+      "Trend_MA50"
+    ],
+    "trades": 296,
+    "win_rate": 19.26,
+    "roi": 8.21,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 15,
+    "id": 172,
+    "name": "RSI_BB_VWAP",
+    "strategies": [
+      "RSI_Oversold",
+      "BB_Lower",
+      "VWAP",
+      "Supertrend"
+    ],
+    "trades": 201,
+    "win_rate": 19.9,
+    "roi": 8.13,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 9,
+    "id": 113,
+    "name": "Breakout_Volume_Pro",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "EMA_Cross"
+    ],
+    "trades": 74,
+    "win_rate": 18.92,
+    "roi": 8.04,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 10,
+    "id": 121,
+    "name": "EMA_Breakout_Pro",
+    "strategies": [
+      "EMA_Cross",
+      "Breakout_20",
+      "Volume_Spike"
+    ],
+    "trades": 74,
+    "win_rate": 18.92,
+    "roi": 8.04,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 1,
+    "id": 15,
+    "name": "Aggressive_Growth",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "Volume_Spike",
+      "Breakout_20",
+      "ADX_Trend",
+      "VWAP"
+    ],
+    "trades": 41,
+    "win_rate": 21.95,
+    "roi": 7.97,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 17,
+    "id": 200,
+    "name": "Volume_All_Confirm",
+    "strategies": [
+      "Volume_Spike",
+      "EMA_Cross",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Supertrend",
+      "VWAP"
+    ],
+    "trades": 41,
+    "win_rate": 21.95,
+    "roi": 7.97,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "BTCUSDT_15m",
+    "batch": 13,
+    "id": 154,
+    "name": "Breakout_VWAP",
+    "strategies": [
+      "Breakout_20",
+      "VWAP",
+      "Volume_Spike",
+      "MACD_Cross"
+    ],
+    "trades": 23,
+    "win_rate": 17.39,
+    "roi": 7.86,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BTCUSDT_15m",
+    "batch": 18,
+    "id": 203,
+    "name": "MACD_VWAP_Breakout",
+    "strategies": [
+      "MACD_Cross",
+      "VWAP",
+      "Breakout_20",
+      "Volume_Spike"
+    ],
+    "trades": 23,
+    "win_rate": 17.39,
+    "roi": 7.86,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 16,
+    "id": 181,
+    "name": "EMA_BB_Stochastic",
+    "strategies": [
+      "EMA_Cross",
+      "BB_Lower",
+      "Stochastic",
+      "VWAP"
+    ],
+    "trades": 164,
+    "win_rate": 19.51,
+    "roi": 7.82,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 16,
+    "id": 188,
+    "name": "BB_Stochastic_VWAP",
+    "strategies": [
+      "BB_Lower",
+      "Stochastic",
+      "VWAP",
+      "EMA_Cross"
+    ],
+    "trades": 164,
+    "win_rate": 19.51,
+    "roi": 7.82,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BTCUSDT_1h",
+    "batch": 12,
+    "id": 146,
+    "name": "VWAP_Breakout",
+    "strategies": [
+      "VWAP",
+      "Breakout_20",
+      "MACD_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 58,
+    "win_rate": 20.69,
+    "roi": 7.81,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 3,
+    "id": 35,
+    "name": "RSI_Momentum_Burst",
+    "strategies": [
+      "RSI_Oversold",
+      "MACD_Cross",
+      "Volume_Spike"
+    ],
+    "trades": 139,
+    "win_rate": 19.42,
+    "roi": 7.8,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 17,
+    "id": 195,
+    "name": "Supertrend_Volume_ADX",
+    "strategies": [
+      "Supertrend",
+      "Volume_Spike",
+      "ADX_Trend",
+      "EMA_Cross",
+      "MACD_Cross"
+    ],
+    "trades": 73,
+    "win_rate": 19.18,
+    "roi": 7.62,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 6,
+    "id": 89,
+    "name": "MACD_ADX_Combo",
+    "strategies": [
+      "MACD_Cross",
+      "ADX_Trend",
+      "Supertrend",
+      "Trend_MA50"
+    ],
+    "trades": 123,
+    "win_rate": 20.33,
+    "roi": 7.52,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 13,
+    "id": 153,
+    "name": "MACD_Trend_Follow",
+    "strategies": [
+      "MACD_Cross",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 123,
+    "win_rate": 20.33,
+    "roi": 7.52,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 14,
+    "id": 163,
+    "name": "MACD_Supertrend_ADX",
+    "strategies": [
+      "MACD_Cross",
+      "Supertrend",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 123,
+    "win_rate": 20.33,
+    "roi": 7.52,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 14,
+    "id": 170,
+    "name": "Trend_Strength_Entry",
+    "strategies": [
+      "Trend_MA50",
+      "EMA_Cross",
+      "ADX_Trend",
+      "Supertrend"
+    ],
+    "trades": 123,
+    "win_rate": 20.33,
+    "roi": 7.52,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 9,
+    "id": 120,
+    "name": "Multi_Indicator",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "RSI_Oversold",
+      "ADX_Trend"
+    ],
+    "trades": 177,
+    "win_rate": 20.9,
+    "roi": 7.51,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 18,
+    "id": 201,
+    "name": "EMA_RSI_MACD_ADX",
+    "strategies": [
+      "EMA_Cross",
+      "RSI_Oversold",
+      "MACD_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 177,
+    "win_rate": 20.9,
+    "roi": 7.51,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 14,
+    "id": 166,
+    "name": "VWAP_ADX_Strength",
+    "strategies": [
+      "VWAP",
+      "ADX_Trend",
+      "EMA_Cross",
+      "MACD_Cross"
+    ],
+    "trades": 64,
+    "win_rate": 20.31,
+    "roi": 7.48,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 8,
+    "id": 101,
+    "name": "EMA_Cloud_Strategy",
+    "strategies": [
+      "EMA_Cross",
+      "Trend_MA50",
+      "VWAP"
+    ],
+    "trades": 113,
+    "win_rate": 16.81,
+    "roi": 7.25,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 11,
+    "id": 131,
+    "name": "EMA_Cluster",
+    "strategies": [
+      "EMA_Cross",
+      "Trend_MA50",
+      "VWAP"
+    ],
+    "trades": 113,
+    "win_rate": 16.81,
+    "roi": 7.25,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 2,
+    "id": 21,
+    "name": "Bollinger_Squeeze_Entry",
+    "strategies": [
+      "BB_Lower",
+      "MACD_Cross",
+      "Stochastic"
+    ],
+    "trades": 167,
+    "win_rate": 19.76,
+    "roi": 7.1,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 13,
+    "id": 158,
+    "name": "BB_MACD_Trade",
+    "strategies": [
+      "BB_Lower",
+      "MACD_Cross",
+      "Stochastic"
+    ],
+    "trades": 167,
+    "win_rate": 19.76,
+    "roi": 7.1,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 5,
+    "id": 75,
+    "name": "High_Momentum_Entry",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "Volume_Spike",
+      "ADX_Trend",
+      "Breakout_20"
+    ],
+    "trades": 33,
+    "win_rate": 21.21,
+    "roi": 7.06,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 16,
+    "id": 184,
+    "name": "Breakout_ADX_Pro",
+    "strategies": [
+      "Breakout_20",
+      "ADX_Trend",
+      "Volume_Spike",
+      "EMA_Cross",
+      "MACD_Cross"
+    ],
+    "trades": 33,
+    "win_rate": 21.21,
+    "roi": 7.06,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 2,
+    "id": 30,
+    "name": "Conservative_Growth",
+    "strategies": [
+      "EMA_Cross",
+      "ADX_Trend",
+      "Trend_MA50",
+      "VWAP"
+    ],
+    "trades": 252,
+    "win_rate": 19.84,
+    "roi": 7.0,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 15,
+    "id": 179,
+    "name": "Stochastic_Pro_Trade",
+    "strategies": [
+      "Stochastic",
+      "EMA_Cross",
+      "MACD_Cross",
+      "Supertrend",
+      "ADX_Trend"
+    ],
+    "trades": 113,
+    "win_rate": 20.35,
+    "roi": 6.95,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 17,
+    "id": 199,
+    "name": "Stochastic_Trend_MACD",
+    "strategies": [
+      "Stochastic",
+      "Trend_MA50",
+      "MACD_Cross",
+      "EMA_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 89,
+    "win_rate": 19.1,
+    "roi": 6.88,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BTCUSDT_15m",
+    "batch": 5,
+    "id": 62,
+    "name": "RSI_Extreme_Reversal",
+    "strategies": [
+      "RSI_Oversold",
+      "Stochastic",
+      "BB_Lower",
+      "VWAP"
+    ],
+    "trades": 125,
+    "win_rate": 13.6,
+    "roi": 6.56,
+    "sl": 0.005,
+    "tp": 0.05,
+    "ts": 0.005
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 11,
+    "id": 140,
+    "name": "Trend_BB_Trade",
+    "strategies": [
+      "Trend_MA50",
+      "BB_Lower",
+      "ADX_Trend"
+    ],
+    "trades": 123,
+    "win_rate": 20.33,
+    "roi": 6.56,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 19,
+    "id": 217,
+    "name": "ADX_EMA_VWAP_MACD",
+    "strategies": [
+      "ADX_Trend",
+      "EMA_Cross",
+      "VWAP",
+      "MACD_Cross",
+      "Supertrend"
+    ],
+    "trades": 55,
+    "win_rate": 21.82,
+    "roi": 6.55,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 8,
+    "id": 106,
+    "name": "VWAP_Break_Pro",
+    "strategies": [
+      "VWAP",
+      "Breakout_20",
+      "MACD_Cross"
+    ],
+    "trades": 65,
+    "win_rate": 20.0,
+    "roi": 6.48,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 10,
+    "id": 130,
+    "name": "Trend_Stochastic",
+    "strategies": [
+      "Trend_MA50",
+      "Stochastic",
+      "EMA_Cross"
+    ],
+    "trades": 153,
+    "win_rate": 19.61,
+    "roi": 6.44,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 10,
+    "id": 122,
+    "name": "RSI_Trend_Trade",
+    "strategies": [
+      "RSI_Oversold",
+      "Trend_MA50",
+      "ADX_Trend"
+    ],
+    "trades": 123,
+    "win_rate": 15.45,
+    "roi": 6.3,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 6,
+    "id": 90,
+    "name": "Max_Agreement",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "RSI_Oversold",
+      "Supertrend",
+      "ADX_Trend",
+      "VWAP"
+    ],
+    "trades": 60,
+    "win_rate": 20.0,
+    "roi": 6.28,
+    "sl": 0.025,
+    "tp": 0.15,
+    "ts": 0.025
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 8,
+    "id": 107,
+    "name": "ADX_Momentum",
+    "strategies": [
+      "ADX_Trend",
+      "EMA_Cross",
+      "RSI_Oversold"
+    ],
+    "trades": 123,
+    "win_rate": 15.45,
+    "roi": 6.21,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 2,
+    "id": 22,
+    "name": "VWAP_Trend_Follow",
+    "strategies": [
+      "VWAP",
+      "EMA_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 121,
+    "win_rate": 15.7,
+    "roi": 6.16,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 4,
+    "id": 46,
+    "name": "EMA_Rainbow_Stack",
+    "strategies": [
+      "EMA_Cross",
+      "Trend_MA50",
+      "ADX_Trend",
+      "VWAP"
+    ],
+    "trades": 115,
+    "win_rate": 16.52,
+    "roi": 6.15,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 1,
+    "id": 6,
+    "name": "Breakout_Hunter",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "MACD_Cross",
+      "Supertrend"
+    ],
+    "trades": 50,
+    "win_rate": 22.0,
+    "roi": 6.1,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 5,
+    "id": 67,
+    "name": "ADX_Trend_Strength",
+    "strategies": [
+      "ADX_Trend",
+      "EMA_Cross",
+      "MACD_Cross"
+    ],
+    "trades": 122,
+    "win_rate": 15.57,
+    "roi": 6.02,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 17,
+    "id": 197,
+    "name": "ADX_BB_MACD",
+    "strategies": [
+      "ADX_Trend",
+      "BB_Lower",
+      "MACD_Cross",
+      "Stochastic"
+    ],
+    "trades": 85,
+    "win_rate": 18.82,
+    "roi": 5.93,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 2,
+    "id": 20,
+    "name": "Trend_Acceleration",
+    "strategies": [
+      "EMA_Cross",
+      "ADX_Trend",
+      "Volume_Spike",
+      "Trend_MA50"
+    ],
+    "trades": 51,
+    "win_rate": 21.57,
+    "roi": 5.89,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 8,
+    "id": 106,
+    "name": "VWAP_Break_Pro",
+    "strategies": [
+      "VWAP",
+      "Breakout_20",
+      "MACD_Cross"
+    ],
+    "trades": 166,
+    "win_rate": 20.48,
+    "roi": 5.87,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 3,
+    "id": 38,
+    "name": "Breakout_Momentum",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "MACD_Cross",
+      "Supertrend"
+    ],
+    "trades": 68,
+    "win_rate": 19.12,
+    "roi": 5.85,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 17,
+    "id": 191,
+    "name": "EMA_BB_ADX",
+    "strategies": [
+      "EMA_Cross",
+      "BB_Lower",
+      "ADX_Trend",
+      "Supertrend"
+    ],
+    "trades": 124,
+    "win_rate": 20.16,
+    "roi": 5.83,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 19,
+    "id": 212,
+    "name": "RSI_Stochastic_VWAP_ADX",
+    "strategies": [
+      "RSI_Oversold",
+      "Stochastic",
+      "VWAP",
+      "ADX_Trend",
+      "MACD_Cross"
+    ],
+    "trades": 78,
+    "win_rate": 20.51,
+    "roi": 5.77,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 15,
+    "id": 175,
+    "name": "Supertrend_Confirm",
+    "strategies": [
+      "Supertrend",
+      "EMA_Cross",
+      "ADX_Trend",
+      "RSI_Oversold",
+      "MACD_Cross"
+    ],
+    "trades": 178,
+    "win_rate": 20.79,
+    "roi": 5.37,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 19,
+    "id": 215,
+    "name": "Supertrend_RSI_MACD_ADX",
+    "strategies": [
+      "Supertrend",
+      "RSI_Oversold",
+      "MACD_Cross",
+      "ADX_Trend",
+      "EMA_Cross"
+    ],
+    "trades": 178,
+    "win_rate": 20.79,
+    "roi": 5.37,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 2,
+    "id": 18,
+    "name": "Channel_Breakout",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "Supertrend"
+    ],
+    "trades": 125,
+    "win_rate": 20.0,
+    "roi": 5.3,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 4,
+    "id": 50,
+    "name": "BB_Squeeze_Exit",
+    "strategies": [
+      "BB_Lower",
+      "Volume_Spike",
+      "Supertrend"
+    ],
+    "trades": 125,
+    "win_rate": 20.0,
+    "roi": 5.3,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 5,
+    "id": 66,
+    "name": "Volume_Surge_Breakout",
+    "strategies": [
+      "Volume_Spike",
+      "Breakout_20",
+      "Supertrend"
+    ],
+    "trades": 125,
+    "win_rate": 20.0,
+    "roi": 5.3,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 9,
+    "id": 113,
+    "name": "Breakout_Volume_Pro",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "EMA_Cross"
+    ],
+    "trades": 51,
+    "win_rate": 21.57,
+    "roi": 5.29,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 10,
+    "id": 121,
+    "name": "EMA_Breakout_Pro",
+    "strategies": [
+      "EMA_Cross",
+      "Breakout_20",
+      "Volume_Spike"
+    ],
+    "trades": 51,
+    "win_rate": 21.57,
+    "roi": 5.29,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 14,
+    "id": 166,
+    "name": "VWAP_ADX_Strength",
+    "strategies": [
+      "VWAP",
+      "ADX_Trend",
+      "EMA_Cross",
+      "MACD_Cross"
+    ],
+    "trades": 112,
+    "win_rate": 19.64,
+    "roi": 5.28,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 1,
+    "id": 8,
+    "name": "Momentum_Burst",
+    "strategies": [
+      "EMA_Cross",
+      "Volume_Spike",
+      "MACD_Cross"
+    ],
+    "trades": 75,
+    "win_rate": 18.67,
+    "roi": 5.26,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 5,
+    "id": 70,
+    "name": "EMA_Momentum_Entry",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "Volume_Spike"
+    ],
+    "trades": 75,
+    "win_rate": 18.67,
+    "roi": 5.26,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 6,
+    "id": 85,
+    "name": "Stochastic_Trend",
+    "strategies": [
+      "Stochastic",
+      "Trend_MA50",
+      "ADX_Trend"
+    ],
+    "trades": 123,
+    "win_rate": 15.45,
+    "roi": 5.22,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 12,
+    "id": 147,
+    "name": "ADX_Stochastic_Trade",
+    "strategies": [
+      "ADX_Trend",
+      "Stochastic",
+      "Trend_MA50"
+    ],
+    "trades": 123,
+    "win_rate": 15.45,
+    "roi": 5.22,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 3,
+    "id": 45,
+    "name": "Support_Resistance_Bounce",
+    "strategies": [
+      "BB_Lower",
+      "VWAP",
+      "Stochastic"
+    ],
+    "trades": 144,
+    "win_rate": 18.06,
+    "roi": 5.09,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 8,
+    "id": 108,
+    "name": "BB_Stochastic_Combo",
+    "strategies": [
+      "BB_Lower",
+      "Stochastic",
+      "VWAP"
+    ],
+    "trades": 144,
+    "win_rate": 18.06,
+    "roi": 5.09,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 1,
+    "id": 12,
+    "name": "EMA_Cloud_Strength",
+    "strategies": [
+      "EMA_Cross",
+      "Trend_MA50",
+      "ADX_Trend"
+    ],
+    "trades": 83,
+    "win_rate": 18.07,
+    "roi": 4.98,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 7,
+    "id": 91,
+    "name": "Trend_Follower_Pro",
+    "strategies": [
+      "EMA_Cross",
+      "Trend_MA50",
+      "ADX_Trend"
+    ],
+    "trades": 83,
+    "win_rate": 18.07,
+    "roi": 4.98,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 8,
+    "id": 110,
+    "name": "Trend_Break_Pro",
+    "strategies": [
+      "Trend_MA50",
+      "Breakout_20",
+      "Supertrend"
+    ],
+    "trades": 99,
+    "win_rate": 21.21,
+    "roi": 4.97,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 9,
+    "id": 119,
+    "name": "Breakout_Confirmation",
+    "strategies": [
+      "Breakout_20",
+      "Supertrend",
+      "MACD_Cross"
+    ],
+    "trades": 99,
+    "win_rate": 21.21,
+    "roi": 4.97,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 6,
+    "id": 90,
+    "name": "Max_Agreement",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "RSI_Oversold",
+      "Supertrend",
+      "ADX_Trend",
+      "VWAP"
+    ],
+    "trades": 37,
+    "win_rate": 21.62,
+    "roi": 4.82,
+    "sl": 0.025,
+    "tp": 0.15,
+    "ts": 0.025
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 14,
+    "id": 164,
+    "name": "Breakout_Confirmation",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "EMA_Cross",
+      "Supertrend"
+    ],
+    "trades": 41,
+    "win_rate": 21.95,
+    "roi": 4.79,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 14,
+    "id": 166,
+    "name": "VWAP_ADX_Strength",
+    "strategies": [
+      "VWAP",
+      "ADX_Trend",
+      "EMA_Cross",
+      "MACD_Cross"
+    ],
+    "trades": 188,
+    "win_rate": 20.21,
+    "roi": 4.74,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 14,
+    "id": 167,
+    "name": "ADX_Volume_Break",
+    "strategies": [
+      "ADX_Trend",
+      "Volume_Spike",
+      "Breakout_20",
+      "EMA_Cross"
+    ],
+    "trades": 42,
+    "win_rate": 21.43,
+    "roi": 4.71,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 19,
+    "id": 211,
+    "name": "EMA_Breakout_ADX",
+    "strategies": [
+      "EMA_Cross",
+      "Breakout_20",
+      "ADX_Trend",
+      "Supertrend",
+      "Volume_Spike"
+    ],
+    "trades": 42,
+    "win_rate": 21.43,
+    "roi": 4.71,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 17,
+    "id": 198,
+    "name": "BB_VWAP_ADX",
+    "strategies": [
+      "BB_Lower",
+      "VWAP",
+      "ADX_Trend",
+      "EMA_Cross"
+    ],
+    "trades": 109,
+    "win_rate": 17.43,
+    "roi": 4.56,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 4,
+    "id": 60,
+    "name": "Consolidation_Break",
+    "strategies": [
+      "Breakout_20",
+      "Supertrend",
+      "ADX_Trend",
+      "Volume_Spike"
+    ],
+    "trades": 42,
+    "win_rate": 21.43,
+    "roi": 4.49,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 8,
+    "id": 101,
+    "name": "EMA_Cloud_Strategy",
+    "strategies": [
+      "EMA_Cross",
+      "Trend_MA50",
+      "VWAP"
+    ],
+    "trades": 67,
+    "win_rate": 19.4,
+    "roi": 4.49,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 11,
+    "id": 131,
+    "name": "EMA_Cluster",
+    "strategies": [
+      "EMA_Cross",
+      "Trend_MA50",
+      "VWAP"
+    ],
+    "trades": 67,
+    "win_rate": 19.4,
+    "roi": 4.49,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 13,
+    "id": 160,
+    "name": "Volume_Break_Pro",
+    "strategies": [
+      "Volume_Spike",
+      "Breakout_20",
+      "Supertrend",
+      "ADX_Trend"
+    ],
+    "trades": 42,
+    "win_rate": 21.43,
+    "roi": 4.49,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 8,
+    "id": 110,
+    "name": "Trend_Break_Pro",
+    "strategies": [
+      "Trend_MA50",
+      "Breakout_20",
+      "Supertrend"
+    ],
+    "trades": 188,
+    "win_rate": 21.28,
+    "roi": 4.36,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 9,
+    "id": 119,
+    "name": "Breakout_Confirmation",
+    "strategies": [
+      "Breakout_20",
+      "Supertrend",
+      "MACD_Cross"
+    ],
+    "trades": 188,
+    "win_rate": 21.28,
+    "roi": 4.36,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 2,
+    "id": 21,
+    "name": "Bollinger_Squeeze_Entry",
+    "strategies": [
+      "BB_Lower",
+      "MACD_Cross",
+      "Stochastic"
+    ],
+    "trades": 103,
+    "win_rate": 17.48,
+    "roi": 4.16,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 13,
+    "id": 158,
+    "name": "BB_MACD_Trade",
+    "strategies": [
+      "BB_Lower",
+      "MACD_Cross",
+      "Stochastic"
+    ],
+    "trades": 103,
+    "win_rate": 17.48,
+    "roi": 4.16,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 2,
+    "id": 16,
+    "name": "RSI_Extreme_Play",
+    "strategies": [
+      "RSI_Oversold",
+      "Stochastic",
+      "Trend_MA50"
+    ],
+    "trades": 512,
+    "win_rate": 17.77,
+    "roi": 4.08,
+    "sl": 0.005,
+    "tp": 0.05,
+    "ts": 0.005
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 3,
+    "id": 33,
+    "name": "Trend_Line_Break",
+    "strategies": [
+      "Breakout_20",
+      "Supertrend",
+      "ADX_Trend"
+    ],
+    "trades": 188,
+    "win_rate": 21.28,
+    "roi": 4.08,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 7,
+    "id": 94,
+    "name": "Breakout_Alert",
+    "strategies": [
+      "Breakout_20",
+      "Supertrend",
+      "Volume_Spike"
+    ],
+    "trades": 188,
+    "win_rate": 21.28,
+    "roi": 4.08,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 1,
+    "id": 4,
+    "name": "Bollinger_Bounce",
+    "strategies": [
+      "BB_Lower",
+      "RSI_Oversold",
+      "Stochastic"
+    ],
+    "trades": 207,
+    "win_rate": 15.46,
+    "roi": 3.87,
+    "sl": 0.005,
+    "tp": 0.05,
+    "ts": 0.005
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 1,
+    "id": 9,
+    "name": "Stochastic_Reversal",
+    "strategies": [
+      "Stochastic",
+      "RSI_Oversold",
+      "BB_Lower"
+    ],
+    "trades": 207,
+    "win_rate": 15.46,
+    "roi": 3.87,
+    "sl": 0.005,
+    "tp": 0.05,
+    "ts": 0.005
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 14,
+    "id": 169,
+    "name": "Volume_EMA_ADX",
+    "strategies": [
+      "Volume_Spike",
+      "EMA_Cross",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 97,
+    "win_rate": 17.53,
+    "roi": 3.83,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 10,
+    "id": 124,
+    "name": "Breakout_Momentum",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "MACD_Cross"
+    ],
+    "trades": 42,
+    "win_rate": 21.43,
+    "roi": 3.68,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 10,
+    "id": 128,
+    "name": "BB_VWAP_Strategy",
+    "strategies": [
+      "BB_Lower",
+      "VWAP",
+      "EMA_Cross"
+    ],
+    "trades": 164,
+    "win_rate": 15.24,
+    "roi": 3.63,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 11,
+    "id": 138,
+    "name": "BB_EMA_Pro",
+    "strategies": [
+      "BB_Lower",
+      "EMA_Cross",
+      "VWAP"
+    ],
+    "trades": 164,
+    "win_rate": 15.24,
+    "roi": 3.63,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 5,
+    "id": 71,
+    "name": "Trend_Channel_Bounce",
+    "strategies": [
+      "BB_Lower",
+      "Trend_MA50",
+      "VWAP"
+    ],
+    "trades": 116,
+    "win_rate": 17.24,
+    "roi": 3.49,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BTCUSDT_15m",
+    "batch": 19,
+    "id": 220,
+    "name": "Ultimate_Entry",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "RSI_Oversold",
+      "Supertrend",
+      "ADX_Trend",
+      "VWAP",
+      "Trend_MA50",
+      "Volume_Spike"
+    ],
+    "trades": 24,
+    "win_rate": 16.67,
+    "roi": 3.42,
+    "sl": 0.025,
+    "tp": 0.15,
+    "ts": 0.025
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 4,
+    "id": 46,
+    "name": "EMA_Rainbow_Stack",
+    "strategies": [
+      "EMA_Cross",
+      "Trend_MA50",
+      "ADX_Trend",
+      "VWAP"
+    ],
+    "trades": 68,
+    "win_rate": 19.12,
+    "roi": 3.36,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 15,
+    "id": 174,
+    "name": "Breakout_Multi_Signal",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "EMA_Cross",
+      "MACD_Cross",
+      "Supertrend"
+    ],
+    "trades": 41,
+    "win_rate": 19.51,
+    "roi": 3.28,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 4,
+    "id": 49,
+    "name": "Stochastic_Momentum",
+    "strategies": [
+      "Stochastic",
+      "MACD_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 108,
+    "win_rate": 16.67,
+    "roi": 3.26,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 3,
+    "id": 38,
+    "name": "Breakout_Momentum",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "MACD_Cross",
+      "Supertrend"
+    ],
+    "trades": 42,
+    "win_rate": 21.43,
+    "roi": 3.17,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "BTCUSDT_1h",
+    "batch": 8,
+    "id": 106,
+    "name": "VWAP_Break_Pro",
+    "strategies": [
+      "VWAP",
+      "Breakout_20",
+      "MACD_Cross"
+    ],
+    "trades": 76,
+    "win_rate": 19.74,
+    "roi": 3.05,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 10,
+    "id": 128,
+    "name": "BB_VWAP_Strategy",
+    "strategies": [
+      "BB_Lower",
+      "VWAP",
+      "EMA_Cross"
+    ],
+    "trades": 116,
+    "win_rate": 17.24,
+    "roi": 2.96,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 11,
+    "id": 138,
+    "name": "BB_EMA_Pro",
+    "strategies": [
+      "BB_Lower",
+      "EMA_Cross",
+      "VWAP"
+    ],
+    "trades": 116,
+    "win_rate": 17.24,
+    "roi": 2.96,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 10,
+    "id": 130,
+    "name": "Trend_Stochastic",
+    "strategies": [
+      "Trend_MA50",
+      "Stochastic",
+      "EMA_Cross"
+    ],
+    "trades": 118,
+    "win_rate": 16.1,
+    "roi": 2.86,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 19,
+    "id": 216,
+    "name": "VWAP_BB_Stochastic_EMA",
+    "strategies": [
+      "VWAP",
+      "BB_Lower",
+      "Stochastic",
+      "EMA_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 102,
+    "win_rate": 20.59,
+    "roi": 2.79,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 5,
+    "id": 62,
+    "name": "RSI_Extreme_Reversal",
+    "strategies": [
+      "RSI_Oversold",
+      "Stochastic",
+      "BB_Lower",
+      "VWAP"
+    ],
+    "trades": 214,
+    "win_rate": 18.22,
+    "roi": 2.72,
+    "sl": 0.005,
+    "tp": 0.05,
+    "ts": 0.005
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 13,
+    "id": 154,
+    "name": "Breakout_VWAP",
+    "strategies": [
+      "Breakout_20",
+      "VWAP",
+      "Volume_Spike",
+      "MACD_Cross"
+    ],
+    "trades": 44,
+    "win_rate": 22.73,
+    "roi": 2.71,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 18,
+    "id": 203,
+    "name": "MACD_VWAP_Breakout",
+    "strategies": [
+      "MACD_Cross",
+      "VWAP",
+      "Breakout_20",
+      "Volume_Spike"
+    ],
+    "trades": 44,
+    "win_rate": 22.73,
+    "roi": 2.71,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 5,
+    "id": 71,
+    "name": "Trend_Channel_Bounce",
+    "strategies": [
+      "BB_Lower",
+      "Trend_MA50",
+      "VWAP"
+    ],
+    "trades": 297,
+    "win_rate": 19.19,
+    "roi": 2.64,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 13,
+    "id": 155,
+    "name": "Supertrend_ADX_Pro",
+    "strategies": [
+      "Supertrend",
+      "ADX_Trend",
+      "EMA_Cross",
+      "Volume_Spike"
+    ],
+    "trades": 126,
+    "win_rate": 19.84,
+    "roi": 2.6,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 5,
+    "id": 74,
+    "name": "VWAP_Trend_Pro",
+    "strategies": [
+      "VWAP",
+      "EMA_Cross",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 113,
+    "win_rate": 19.47,
+    "roi": 2.42,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 11,
+    "id": 134,
+    "name": "Breakout_ADX",
+    "strategies": [
+      "Breakout_20",
+      "ADX_Trend",
+      "Supertrend"
+    ],
+    "trades": 43,
+    "win_rate": 20.93,
+    "roi": 2.37,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 16,
+    "id": 182,
+    "name": "RSI_Trend_ADX",
+    "strategies": [
+      "RSI_Oversold",
+      "Trend_MA50",
+      "ADX_Trend",
+      "EMA_Cross"
+    ],
+    "trades": 228,
+    "win_rate": 19.3,
+    "roi": 2.36,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 15,
+    "id": 172,
+    "name": "RSI_BB_VWAP",
+    "strategies": [
+      "RSI_Oversold",
+      "BB_Lower",
+      "VWAP",
+      "Supertrend"
+    ],
+    "trades": 160,
+    "win_rate": 15.62,
+    "roi": 2.32,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 3,
+    "id": 32,
+    "name": "Volatility_Expansion",
+    "strategies": [
+      "BB_Lower",
+      "Volume_Spike",
+      "Breakout_20"
+    ],
+    "trades": 66,
+    "win_rate": 19.7,
+    "roi": 2.29,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 3,
+    "id": 33,
+    "name": "Trend_Line_Break",
+    "strategies": [
+      "Breakout_20",
+      "Supertrend",
+      "ADX_Trend"
+    ],
+    "trades": 100,
+    "win_rate": 21.0,
+    "roi": 2.25,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 7,
+    "id": 94,
+    "name": "Breakout_Alert",
+    "strategies": [
+      "Breakout_20",
+      "Supertrend",
+      "Volume_Spike"
+    ],
+    "trades": 100,
+    "win_rate": 21.0,
+    "roi": 2.25,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 15,
+    "id": 177,
+    "name": "ADX_Stochastic_BB",
+    "strategies": [
+      "ADX_Trend",
+      "Stochastic",
+      "BB_Lower",
+      "RSI_Oversold"
+    ],
+    "trades": 102,
+    "win_rate": 17.65,
+    "roi": 2.19,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 16,
+    "id": 187,
+    "name": "ADX_EMA_BB",
+    "strategies": [
+      "ADX_Trend",
+      "EMA_Cross",
+      "BB_Lower",
+      "Stochastic"
+    ],
+    "trades": 127,
+    "win_rate": 14.96,
+    "roi": 1.93,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 14,
+    "id": 169,
+    "name": "Volume_EMA_ADX",
+    "strategies": [
+      "Volume_Spike",
+      "EMA_Cross",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 65,
+    "win_rate": 20.0,
+    "roi": 1.92,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 6,
+    "id": 86,
+    "name": "EMA_Convergence_Pro",
+    "strategies": [
+      "EMA_Cross",
+      "Trend_MA50",
+      "VWAP",
+      "MACD_Cross"
+    ],
+    "trades": 113,
+    "win_rate": 15.04,
+    "roi": 1.89,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "BTCUSDT_1h",
+    "batch": 1,
+    "id": 12,
+    "name": "EMA_Cloud_Strength",
+    "strategies": [
+      "EMA_Cross",
+      "Trend_MA50",
+      "ADX_Trend"
+    ],
+    "trades": 63,
+    "win_rate": 19.05,
+    "roi": 1.85,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BTCUSDT_1h",
+    "batch": 7,
+    "id": 91,
+    "name": "Trend_Follower_Pro",
+    "strategies": [
+      "EMA_Cross",
+      "Trend_MA50",
+      "ADX_Trend"
+    ],
+    "trades": 63,
+    "win_rate": 19.05,
+    "roi": 1.85,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 11,
+    "id": 134,
+    "name": "Breakout_ADX",
+    "strategies": [
+      "Breakout_20",
+      "ADX_Trend",
+      "Supertrend"
+    ],
+    "trades": 134,
+    "win_rate": 20.15,
+    "roi": 1.78,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 20,
+    "id": 225,
+    "name": "High_Profit_Trade",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Supertrend",
+      "VWAP",
+      "Trend_MA50"
+    ],
+    "trades": 22,
+    "win_rate": 22.73,
+    "roi": 1.7,
+    "sl": 0.025,
+    "tp": 0.15,
+    "ts": 0.025
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 1,
+    "id": 3,
+    "name": "Volume_Breakout_Pro",
+    "strategies": [
+      "Volume_Spike",
+      "Breakout_20",
+      "VWAP"
+    ],
+    "trades": 69,
+    "win_rate": 18.84,
+    "roi": 1.68,
+    "sl": 0.012,
+    "tp": 0.08,
+    "ts": 0.012
+  },
+  {
+    "asset": "BTCUSDT_15m",
+    "batch": 18,
+    "id": 207,
+    "name": "ADX_Stochastic_VWAP",
+    "strategies": [
+      "ADX_Trend",
+      "Stochastic",
+      "VWAP",
+      "BB_Lower",
+      "Volume_Spike"
+    ],
+    "trades": 35,
+    "win_rate": 14.29,
+    "roi": 1.64,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 5,
+    "id": 74,
+    "name": "VWAP_Trend_Pro",
+    "strategies": [
+      "VWAP",
+      "EMA_Cross",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 60,
+    "win_rate": 20.0,
+    "roi": 1.64,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BTCUSDT_1h",
+    "batch": 14,
+    "id": 161,
+    "name": "EMA_Break_Momentum",
+    "strategies": [
+      "EMA_Cross",
+      "Breakout_20",
+      "MACD_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 56,
+    "win_rate": 19.64,
+    "roi": 1.5,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 6,
+    "id": 90,
+    "name": "Max_Agreement",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "RSI_Oversold",
+      "Supertrend",
+      "ADX_Trend",
+      "VWAP"
+    ],
+    "trades": 89,
+    "win_rate": 20.22,
+    "roi": 1.5,
+    "sl": 0.025,
+    "tp": 0.15,
+    "ts": 0.025
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 19,
+    "id": 214,
+    "name": "Breakout_EMA_ADX_VWAP",
+    "strategies": [
+      "Breakout_20",
+      "EMA_Cross",
+      "ADX_Trend",
+      "VWAP",
+      "Volume_Spike"
+    ],
+    "trades": 43,
+    "win_rate": 20.93,
+    "roi": 1.48,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 15,
+    "id": 173,
+    "name": "MACD_Breakout",
+    "strategies": [
+      "MACD_Cross",
+      "Breakout_20",
+      "Volume_Spike",
+      "ADX_Trend"
+    ],
+    "trades": 42,
+    "win_rate": 21.43,
+    "roi": 1.36,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 20,
+    "id": 222,
+    "name": "Moderate_Strategy",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "Supertrend",
+      "ADX_Trend"
+    ],
+    "trades": 137,
+    "win_rate": 16.79,
+    "roi": 1.31,
+    "sl": 0.012,
+    "tp": 0.07,
+    "ts": 0.012
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 16,
+    "id": 186,
+    "name": "VWAP_Break_Entry",
+    "strategies": [
+      "VWAP",
+      "Breakout_20",
+      "ADX_Trend",
+      "RSI_Oversold"
+    ],
+    "trades": 99,
+    "win_rate": 20.2,
+    "roi": 1.07,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 18,
+    "id": 202,
+    "name": "RSI_BB_MACD_Stochastic",
+    "strategies": [
+      "RSI_Oversold",
+      "BB_Lower",
+      "MACD_Cross",
+      "Stochastic"
+    ],
+    "trades": 75,
+    "win_rate": 18.67,
+    "roi": 1.06,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 9,
+    "id": 120,
+    "name": "Multi_Indicator",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "RSI_Oversold",
+      "ADX_Trend"
+    ],
+    "trades": 67,
+    "win_rate": 19.4,
+    "roi": 0.98,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 15,
+    "id": 175,
+    "name": "Supertrend_Confirm",
+    "strategies": [
+      "Supertrend",
+      "EMA_Cross",
+      "ADX_Trend",
+      "RSI_Oversold",
+      "MACD_Cross"
+    ],
+    "trades": 67,
+    "win_rate": 19.4,
+    "roi": 0.98,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 18,
+    "id": 201,
+    "name": "EMA_RSI_MACD_ADX",
+    "strategies": [
+      "EMA_Cross",
+      "RSI_Oversold",
+      "MACD_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 67,
+    "win_rate": 19.4,
+    "roi": 0.98,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 19,
+    "id": 215,
+    "name": "Supertrend_RSI_MACD_ADX",
+    "strategies": [
+      "Supertrend",
+      "RSI_Oversold",
+      "MACD_Cross",
+      "ADX_Trend",
+      "EMA_Cross"
+    ],
+    "trades": 67,
+    "win_rate": 19.4,
+    "roi": 0.98,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 6,
+    "id": 90,
+    "name": "Max_Agreement",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "RSI_Oversold",
+      "Supertrend",
+      "ADX_Trend",
+      "VWAP"
+    ],
+    "trades": 54,
+    "win_rate": 14.81,
+    "roi": 0.96,
+    "sl": 0.025,
+    "tp": 0.15,
+    "ts": 0.025
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 3,
+    "id": 39,
+    "name": "ADX_Volatility_Trade",
+    "strategies": [
+      "ADX_Trend",
+      "BB_Lower",
+      "RSI_Oversold"
+    ],
+    "trades": 167,
+    "win_rate": 15.57,
+    "roi": 0.9,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 10,
+    "id": 127,
+    "name": "ADX_BB_Combo",
+    "strategies": [
+      "ADX_Trend",
+      "BB_Lower",
+      "RSI_Oversold"
+    ],
+    "trades": 167,
+    "win_rate": 15.57,
+    "roi": 0.9,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 9,
+    "id": 118,
+    "name": "Trend_Volume",
+    "strategies": [
+      "Trend_MA50",
+      "Volume_Spike",
+      "EMA_Cross"
+    ],
+    "trades": 66,
+    "win_rate": 19.7,
+    "roi": 0.87,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 12,
+    "id": 149,
+    "name": "Volume_Trend_Pro",
+    "strategies": [
+      "Volume_Spike",
+      "Trend_MA50",
+      "EMA_Cross"
+    ],
+    "trades": 66,
+    "win_rate": 19.7,
+    "roi": 0.87,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 9,
+    "id": 111,
+    "name": "EMA_Acceleration",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "Volume_Spike"
+    ],
+    "trades": 61,
+    "win_rate": 19.67,
+    "roi": 0.85,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 1,
+    "id": 5,
+    "name": "Trend_Follower_Multi",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 101,
+    "win_rate": 18.81,
+    "roi": 0.85,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 3,
+    "id": 36,
+    "name": "Golden_Cross_Pro",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 101,
+    "win_rate": 18.81,
+    "roi": 0.85,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 12,
+    "id": 150,
+    "name": "Multi_Trend_Entry",
+    "strategies": [
+      "Trend_MA50",
+      "EMA_Cross",
+      "MACD_Cross",
+      "ADX_Trend"
+    ],
+    "trades": 101,
+    "win_rate": 18.81,
+    "roi": 0.85,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 16,
+    "id": 185,
+    "name": "Supertrend_Multi_Pro",
+    "strategies": [
+      "Supertrend",
+      "EMA_Cross",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Trend_MA50"
+    ],
+    "trades": 101,
+    "win_rate": 18.81,
+    "roi": 0.85,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 19,
+    "id": 219,
+    "name": "Volume_Stochastic_MACD_ADX",
+    "strategies": [
+      "Volume_Spike",
+      "Stochastic",
+      "MACD_Cross",
+      "ADX_Trend",
+      "Trend_MA50",
+      "Supertrend"
+    ],
+    "trades": 82,
+    "win_rate": 19.51,
+    "roi": 0.81,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 17,
+    "id": 194,
+    "name": "Breakout_Volume_ADX",
+    "strategies": [
+      "Breakout_20",
+      "Volume_Spike",
+      "ADX_Trend",
+      "Supertrend",
+      "VWAP"
+    ],
+    "trades": 42,
+    "win_rate": 21.43,
+    "roi": 0.72,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 5,
+    "id": 62,
+    "name": "RSI_Extreme_Reversal",
+    "strategies": [
+      "RSI_Oversold",
+      "Stochastic",
+      "BB_Lower",
+      "VWAP"
+    ],
+    "trades": 279,
+    "win_rate": 18.28,
+    "roi": 0.3,
+    "sl": 0.005,
+    "tp": 0.05,
+    "ts": 0.005
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 19,
+    "id": 214,
+    "name": "Breakout_EMA_ADX_VWAP",
+    "strategies": [
+      "Breakout_20",
+      "EMA_Cross",
+      "ADX_Trend",
+      "VWAP",
+      "Volume_Spike"
+    ],
+    "trades": 57,
+    "win_rate": 19.3,
+    "roi": 0.25,
+    "sl": 0.02,
+    "tp": 0.12,
+    "ts": 0.02
+  },
+  {
+    "asset": "BNBUSDT_1h",
+    "batch": 7,
+    "id": 98,
+    "name": "BB_Recovery",
+    "strategies": [
+      "BB_Lower",
+      "RSI_Oversold",
+      "Stochastic"
+    ],
+    "trades": 190,
+    "win_rate": 19.47,
+    "roi": 0.23,
+    "sl": 0.008,
+    "tp": 0.06,
+    "ts": 0.008
+  },
+  {
+    "asset": "ETHUSDT_15m",
+    "batch": 9,
+    "id": 111,
+    "name": "EMA_Acceleration",
+    "strategies": [
+      "EMA_Cross",
+      "MACD_Cross",
+      "Volume_Spike"
+    ],
+    "trades": 105,
+    "win_rate": 17.14,
+    "roi": 0.14,
+    "sl": 0.015,
+    "tp": 0.09,
+    "ts": 0.015
+  },
+  {
+    "asset": "ETHUSDT_1h",
+    "batch": 15,
+    "id": 172,
+    "name": "RSI_BB_VWAP",
+    "strategies": [
+      "RSI_Oversold",
+      "BB_Lower",
+      "VWAP",
+      "Supertrend"
+    ],
+    "trades": 283,
+    "win_rate": 19.79,
+    "roi": 0.09,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 3,
+    "id": 34,
+    "name": "EMA_Convergence",
+    "strategies": [
+      "EMA_Cross",
+      "Trend_MA50",
+      "VWAP"
+    ],
+    "trades": 106,
+    "win_rate": 16.98,
+    "roi": 0.06,
+    "sl": 0.01,
+    "tp": 0.07,
+    "ts": 0.01
+  },
+  {
+    "asset": "BNBUSDT_15m",
+    "batch": 12,
+    "id": 144,
+    "name": "Breakout_Stochastic",
+    "strategies": [
+      "Breakout_20",
+      "Stochastic",
+      "Volume_Spike"
+    ],
+    "trades": 54,
+    "win_rate": 20.37,
+    "roi": 0.05,
+    "sl": 0.018,
+    "tp": 0.1,
+    "ts": 0.018
+  }
+]
