@@ -19,6 +19,19 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 TELEGRAM_API_URL = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}" if TELEGRAM_TOKEN else None
 
+# Configuration for Guardrails
+STOP_LOSS_PCT = 0.01   # 1% loss limit
+TAKE_PROFIT_PCT = 0.02 # 2% profit target
+
+# Initialize Binance client safely
+try:
+    bnc = BinanceClient()
+except Exception as e:
+    print(f"Warning: BinanceClient init failed: {e}")
+    bnc = None
+
+active_positions = {}
+
 
 def send_telegram(message):
     """Send message to Telegram."""
@@ -27,20 +40,8 @@ def send_telegram(message):
     try:
         url = f"{TELEGRAM_API_URL}/sendMessage"
         requests.post(url, data={"chat_id": TELEGRAM_CHAT_ID, "text": message}, timeout=10)
-    except:
-        pass
-
-load_dotenv()
-
-TRADE_LOG = "storage/trades.jsonl"
-
-# Configuration for Guardrails
-STOP_LOSS_PCT = 0.01   # 1% loss limit
-TAKE_PROFIT_PCT = 0.02 # 2% profit target
-
-# Initialize your existing Binance Wrapper
-bnc = BinanceClient()
-active_positions = {}
+    except Exception as e:
+        print(f"Warning: Telegram send failed: {e}")
 
 def process_signal(signal):
     global active_positions
@@ -53,6 +54,9 @@ def process_signal(signal):
 
     # 1. OPEN POSITION (Signal-based)
     if side == "BUY" and symbol not in active_positions:
+        if not bnc:
+            print("BinanceClient not available, skipping order.")
+            return
         print(f"Sending BUY Order to Binance for {symbol}...")
         send_telegram(f"BUY signal for {symbol}")
         order = bnc.place_order(symbol=symbol, side='BUY', order_type='MARKET', quantity=0.01)
@@ -94,6 +98,9 @@ def execute_exit(symbol, price, reason):
     send_telegram(f"Closing {symbol} position...")
     
     # Execute the actual SELL order
+    if not bnc:
+        print("BinanceClient not available, skipping order.")
+        return
     order = bnc.place_order(symbol=symbol, side='SELL', order_type='MARKET', quantity=0.01)
     
     if order:

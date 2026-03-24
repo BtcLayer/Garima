@@ -84,22 +84,56 @@ class OptimizerBot:
         # Custom Pine Script
         self.custom_pine_script = None
         
+        # Process tracking
+        self._is_running = False  # True when bot is executing a command
+        self._current_process = None  # Name of current process
+        self._process_start_time = None  # When current process started
+        self._process_progress = None  # Progress info (e.g., "5/20")
+        
         self.load_settings()
     
+    def _storage_path(self, filename):
+        """Get absolute path for a file in the storage directory"""
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        storage_dir = os.path.join(base_dir, '..', 'storage')
+        os.makedirs(storage_dir, exist_ok=True)
+        return os.path.join(storage_dir, filename)
+    
+    def _start_process(self, process_name, progress=None):
+        """Mark the start of a process"""
+        self._is_running = True
+        self._current_process = process_name
+        self._process_start_time = datetime.now()
+        self._process_progress = progress
+    
+    def _update_progress(self, progress):
+        """Update process progress"""
+        self._process_progress = progress
+    
+    def _end_process(self):
+        """Mark the end of a process"""
+        self._is_running = False
+        self._current_process = None
+        self._process_start_time = None
+        self._process_progress = None
+    
     def load_settings(self):
+        settings_file = self._storage_path('bot_settings.json')
         try:
-            with open('storage/bot_settings.json', 'r') as f:
+            with open(settings_file, 'r') as f:
                 s = json.load(f)
                 self.selected_asset = s.get('selected_asset', 'BTCUSDT')
         except: pass
         
+        custom_file = self._storage_path('custom_strategies.json')
         try:
-            with open('storage/custom_strategies.json', 'r') as f:
+            with open(custom_file, 'r') as f:
                 self.custom_strategies = json.load(f)
         except: self.custom_strategies = {}
     
     def save_settings(self):
-        with open('storage/bot_settings.json', 'w') as f:
+        settings_file = self._storage_path('bot_settings.json')
+        with open(settings_file, 'w') as f:
             json.dump({'selected_asset': self.selected_asset}, f)
     
     def send(self, text, parse_mode="Markdown"):
@@ -210,6 +244,7 @@ INFO & SETTINGS
 /status          — show current config and saved files
 /auto            — toggle auto-run every 5 min
 /counter         — toggle counter-trade mode
+/restart         — reload settings & reset bot state
 
 ━━━━━━━━━━━━━━━
 EXAMPLES
@@ -256,6 +291,23 @@ EXAMPLES
             status = "ON" if self.counter_trade else "OFF"
             return f"[OK] Counter-trade mode: {status}"
         
+        elif cmd == "restart":
+            # Reload settings and reinitialize
+            try:
+                if hasattr(self, 'load_settings'):
+                    self.load_settings()
+                if hasattr(self, '_is_running'):
+                    self._is_running = False
+                if hasattr(self, '_current_process'):
+                    self._current_process = None
+                if hasattr(self, '_process_start_time'):
+                    self._process_start_time = None
+                if hasattr(self, '_process_progress'):
+                    self._process_progress = None
+                return "[OK] Bot restarted!\n\nSettings reloaded. Bot is ready."
+            except Exception as e:
+                return f"[ERROR] Restart failed: {str(e)}"
+        
         elif cmd == "set":
             return self.set_asset(args)
         
@@ -272,10 +324,19 @@ EXAMPLES
             else:
                 strategies = "  (none saved yet)"
 
+            # Use absolute path for storage directory
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            storage_dir = os.path.join(base_dir, '..', 'storage')
+            os.makedirs(storage_dir, exist_ok=True)
+            
             # Check which result files exist
             result_files = []
-            for f in ["storage/optimized_results.json",
-                      "all_assets_strategies_combined.csv"] + sorted(glob.glob("*_all_results.csv")):
+            json_result = os.path.join(storage_dir, 'optimized_results.json')
+            if os.path.exists(json_result):
+                size = os.path.getsize(json_result)
+                result_files.append(f"  ✅ storage/optimized_results.json  ({size // 1024} KB)")
+            
+            for f in ["all_assets_strategies_combined.csv"] + sorted(glob.glob("*_all_results.csv")):
                 if os.path.exists(f):
                     size = os.path.getsize(f)
                     result_files.append(f"  ✅ {f}  ({size // 1024} KB)")
@@ -285,7 +346,18 @@ EXAMPLES
             auto_label = f"ON (every {interval_min} min)" if self.auto_schedule else "OFF"
             pine_saved = "✅ saved" if self.custom_pine_script else "None"
 
-            return f"""*Bot Status*
+            # Check for ongoing processes
+            if self._is_running and self._current_process:
+                elapsed = ""
+                if self._process_start_time:
+                    elapsed_secs = (datetime.now() - self._process_start_time).total_seconds()
+                    elapsed = f" ({int(elapsed_secs)}s ago)"
+                progress_info = f" - {self._process_progress}" if self._process_progress else ""
+                ongoing = f"\n⚡ Running  : {self._current_process}{progress_info}{elapsed}"
+            else:
+                ongoing = "\n⚡ Running  : None (idle)"
+
+            return f"""*Bot Status*{ongoing}
 
 Asset       : {self.selected_asset}
 Target ROI  : {self.target_roi}%
@@ -436,6 +508,8 @@ Note: Bot must stay running for auto-schedule to work."""
             "Win_Rate_Percent": "win_rate",
             "Profit_Factor":    "profit_factor",
             "Max_Drawdown":     "drawdown",
+            "Gross_Drawdown":   "gross_drawdown",
+            "Net_Drawdown":     "net_drawdown",
             "Sharpe_Ratio":     "sharpe",
             "Total_Trades":     "trades",
             "Avg_Trade_Percent":"avg_trade",
@@ -479,7 +553,8 @@ Note: Bot must stay running for auto-schedule to work."""
             roi         = r.get("roi", 0)
             wr          = r.get("win_rate", 0)
             pf          = r.get("profit_factor", 0)
-            dd          = r.get("drawdown", 0)
+            gross_dd    = r.get("gross_drawdown", r.get("drawdown", 0))
+            net_dd      = r.get("net_drawdown", 0)
             sharpe      = r.get("sharpe", 0)
             trades      = int(r.get("trades", 0))
             avg_trade   = r.get("avg_trade", 0)
@@ -487,8 +562,8 @@ Note: Bot must stay running for auto-schedule to work."""
 
             row  = f"{rank:>2}. {name:<28} {asset} {tf}\n"
             row += f"    ROI      : {roi:>7.2f}%  |  Grade    : {grade}\n"
-            row += f"    Win Rate : {wr:>6.1f}%  |  Drawdown : {dd:.1f}%\n"
-            row += f"    Prof.Fac : {pf:>6.2f}   |  Sharpe   : {sharpe:.2f}\n"
+            row += f"    Win Rate : {wr:>6.1f}%  |  Gross DD : {gross_dd:.1f}%\n"
+            row += f"    Prof.Fac : {pf:>6.2f}   |  Net DD   : {net_dd:.1f}%\n"
             row += f"    Trades   : {trades:>5}    |  Avg/Trade: {avg_trade:+.2f}%\n"
             rows.append(row)
 
@@ -659,6 +734,7 @@ Reply with your choice (e.g., RSI,MACD or ALL)"""
     
     def run_optimization_wizard(self, assets, timeframes, selected_strategies):
         """Run optimization with wizard settings - supports multiple assets/timeframes"""
+        self._start_process("Wizard Optimization", "0%")
         
         # Build asset/timeframe string for display
         if len(assets) == 1:
@@ -697,6 +773,7 @@ Reply with your choice (e.g., RSI,MACD or ALL)"""
                 for strat_name in selected_strategies:
                     self.send_typing()
                     done += 1
+                    self._update_progress(f"{done}/{total}")
 
                     # Check if custom
                     if strat_name in self.custom_strategies:
@@ -726,6 +803,10 @@ Reply with your choice (e.g., RSI,MACD or ALL)"""
                             'win_rate': result.win_rate * 100,
                             'drawdown': result.max_drawdown,
                             'drawdown_pct': result.max_drawdown_pct,
+                            'gross_drawdown': result.gross_drawdown,
+                            'gross_drawdown_pct': result.gross_drawdown_pct,
+                            'net_drawdown': result.net_drawdown,
+                            'net_drawdown_pct': result.net_drawdown_pct,
                             'trades': result.total_trades,
                             'wins': result.winning_trades,
                             'losses': result.losing_trades,
@@ -742,7 +823,7 @@ Reply with your choice (e.g., RSI,MACD or ALL)"""
                         emoji = "✅" if result.roi_per_annum >= self.target_roi else "⚡"
                         self.send(f"[Run {done}] {emoji} {self._display_name(strat_name)} {asset} {tf}  Score:{score:.0f}\n"
                                   f"   ROI: {result.roi_per_annum:.2f}% | Win: {result.win_rate*100:.1f}%\n"
-                                  f"   Sharpe: {result.sharpe_ratio:.2f} | DD: {result.max_drawdown*100:.1f}%\n"
+                                  f"   Sharpe: {result.sharpe_ratio:.2f} | Gross DD: {result.gross_drawdown:.1f}% | Net DD: {result.net_drawdown:.1f}%\n"
                                   f"   Trades: {result.total_trades} | PF: {result.profit_factor:.2f}")
 
                         # Counter-trade if negative
@@ -763,6 +844,10 @@ Reply with your choice (e.g., RSI,MACD or ALL)"""
                                     'win_rate': result_ct.win_rate * 100,
                                     'drawdown': result_ct.max_drawdown,
                                     'drawdown_pct': result_ct.max_drawdown_pct,
+                                    'gross_drawdown': result_ct.gross_drawdown,
+                                    'gross_drawdown_pct': result_ct.gross_drawdown_pct,
+                                    'net_drawdown': result_ct.net_drawdown,
+                                    'net_drawdown_pct': result_ct.net_drawdown_pct,
                                     'trades': result_ct.total_trades,
                                     'wins': result_ct.winning_trades,
                                     'losses': result_ct.losing_trades,
@@ -786,7 +871,11 @@ Reply with your choice (e.g., RSI,MACD or ALL)"""
         # Sort by score (same as run_optimization)
         all_results.sort(key=lambda x: x.get('score', x.get('roi', 0)), reverse=True)
         
-        with open('storage/optimized_results.json', 'w') as f:
+        # Ensure storage directory exists and use absolute path
+        storage_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'storage')
+        os.makedirs(storage_dir, exist_ok=True)
+        results_file = os.path.join(storage_dir, 'optimized_results.json')
+        with open(results_file, 'w') as f:
             json.dump(all_results, f, indent=2)
         
         # Final message - show ALL results, grouped by asset/timeframe
@@ -816,6 +905,7 @@ Reply with your choice (e.g., RSI,MACD or ALL)"""
             msg += "\n"
         
         self.send(msg)
+        self._end_process()
         
         return msg
     
@@ -939,10 +1029,11 @@ Or just paste your Pine Script code now (next message) ↓"""
 
         self.custom_strategies[name] = params
 
-        with open('storage/custom_strategies.json', 'w') as f:
+        with open(self._storage_path('custom_strategies.json'), 'w') as f:
             json.dump(self.custom_strategies, f, indent=2)
 
-        return f"[OK] Strategy '{name}' added!\nParams: {params}\n\nRun /backtest to test"
+        msg = f"[OK] Strategy '{name}' added!\nParams: {params}\n\nRun /backtest to test"
+        return msg
 
     def _add_from_pine(self, pine_code):
         """Parse Pine Script and register it as a custom strategy with extracted params."""
@@ -956,7 +1047,7 @@ Or just paste your Pine Script code now (next message) ↓"""
         params['pine_code_preview'] = pine_code[:300]
 
         self.custom_strategies[key] = params
-        with open('storage/custom_strategies.json', 'w') as f:
+        with open(self._storage_path('custom_strategies.json'), 'w') as f:
             json.dump(self.custom_strategies, f, indent=2)
 
         # Build summary of what was extracted
@@ -1036,7 +1127,7 @@ Next steps:
         # Save under a unique asset-specific key (not the generic 'LEARNED')
         strat_key = f"RSI_{asset}_P{rsi_period}"
         self.custom_strategies[strat_key] = best_params
-        with open('storage/custom_strategies.json', 'w') as f:
+        with open(self._storage_path('custom_strategies.json'), 'w') as f:
             json.dump(self.custom_strategies, f, indent=2)
 
         # Validate — test the learned params
@@ -1169,7 +1260,7 @@ Run /backtest to run it with all other strategies."""
     def _load_best_results(self):
         """Load saved best results keyed by strategy|asset|timeframe."""
         try:
-            with open('storage/optimized_results.json', 'r') as f:
+            with open(self._storage_path('optimized_results.json'), 'r') as f:
                 data = json.load(f)
             return {f"{r['strategy']}|{r.get('symbol','?')}|{r['timeframe']}": r
                     for r in data if isinstance(r, dict)}
@@ -1207,9 +1298,12 @@ Run /backtest to run it with all other strategies."""
                 )
             # else: existing is better, discard new result
 
-        # Persist
+        # Persist - use absolute path for storage directory
+        storage_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'storage')
+        os.makedirs(storage_dir, exist_ok=True)
+        results_file = os.path.join(storage_dir, 'optimized_results.json')
         all_best = sorted(best_map.values(), key=lambda x: x.get('score', 0), reverse=True)
-        with open('storage/optimized_results.json', 'w') as f:
+        with open(results_file, 'w') as f:
             json.dump(all_best, f, indent=2)
 
         return saved, improved, summary
@@ -1220,6 +1314,8 @@ Run /backtest to run it with all other strategies."""
         on their 3 best timeframes (15m, 1h, 4h) using randomised params.
         No setup needed — just /run and go.
         """
+        self._start_process("Quick Run", "0%")
+        
         assets     = ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
         timeframes = ["15m", "1h", "4h"]
 
@@ -1253,6 +1349,10 @@ Run /backtest to run it with all other strategies."""
                 'win_rate':     result.win_rate * 100,
                 'drawdown':     result.max_drawdown,
                 'drawdown_pct': result.max_drawdown_pct,
+                'gross_drawdown': result.gross_drawdown,
+                'gross_drawdown_pct': result.gross_drawdown_pct,
+                'net_drawdown': result.net_drawdown,
+                'net_drawdown_pct': result.net_drawdown_pct,
                 'trades':       result.total_trades,
                 'wins':         result.winning_trades,
                 'losses':       result.losing_trades,
@@ -1267,6 +1367,7 @@ Run /backtest to run it with all other strategies."""
                 for strat_cls, strat_name in strategies:
                     self.send_typing()
                     done += 1
+                    self._update_progress(f"{done}/{total}")
                     params = self._random_params(strat_name)
                     strat  = strat_cls(params)
                     result = self.engine.run_backtest(strat, asset, tf, "2024-01-01", "2025-01-01")
@@ -1280,7 +1381,7 @@ Run /backtest to run it with all other strategies."""
                         emoji = "✅" if result.roi_per_annum >= self.target_roi else "⚡"
                         self.send(f"[Run {done}/{total}] {emoji} {asset} {tf} {self._display_name(strat_name)}  Score:{score:.0f}\n"
                                   f"   ROI:{result.roi_per_annum:.1f}%  Win:{result.win_rate*100:.1f}%  "
-                                  f"PF:{result.profit_factor:.2f}  DD:{result.max_drawdown_pct:.1f}%")
+                                  f"PF:{result.profit_factor:.2f}  Gross DD:{result.gross_drawdown:.1f}%  Net DD:{result.net_drawdown:.1f}%")
 
                         if result.roi_per_annum < 0:
                             self.send_typing()
@@ -1317,6 +1418,7 @@ Run /backtest to run it with all other strategies."""
                     f"   ROI:{r['roi']:.1f}%  Win:{r['win_rate']:.1f}%  DD:{dd:.1f}%\n")
 
         self.send(msg)
+        self._end_process()
         return msg
 
     def run_optimization(self):
@@ -1325,6 +1427,8 @@ Run /backtest to run it with all other strategies."""
         with fresh random params, scores it, and moves on.
         Next cycle picks the next strategy — so every 6 cycles, all strategies
         have been re-tested with new params."""
+        self._start_process("Optimization", "0%")
+        
         asset = self.selected_asset
         self.engine = BacktestEngine()
         timeframes = ["1h", "4h"]
@@ -1368,6 +1472,8 @@ Run /backtest to run it with all other strategies."""
                     'sharpe': result.sharpe_ratio, 'sortino': result.sortino_ratio,
                     'calmar': result.calmar_ratio, 'win_rate': result.win_rate * 100,
                     'drawdown': result.max_drawdown, 'drawdown_pct': result.max_drawdown_pct,
+                    'gross_drawdown': result.gross_drawdown, 'gross_drawdown_pct': result.gross_drawdown_pct,
+                    'net_drawdown': result.net_drawdown, 'net_drawdown_pct': result.net_drawdown_pct,
                     'trades': result.total_trades, 'wins': result.winning_trades,
                     'losses': result.losing_trades, 'profit_factor': result.profit_factor,
                     'avg_win': result.avg_win_pct, 'avg_loss': result.avg_loss_pct,
@@ -1376,6 +1482,7 @@ Run /backtest to run it with all other strategies."""
 
             for run_num, tf in enumerate(timeframes, 1):
                 self.send_typing()
+                self._update_progress(f"Strategy {idx+1}/{total_pool}, TF {run_num}/{len(timeframes)}")
                 params = self._random_params(strat_name)
                 strat  = strat_cls(params)
                 result = self.engine.run_backtest(strat, asset, tf, "2024-01-01", "2025-01-01")
@@ -1392,7 +1499,7 @@ Run /backtest to run it with all other strategies."""
                     self.send(f"[{tf}] {emoji} {self._display_name(strat_name)}  Score:{score:.0f}\n"
                               f"   Params: {p_str} SL={params.get('stop_loss','?')} TP={params.get('take_profit','?')}\n"
                               f"   ROI:{result.roi_per_annum:.1f}% Win:{result.win_rate*100:.1f}% "
-                              f"PF:{result.profit_factor:.2f} DD:{result.max_drawdown_pct:.1f}%")
+                              f"PF:{result.profit_factor:.2f} Gross DD:{result.gross_drawdown:.1f}% Net DD:{result.net_drawdown:.1f}%")
 
                     # Counter-trade if negative ROI
                     if result.roi_per_annum < 0:
@@ -1479,30 +1586,57 @@ Run /backtest to run it with all other strategies."""
                     f"PF:{r.get('profit_factor',0):.2f} DD:{dd:.1f}%\n")
 
         self.send(msg)
+        self._end_process()
         return msg
     
     def show_results(self):
-        # Try optimized_results.json first
+        import glob
+        import pandas as pd
+        
+        # Use absolute path for storage directory
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        storage_dir = os.path.join(base_dir, '..', 'storage')
+        os.makedirs(storage_dir, exist_ok=True)
+        
+        # First, try optimized_results.json
         results = []
         source  = ""
-        for fname in ('storage/optimized_results.json', 'storage/custom_strategies.json'):
+        json_files = [os.path.join(storage_dir, 'optimized_results.json'), 
+                      os.path.join(storage_dir, 'custom_strategies.json')]
+        for fname in json_files:
             if os.path.exists(fname):
                 try:
                     with open(fname, 'r') as f:
                         data = json.load(f)
                     if isinstance(data, list) and data:
                         results = data
-                        source  = fname
+                        source  = os.path.basename(fname)
                         break
                     elif isinstance(data, dict) and data:
                         # custom_strategies dict — show as strategy list
-                        msg = f"*Saved Strategies* (from {fname})\n\n"
+                        msg = f"*Saved Strategies* (from {os.path.basename(fname)})\n\n"
                         for k, v in list(data.items())[:10]:
                             msg += f"  {k}: {v}\n"
                         msg += "\nRun /backtest to get ROI results."
                         return msg
                 except Exception as e:
                     return f"Error reading {fname}: {e}"
+
+        # If no JSON results, try CSV files
+        if not results:
+            csv_files = sorted(glob.glob("*_all_results.csv"))
+            combined_file = "all_assets_strategies_combined.csv"
+            if os.path.exists(combined_file):
+                csv_files = [combined_file] + [f for f in csv_files if f != combined_file]
+            
+            for f in csv_files:
+                try:
+                    df = pd.read_csv(f)
+                    if len(df) > 0:
+                        results = df.to_dict('records')
+                        source = f
+                        break
+                except: continue
 
         if not results:
             return ("No results yet.\n\n"
@@ -1517,14 +1651,20 @@ Run /backtest to run it with all other strategies."""
             score = r.get('score')
             grade = r.get('grade', '?')
             dd    = r.get('drawdown_pct', r.get('drawdown', 0))
+            gross_dd = r.get('gross_drawdown_pct', r.get('gross_drawdown', 0))
+            net_dd = r.get('net_drawdown_pct', r.get('net_drawdown', 0))
             if dd and dd < 1:
                 dd = dd * 100
+            if gross_dd and gross_dd < 1:
+                gross_dd = gross_dd * 100
+            if net_dd and net_dd < 1:
+                net_dd = net_dd * 100
             score_str = f"Score:{score:.0f} ({grade})" if score is not None else "Score:n/a"
             params = r.get('params', {})
             p_str  = "  ".join(f"{k}={v}" for k, v in list(params.items())[:3]) if params else "default"
             msg += (f"{i+1}. {self._display_name(r.get('strategy','?'))} {r.get('timeframe','?')}  {score_str}\n"
                     f"   ROI:{r.get('roi',0):.1f}%  Win:{r.get('win_rate',0):.1f}%  "
-                    f"PF:{r.get('profit_factor',0):.2f}  DD:{dd:.1f}%\n"
+                    f"PF:{r.get('profit_factor',0):.2f}  Gross DD:{gross_dd:.1f}%  Net DD:{net_dd:.1f}%\n"
                     f"   Params: {p_str}\n\n")
         return msg
     
@@ -1573,7 +1713,7 @@ For full backtesting, use TradingView's native tools."""
                 "source": "pine_script",
                 "pine_code": text[:500],   # first 500 chars for reference
             }
-            with open('storage/custom_strategies.json', 'w') as f:
+            with open(self._storage_path('custom_strategies.json'), 'w') as f:
                 json.dump(self.custom_strategies, f, indent=2)
 
             return f"""*✅ Pine Script Saved!*

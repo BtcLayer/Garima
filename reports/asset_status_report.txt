@@ -1,0 +1,151 @@
+==========================================================================================
+  STRATEGY ANALYSIS & ASSET STATUS REPORT
+  Generated: 2026-03-24 10:41 IST
+==========================================================================================
+
+  Total combinations : 30
+  Data available     : 0
+  Results exist      : 0
+  Pending            : 0
+  Unique strategies  : 227
+  Total result rows  : 6746
+
+──────────────────────────────────────────────────────────────────────────────────────────
+  ASSET × TIMEFRAME STATUS
+──────────────────────────────────────────────────────────────────────────────────────────
+  ASSET        15m                    1h                     4h                    
+──────────────────────────────────────────────────────────────────────────────────────────
+  BTCUSDT      NO DATA                NO DATA                NO DATA               
+  ETHUSDT      NO DATA                NO DATA                NO DATA               
+  BNBUSDT      NO DATA                NO DATA                NO DATA               
+  SOLUSDT      NO DATA                NO DATA                NO DATA               
+  XRPUSDT      NO DATA                NO DATA                NO DATA               
+  ADAUSDT      NO DATA                NO DATA                NO DATA               
+  AVAXUSDT     NO DATA                NO DATA                NO DATA               
+  DOTUSDT      NO DATA                NO DATA                NO DATA               
+  LINKUSDT     NO DATA                NO DATA                NO DATA               
+  LTCUSDT      NO DATA                NO DATA                NO DATA               
+──────────────────────────────────────────────────────────────────────────────────────────
+
+──────────────────────────────────────────────────────────────────────────────────────────
+  BEST STRATEGY PER ASSET × TIMEFRAME (by ROI/yr)
+──────────────────────────────────────────────────────────────────────────────────────────
+  Asset      TF    Strategy                       ROI/yr   Win%  Trades  GrossDD   NetDD Grade 
+──────────────────────────────────────────────────────────────────────────────────────────
+  BTCUSDT    15m   RSI_Stochastic_VWAP_ADX       1819.9%  17.1%      35    22.5%    0.0% C   🏆
+  BTCUSDT    1h    VWAP_Breakout                 1267.2%  20.7%      58    33.0%    0.0% C   🏆
+  BTCUSDT    4h    Supertrend_BB_Entry           3823.2%  33.3%      21     9.9%    0.0% B   🏆
+  ETHUSDT    15m   Momentum_Trade                  95.4%  20.6%      68    28.6%    0.0% B+  🏆
+  ETHUSDT    1h    Aggressive_Entry                99.2%  24.3%     136    48.0%    0.0% B+  🏆
+  ETHUSDT    4h    Breakout_Volume_ADX            106.2%  26.9%      78    43.3%    0.0% B+  🏆
+  BNBUSDT    15m   Trend_Pullback_Entry            29.4%  18.4%     136    50.2%    0.0% B   🏆
+  BNBUSDT    1h    Breakout_Retest_Pro             72.7%  23.1%     134    36.8%    0.0% B+  🏆
+  BNBUSDT    4h    Volume_Stochastic_MACD_ADX      67.0%  32.1%      28    17.3%    0.0% B+  🏆
+  SOLUSDT    15m   ADX_BB_MACD                     20.4%  50.0%       6     nan%    0.0% B+  🏆
+  SOLUSDT    1h    Supertrend_Confirm              23.9%  25.9%      27     nan%    0.0% B   🏆
+  SOLUSDT    4h    RSI_Divergence_Pro              23.9%  27.9%      68     nan%    0.0% B   🏆
+  XRPUSDT    15m   Breakout_Retest                 16.7%  60.0%       5     nan%    0.0% B+  ✅
+  XRPUSDT    1h    Conservative_Entry              41.5%  29.3%      58     nan%    0.0% B   🏆
+  XRPUSDT    4h    RSI_Trend_ADX                   21.3%  20.9%      67     nan%    0.0% B   🏆
+  ADAUSDT    15m   High_Momentum_Entry             10.5%  57.1%       7     3.0%    0.0% B+  ✅
+  ADAUSDT    1h    Breakout_Hunter                 30.3%  30.8%      39    12.0%    0.0% B   🏆
+  ADAUSDT    4h    Breakout_Retest_Pro             32.9%  38.5%      65    11.3%    0.0% B   🏆
+  AVAXUSDT   15m   BB_Stochastic_ADX               12.7%  48.6%      37     3.0%    0.0% B   ✅
+  AVAXUSDT   1h    Breakout_Hunter                 36.2%  41.9%      31     5.7%    0.0% B+  🏆
+  AVAXUSDT   4h    VWAP_Break_Entry                56.0%  53.1%      32    12.2%    0.0% A+  🏆
+  DOTUSDT    15m   RSI_BB_MACD_Stochastic           8.8%  46.1%      13     3.5%    0.0% B   ✅
+  DOTUSDT    1h    ADX_Volatility_Trade            33.0%  38.4%     112    16.5%    0.0% B   🏆
+  DOTUSDT    4h    Breakout_Retest_Pro             52.3%  44.6%      56    17.3%    0.0% A   🏆
+  LINKUSDT   15m   ADX_EMA_BB                       9.9%  52.0%      25     3.5%    0.0% B+  ✅
+  LINKUSDT   1h    Bollinger_Break_Upper           28.3%  44.8%      29     4.5%    0.0% B+  🏆
+  LINKUSDT   4h    VWAP_Break_Entry                41.5%  44.8%      29    12.8%    0.0% B+  🏆
+  LTCUSDT    15m   Stochastic_Reversal              5.2%  41.2%      34     1.4%    0.0% D   ✅
+  LTCUSDT    1h    ADX_BB_MACD                     23.8%  43.6%      39     5.8%    0.0% B+  🏆
+  LTCUSDT    4h    RSI_Divergence_Pro              35.6%  48.8%      80    14.7%    0.0% B+  🏆
+──────────────────────────────────────────────────────────────────────────────────────────
+
+──────────────────────────────────────────────────────────────────────────────────────────
+  TOP 15 STRATEGIES OVERALL (by ROI/yr)
+──────────────────────────────────────────────────────────────────────────────────────────
+  #   Strategy                  Asset      TF      ROI/yr   Win%  GrossDD   NetDD Grade 
+──────────────────────────────────────────────────────────────────────────────────────────
+  1   Supertrend_BB_Entry       BTCUSDT    4h     3823.2%  33.3%     9.9%    0.0% B  
+  2   ADX_Stochastic_VWAP       BTCUSDT    4h     3313.6%  25.6%    18.4%    0.0% B  
+  3   RSI_BB_MACD_Stochastic    BTCUSDT    4h     2961.6%  27.5%    12.7%    0.0% B  
+  4   Breakout_Pullback         BTCUSDT    4h     2698.9%  21.9%    22.5%    0.0% B  
+  5   Volume_Breakout_Pro       BTCUSDT    4h     2666.9%  23.2%    15.6%    0.0% B  
+  6   RSI_Stochastic_VWAP_ADX   BTCUSDT    4h     2650.8%  28.6%     9.9%    0.0% B  
+  7   RSI_Recovery              BTCUSDT    4h     2612.8%  21.9%    27.0%    0.0% B  
+  8   RSI_Confirmation          BTCUSDT    4h     2578.6%  24.2%    13.2%    0.0% B  
+  9   Double_Bottom_Formation   BTCUSDT    4h     2578.6%  24.2%    13.2%    0.0% B  
+  10  Oversold_Recovery         BTCUSDT    4h     2578.6%  24.2%    13.2%    0.0% B  
+  11  Mean_Reversion_Pro        BTCUSDT    4h     2578.6%  24.2%    13.2%    0.0% B  
+  12  BB_Stochastic_Trade       BTCUSDT    4h     2578.6%  24.2%    13.2%    0.0% B  
+  13  RSI_Stochastic_Pro        BTCUSDT    4h     2342.6%  26.8%    12.7%    0.0% B  
+  14  Stochastic_KD_Cross       BTCUSDT    4h     2145.9%  21.2%    26.8%    0.0% B  
+  15  Scalp_Trade               BTCUSDT    4h     2107.2%  35.9%     8.9%    0.0% B  
+──────────────────────────────────────────────────────────────────────────────────────────
+
+──────────────────────────────────────────────────────────────────────────────────────────
+  BOTTOM 10 STRATEGIES (worst ROI/yr)
+──────────────────────────────────────────────────────────────────────────────────────────
+  #   Strategy                  Asset      TF      ROI/yr   NetDD Grade 
+──────────────────────────────────────────────────────────────────────────────────────────
+  1   EMA_Break_Momentum        BTCUSDT    4h    -4527.6%    0.0% C  
+  2   RSI_Extreme_Play          BTCUSDT    1h    -3571.6%    0.0% C  
+  3   BB_VWAP_ADX               BTCUSDT    4h    -3534.0%    0.0% C  
+  4   ADX_EMA_VWAP_MACD         BTCUSDT    4h    -3480.3%    0.0% C  
+  5   Stochastic_KD_Cross       BTCUSDT    1h    -3449.2%    0.0% C  
+  6   RSI_Recovery              BTCUSDT    1h    -3393.3%    0.0% C  
+  7   Golden_Cross_Pro          BTCUSDT    4h    -3309.4%    0.0% C  
+  8   Supertrend_Multi_Pro      BTCUSDT    4h    -3309.4%    0.0% C  
+  9   Trend_Follower_Multi      BTCUSDT    4h    -3309.4%    0.0% C  
+  10  Multi_Trend_Entry         BTCUSDT    4h    -3309.4%    0.0% C  
+──────────────────────────────────────────────────────────────────────────────────────────
+
+──────────────────────────────────────────────────────────────────────────────────────────
+  DRAWDOWN ANALYSIS
+──────────────────────────────────────────────────────────────────────────────────────────
+  Among profitable strategies:
+    ✅ Safe (GrossDD < 50%)     : 1815
+    🟡 Moderate (50-75%)        : 528
+    🔴 High risk (> 75%)        : 0
+──────────────────────────────────────────────────────────────────────────────────────────
+
+──────────────────────────────────────────────────────────────────────────────────────────
+  STRATEGY CONSISTENCY ACROSS ASSETS
+──────────────────────────────────────────────────────────────────────────────────────────
+  Strategy                     Assets Avg ROI/yr Profitable      Worst
+──────────────────────────────────────────────────────────────────────────────────────────
+  ADX_Stochastic_VWAP              10     136.7%      13/10     -64.6%
+  RSI_Stochastic_VWAP_ADX          10     114.1%      15/10   -1208.7%
+  RSI_BB_MACD_Stochastic           10      59.2%      15/10   -1877.8%
+  Supertrend_BB_Entry              10      58.4%      16/10   -1504.8%
+  Scalp_Trade                      10      56.4%      12/10   -1965.0%
+  Mean_Reversion_Pro               10      31.5%      13/10   -3256.6%
+  Oversold_Recovery                10      31.5%      13/10   -3256.6%
+  BB_Stochastic_Trade              10      31.5%      13/10   -3256.6%
+  RSI_Confirmation                 10      31.5%      13/10   -3256.6%
+  Double_Bottom_Formation          10      31.5%      13/10   -3256.6%
+  RSI_Extreme_Reversal             10      15.0%      16/10   -2574.0%
+  RSI_Stochastic_Pro               10      13.0%      10/10   -1500.7%
+  VWAP_Break_Entry                 10      11.0%      18/10   -1445.8%
+  Breakout_Pullback                10      -3.5%      20/10   -1982.7%
+  Volume_Breakout_Pro              10      -4.2%      14/10   -2036.4%
+  VWAP_BB_Stochastic_EMA           10      -6.7%      15/10   -1628.3%
+  Supertrend_Multi_Entry           10     -15.8%      17/10   -1049.5%
+  VWAP_Break_Through               10     -28.9%      14/10   -1569.2%
+  Volume_Profile                   10     -28.9%      14/10   -1569.2%
+  MACD_VWAP_Breakout               10     -33.0%      14/10   -1911.2%
+──────────────────────────────────────────────────────────────────────────────────────────
+
+──────────────────────────────────────────────────────────────────────────────────────────
+  LAST MODIFIED (IST)
+──────────────────────────────────────────────────────────────────────────────────────────
+  ASSET      TF    Command          Bot Command              Timestamp
+──────────────────────────────────────────────────────────────────────────────────────────
+──────────────────────────────────────────────────────────────────────────────────────────
+
+  ✅ All available data has been processed.
+
+==========================================================================================

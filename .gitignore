@@ -2,9 +2,35 @@
 .env
 service_account.json
 .venv/
+.tbenv/
 __pycache__/
+*.pyc
+*.pem
 
-# Local Trading Data (Don't sync private logs)
+# Local Trading Data
 storage/*.jsonl
 storage/*.json
 storage/*.csv
+storage/historical_data/*.parquet
+
+# Databases
+*.sqlite3
+*.db
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+state/
+
+# Claude
+.claude/
+
+# Server keys
+deploy/harsh_server/

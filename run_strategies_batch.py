@@ -11,15 +11,26 @@ import os
 # Data directory
 DATA_DIR = "storage/historical_data"
 
-# Available data files
-DATA_FILES = {
-    "BTCUSDT_15m": "BTCUSDT_15m_2025-03-17_2026-03-17.parquet",
-    "BTCUSDT_1h": "BTCUSDT_1h_2025-03-17_2026-03-17.parquet",
-    "ETHUSDT_15m": "ETHUSDT_15m_2025-03-17_2026-03-17.parquet",
-    "ETHUSDT_1h": "ETHUSDT_1h_2025-03-17_2026-03-17.parquet",
-    "BNBUSDT_15m": "BNBUSDT_15m_2025-03-17_2026-03-17.parquet",
-    "BNBUSDT_1h": "BNBUSDT_1h_2025-03-17_2026-03-17.parquet",
-}
+# Available data files — 6 years (2020-2026), 10 assets x 3 timeframes
+_SYMBOLS = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT",
+            "ADAUSDT", "AVAXUSDT", "DOTUSDT", "LINKUSDT", "LTCUSDT"]
+_TIMEFRAMES = ["15m", "1h", "4h"]
+_DATE_RANGE = "2020-01-01_2026-03-21"
+
+DATA_FILES = {}
+for _sym in _SYMBOLS:
+    for _tf in _TIMEFRAMES:
+        _key = f"{_sym}_{_tf}"
+        _file = f"{_sym}_{_tf}_{_DATE_RANGE}.parquet"
+        # Use 6yr file if it exists, fall back to 1yr file
+        if os.path.exists(os.path.join(DATA_DIR, _file)):
+            DATA_FILES[_key] = _file
+        else:
+            # Try any matching parquet file for this symbol+timeframe
+            for f in sorted(os.listdir(DATA_DIR), reverse=True):
+                if f.startswith(f"{_sym}_{_tf}_") and f.endswith(".parquet"):
+                    DATA_FILES[_key] = f
+                    break
 
 # Trading parameters
 INITIAL_CAPITAL = 10000
@@ -28,13 +39,17 @@ FEE = 0.001
 
 def load_data(symbol_key):
     """Load historical data from parquet file"""
-    filepath = os.path.join(DATA_DIR, DATA_FILES.get(symbol_key))
+    filename = DATA_FILES.get(symbol_key)
+    if not filename:
+        print(f"No data file found for: {symbol_key}")
+        return None
+    filepath = os.path.join(DATA_DIR, filename)
     if not os.path.exists(filepath):
         print(f"Data file not found: {filepath}")
         return None
-    
+
     df = pd.read_parquet(filepath)
-    print(f"Loaded {symbol_key}: {len(df)} candles")
+    print(f"Loaded {symbol_key}: {len(df)} candles ({filename})")
     return df
 
 
@@ -102,7 +117,8 @@ def calculate_indicators(df):
     minus_dm = (-df["low"].diff()).clip(lower=0)
     plus_di = 100 * plus_dm.rolling(14).mean() / df["atr"]
     minus_di = 100 * minus_dm.rolling(14).mean() / df["atr"]
-    dx = 100 * abs(plus_di - minus_di) / (plus_di + minus_di)
+    denom = plus_di + minus_di
+    dx = 100 * abs(plus_di - minus_di) / denom.replace(0, float('nan'))
     df["adx"] = dx.rolling(14).mean()
     
     # Price channels
@@ -224,11 +240,14 @@ def run_backtest(df, stop_loss, take_profit, trailing_stop, use_tight=False):
                 exit_price = row["close"]
                 pnl = position_size * exit_price * (1 - FEE) - position_size * entry_price
                 capital += pnl
+                exit_date = str(row.get("timestamp", row.get("open_time", idx)))[:10]
                 trades.append({
                     "entry": entry_price,
                     "exit": exit_price,
                     "pnl": pnl,
-                    "return_pct": (exit_price - entry_price) / entry_price * 100
+                    "return_pct": (exit_price - entry_price) / entry_price * 100,
+                    "exit_date": exit_date,
+                    "capital_after": round(capital, 2),
                 })
                 position = 0
     
@@ -250,7 +269,7 @@ def process_with_pagination(df, page_size=5000):
     return total_rows
 
 
-def run_batch_strategies(data_key="BTCUSDT_15m", batch_num=None):
+def run_batch_strategies(data_key="BTCUSDT_15m", batch_num=None, params_override=None):
     """Run strategies on historical data"""
     print(f"\n{'='*60}")
     print(f"Running strategies on {data_key}")
@@ -276,10 +295,131 @@ def run_batch_strategies(data_key="BTCUSDT_15m", batch_num=None):
     # Process with pagination
     process_with_pagination(df, page_size=5000)
     
+    # Detect data time range from the dataframe
+    time_start = str(df["timestamp"].min())[:10] if "timestamp" in df.columns else "unknown"
+    time_end = str(df["timestamp"].max())[:10] if "timestamp" in df.columns else "unknown"
+    try:
+        from datetime import datetime as _dt
+        _start = _dt.fromisoformat(time_start)
+        _end = _dt.fromisoformat(time_end)
+        _years = max((_end - _start).days / 365.25, 0.01)
+    except Exception:
+        _years = 1.0
+
+    # Parse asset and timeframe from data_key (e.g. "BTCUSDT_15m")
+    _parts = data_key.rsplit("_", 1)
+    _asset = _parts[0] if len(_parts) == 2 else data_key
+    _timeframe = _parts[1] if len(_parts) == 2 else "unknown"
+
+    def _build_result(strategy, final_capital, trades, is_counter=False):
+        """Build a full result dict with all metrics."""
+        import numpy as np
+
+        wins = [t for t in trades if t["pnl"] > 0]
+        losses = [t for t in trades if t["pnl"] <= 0]
+        win_rate = len(wins) / len(trades) * 100 if trades else 0
+        net_profit = final_capital - INITIAL_CAPITAL
+        roi = net_profit / INITIAL_CAPITAL * 100
+        roi_annum = ((final_capital / INITIAL_CAPITAL) ** (1 / _years) - 1) * 100 if _years > 0 else 0
+
+        # Profit factor
+        total_wins = sum(t["pnl"] for t in trades if t["pnl"] > 0)
+        total_losses = abs(sum(t["pnl"] for t in trades if t["pnl"] <= 0))
+        profit_factor = total_wins / total_losses if total_losses > 0 else 0
+
+        # Sharpe ratio (annualized from trade returns)
+        returns = [t["return_pct"] for t in trades]
+        sharpe = 0.0
+        avg_trade = 0.0
+        if returns:
+            avg_trade = sum(returns) / len(returns)
+            std = np.std(returns) if len(returns) > 1 else 1
+            if std > 0:
+                sharpe = (avg_trade / std) * np.sqrt(len(trades))
+
+        # Gross drawdown (peak-to-trough of equity curve)
+        equity = INITIAL_CAPITAL
+        peak = equity
+        max_dd = 0
+        min_capital = INITIAL_CAPITAL
+        for t in trades:
+            equity += t["pnl"]
+            peak = max(peak, equity)
+            dd = (peak - equity) / peak * 100
+            max_dd = max(max_dd, dd)
+            min_capital = min(min_capital, equity)
+        # Net DD — how far capital dropped below initial (0 if never dropped)
+        net_dd = max(0, (INITIAL_CAPITAL - min_capital) / INITIAL_CAPITAL * 100)
+
+        # Grade
+        if roi > 100 and win_rate > 50 and profit_factor > 2.0:
+            grade = "A+"
+        elif roi > 50 and win_rate > 45 and profit_factor > 1.75:
+            grade = "A"
+        elif roi > 30 and win_rate > 40 and profit_factor > 1.5:
+            grade = "B+"
+        elif roi > 20 and win_rate > 35 and profit_factor > 1.3:
+            grade = "B"
+        elif roi > 10 and win_rate > 30:
+            grade = "C"
+        else:
+            grade = "D"
+
+        # Deployment status
+        if grade in ("A+", "A") and len(trades) >= 20 and max_dd < 25:
+            deploy = "READY"
+        elif grade in ("B+", "B") and len(trades) >= 10:
+            deploy = "REVIEW"
+        else:
+            deploy = "NOT READY"
+
+        name = strategy["name"]
+        if is_counter:
+            name = f"{name}_COUNTER"
+
+        return {
+            "id": strategy["id"],
+            "name": name,
+            "Strategy": ", ".join(strategy["strategies"]),
+            "Asset": _asset,
+            "Timeframe": _timeframe,
+            "Initial_Capital_USD": INITIAL_CAPITAL,
+            "Final_Capital_USD": round(final_capital, 2),
+            "Net_Profit_USD": round(net_profit, 2),
+            "ROI_per_annum": round(roi_annum, 2),
+            "ROI_Percent": round(roi, 2),
+            "Total_Trades": len(trades),
+            "Winning_Trades": len(wins),
+            "Losing_Trades": len(losses),
+            "Win_Rate_Percent": round(win_rate, 2),
+            "Profit_Factor": round(profit_factor, 2),
+            "Sharpe_Ratio": round(sharpe, 2),
+            "Avg_Trade_Percent": round(avg_trade, 4),
+            "Gross_DD_Percent": round(max_dd, 2),
+            "Net_DD_Percent": round(net_dd, 2),
+            "Performance_Grade": grade,
+            "Deployment_Status": deploy,
+            "Data_Source": "Binance Spot",
+            "Time_Period": f"{time_start} to {time_end}",
+            "Time_Start": time_start,
+            "Time_End": time_end,
+            "Fees_Exchange": f"{FEE*100}%",
+            "Candle_Period": _timeframe,
+            "Parameters": f"SL={strategy['stop_loss']*100}%, TP={strategy['take_profit']*100}%, TS={strategy['trailing_stop']*100}%",
+            "Is_Counter": is_counter,
+            # Keep old keys for backward compatibility with bot summary
+            "trades": len(trades),
+            "wins": len(wins),
+            "losses": len(losses),
+            "win_rate": round(win_rate, 2),
+            "roi": round(roi, 2),
+            "final_capital": round(final_capital, 2),
+        }
+
     # Run backtest for each strategy
     results = []
     print(f"\nRunning backtests...")
-    
+
     for strategy in strategies:
         try:
             df_copy = apply_strategy(
@@ -287,56 +427,75 @@ def run_batch_strategies(data_key="BTCUSDT_15m", batch_num=None):
                 strategy["strategies"],
                 strategy.get("min_agreement", 1)
             )
-            
+
+            _override = (params_override or {}).get(strategy["name"], {})
             final_capital, trades = run_backtest(
                 df_copy,
-                strategy["stop_loss"],
-                strategy["take_profit"],
-                strategy["trailing_stop"]
+                _override.get("stop_loss", strategy["stop_loss"]),
+                _override.get("take_profit", strategy["take_profit"]),
+                _override.get("trailing_stop", strategy["trailing_stop"])
             )
-            
+
             if len(trades) >= 5:
-                wins = [t for t in trades if t["pnl"] > 0]
-                losses = [t for t in trades if t["pnl"] <= 0]
-                win_rate = len(wins) / len(trades) * 100 if trades else 0
-                roi = (final_capital - INITIAL_CAPITAL) / INITIAL_CAPITAL * 100
-                
-                results.append({
-                    "id": strategy["id"],
-                    "name": strategy["name"],
-                    "strategies": ", ".join(strategy["strategies"]),
-                    "trades": len(trades),
-                    "wins": len(wins),
-                    "losses": len(losses),
-                    "win_rate": round(win_rate, 2),
-                    "roi": round(roi, 2),
-                    "final_capital": round(final_capital, 2)
-                })
+                result = _build_result(strategy, final_capital, trades)
+                results.append(result)
+
+                # Auto counter-strategy for negative ROI
+                if result["roi"] < 0:
+                    # Invert signals: swap entry_signal and exit_signal
+                    df_counter = df_copy.copy()
+                    df_counter["entry_signal"], df_counter["exit_signal"] = (
+                        df_copy["exit_signal"].copy(),
+                        df_copy["entry_signal"].copy(),
+                    )
+                    counter_cap, counter_trades = run_backtest(
+                        df_counter,
+                        strategy["stop_loss"],
+                        strategy["take_profit"],
+                        strategy["trailing_stop"]
+                    )
+                    if len(counter_trades) >= 5:
+                        counter_result = _build_result(strategy, counter_cap, counter_trades, is_counter=True)
+                        if counter_result["roi"] > result["roi"]:
+                            results.append(counter_result)
+
         except Exception as e:
             print(f"Error with strategy {strategy.get('name', 'unknown')}: {e}")
-    
+
     # Sort by ROI
     results.sort(key=lambda x: x["roi"], reverse=True)
-    
+
     # Display top 20 results
     print(f"\n{'='*60}")
-    print("TOP 20 PROFITABLE STRATEGIES")
+    print("TOP 20 STRATEGIES")
     print(f"{'='*60}")
-    print(f"{'ID':<4} {'Name':<25} {'Trades':<8} {'Win%':<8} {'ROI%':<10}")
-    print("-" * 60)
-    
+    print(f"{'ID':<4} {'Name':<28} {'Trades':<7} {'Win%':<7} {'ROI%':<8} {'ROI/yr':<8} {'Grade'}")
+    print("-" * 75)
+
     for r in results[:20]:
-        print(f"{r['id']:<4} {r['name']:<25} {r['trades']:<8} {r['win_rate']:<8} {r['roi']:<10}")
-    
-    # Save to CSV
+        print(f"{r['id']:<4} {r['name'][:28]:<28} {r['trades']:<7} {r['win_rate']:<7} {r['roi']:<8} {r['ROI_per_annum']:<8} {r['Performance_Grade']}")
+
+    # Save to CSV with all columns
     if results:
-        df_results = pd.DataFrame(results)
+        csv_columns = [
+            "id", "name", "Strategy", "Asset", "Timeframe",
+            "Initial_Capital_USD", "Final_Capital_USD", "Net_Profit_USD",
+            "ROI_per_annum", "ROI_Percent", "Total_Trades", "Winning_Trades",
+            "Losing_Trades", "Win_Rate_Percent", "Profit_Factor", "Sharpe_Ratio",
+            "Avg_Trade_Percent", "Max_Drawdown_Percent", "Performance_Grade",
+            "Deployment_Status", "Data_Source", "Time_Period", "Time_Start",
+            "Time_End", "Fees_Exchange", "Candle_Period", "Parameters", "Is_Counter",
+        ]
+        df_results = pd.DataFrame(results)[csv_columns]
         df_results.to_csv("batch_backtest_results.csv", index=False)
         print(f"\nResults saved to batch_backtest_results.csv")
-    
-    print(f"\nTotal profitable: {len([r for r in results if r['roi'] > 0])}")
+
+    profitable = [r for r in results if r["roi"] >= 20]
+    counters = [r for r in results if r.get("Is_Counter", False)]
+    print(f"\nTotal profitable (ROI>=20%): {len(profitable)}")
+    print(f"Counter strategies added: {len(counters)}")
     print(f"Total tested: {len(results)}")
-    
+
     return results
 
 

@@ -53,7 +53,7 @@ def get_strategy_by_id(strategy_id):
             strategy = module.get_strategy_by_id(strategy_id)
             if strategy:
                 return strategy
-        except:
+        except Exception:
             continue
     return None
 
@@ -62,12 +62,12 @@ def get_strategies_by_batch(batch_num):
     """Get strategies from a specific batch"""
     if batch_num < 1 or batch_num > 20:
         return []
-    
+
     module_name = f"strategies.batch_{batch_num:02d}"
     try:
         module = __import__(module_name, fromlist=['get_strategies'])
         return module.get_strategies()
-    except:
+    except Exception:
         return []
 
 

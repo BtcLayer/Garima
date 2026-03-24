@@ -28,8 +28,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configuration
-START_DATE = "2024-01-01"
-END_DATE = "2025-01-01"
+START_DATE = "2020-01-01"
+END_DATE = "2026-03-21"
 # Only use practical timeframes (skip 1m as it has too much data)
 SYMBOLS = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT"]
 TIMEFRAMES = ["15m", "1h", "4h", "1d"]  # Removed 1m and 5m for faster testing
@@ -87,6 +87,10 @@ class BacktestResult:
     # Risk metrics
     max_drawdown: float = 0.0
     max_drawdown_pct: float = 0.0
+    gross_drawdown: float = 0.0
+    gross_drawdown_pct: float = 0.0
+    net_drawdown: float = 0.0
+    net_drawdown_pct: float = 0.0
     sharpe_ratio: float = 0.0
     sortino_ratio: float = 0.0
     calmar_ratio: float = 0.0
@@ -116,6 +120,10 @@ class BacktestResult:
             'avg_trade_pct': round(self.avg_trade_pct, 4),
             'max_drawdown': round(self.max_drawdown, 4),
             'max_drawdown_pct': round(self.max_drawdown_pct, 4),
+            'gross_drawdown': round(self.gross_drawdown, 4),
+            'gross_drawdown_pct': round(self.gross_drawdown_pct, 4),
+            'net_drawdown': round(self.net_drawdown, 4),
+            'net_drawdown_pct': round(self.net_drawdown_pct, 4),
             'sharpe_ratio': round(self.sharpe_ratio, 4),
             'sortino_ratio': round(self.sortino_ratio, 4),
             'calmar_ratio': round(self.calmar_ratio, 4),
@@ -742,12 +750,26 @@ class BacktestEngine:
         if losing_trades:
             result.avg_loss_pct = sum(t.pnl_pct for t in losing_trades) / len(losing_trades)
         
-        # Maximum Drawdown
+        # Maximum Drawdown (Gross Drawdown - peak to trough)
         equity = np.array(equity_curve)
         running_max = np.maximum.accumulate(equity)
         drawdowns = (equity - running_max) / running_max * 100
         result.max_drawdown = abs(min(drawdowns))
         result.max_drawdown_pct = min(drawdowns)
+        result.gross_drawdown = result.max_drawdown
+        result.gross_drawdown_pct = result.max_drawdown_pct
+        
+        # Net Drawdown (cumulative sum of losing trades / absolute drawdown)
+        # Calculate the running net P&L and find the maximum cumulative loss
+        cumulative_pnl = np.cumsum(pnl_list)
+        running_max_net = np.maximum.accumulate(cumulative_pnl)
+        net_drawdowns = cumulative_pnl - running_max_net
+        result.net_drawdown = abs(min(net_drawdowns)) if len(net_drawdowns) > 0 else 0
+        # Convert to percentage based on initial equity
+        if equity_curve and equity_curve[0] > 0:
+            result.net_drawdown_pct = (result.net_drawdown / equity_curve[0]) * 100
+        else:
+            result.net_drawdown_pct = result.net_drawdown
         
         # Calculate returns for Sharpe
         returns = np.diff(equity) / equity[:-1] * 100
