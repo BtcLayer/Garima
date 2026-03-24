@@ -114,7 +114,16 @@ deploy/
 pine/                       TradingView Pine Script references
 pine_scripts/               Generated Pine Scripts for verification
 reports/                    Day reports and result CSVs
-archive/                    Old unused scripts
+archive/                    Old/unused modules from earlier phases
+  webhook/                  Flask webhook receiver (TradingView → bot)
+  processor/                Event processor for webhook signals
+  migrations/               Alembic DB migrations (PostgreSQL schema)
+  core/                     Order manager, executor, reconciler, event logger
+  leaderboard/              CSV ingest + HTML report generator
+  old_runners/              Per-asset backtest scripts (replaced by batch runner)
+  scripts/                  Dashboard export, stress test, Google Sheets sync
+  tests/                    Unit tests for queue, idempotency, DLQ, reconciliation
+  examples/                 Example usage scripts for executor and events
 ```
 
 ## Assets & Data
