@@ -1,25 +1,25 @@
 """
-Trading Bot Brain — Claude-powered AI analysis layer.
+Trading Bot Brain — Gemini-powered AI analysis layer.
 
 Provides two capabilities:
 1. Auto-analysis: after every backtest, generate an expert summary of results.
 2. Free Q&A:  answer any natural-language question about the bot, strategies, or market.
 
-Requires ANTHROPIC_API_KEY in .env
+Requires GEMINI_API_KEY in .env
 """
 
 import os
 import logging
 from typing import List, Dict, Any
 
-import anthropic
+import google.generativeai as genai
 from dotenv import load_dotenv
 
 load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-_MODEL = "claude-opus-4-6"
+_MODEL = "gemini-2.0-flash-lite"
 
 _SYSTEM_PROMPT = """You are an expert algorithmic cryptocurrency trading analyst and quantitative researcher.
 You have deep knowledge of:
@@ -39,50 +39,41 @@ Keep responses concise and structured. Use bullet points. Avoid generic advice."
 
 
 class TradingBrain:
-    """AI brain that wraps the Claude API for trading analysis."""
+    """AI brain that wraps the Google Gemini API for trading analysis."""
 
     def __init__(self):
-        api_key = os.getenv("ANTHROPIC_API_KEY")
+        api_key = os.getenv("GEMINI_API_KEY")
         if not api_key:
             raise ValueError(
-                "ANTHROPIC_API_KEY not found in environment. "
+                "GEMINI_API_KEY not found in environment. "
                 "Add it to your .env file to enable the AI brain."
             )
-        self.client = anthropic.Anthropic(api_key=api_key)
+        genai.configure(api_key=api_key)
+        self.model = genai.GenerativeModel(
+            model_name=_MODEL,
+            system_instruction=_SYSTEM_PROMPT,
+        )
 
     # ------------------------------------------------------------------ #
-    # Core streaming helper
+    # Core helper
     # ------------------------------------------------------------------ #
 
-    def _ask(self, messages: List[Dict[str, str]], max_tokens: int = 1024) -> str:
-        """Send messages to Claude and return the full response text via streaming."""
-        full_text = ""
-        with self.client.messages.stream(
-            model=_MODEL,
-            max_tokens=max_tokens,
-            thinking={"type": "adaptive"},
-            system=_SYSTEM_PROMPT,
-            messages=messages,
-        ) as stream:
-            for text in stream.text_stream:
-                full_text += text
-        return full_text.strip()
+    def _ask(self, prompt: str, max_tokens: int = 1024) -> str:
+        """Send a prompt to Gemini and return the response text."""
+        response = self.model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(
+                max_output_tokens=max_tokens,
+                temperature=0.7,
+            ),
+        )
+        return response.text.strip()
 
     # ------------------------------------------------------------------ #
     # Public API
     # ------------------------------------------------------------------ #
 
     def analyze_backtest(self, results: List[Dict[str, Any]], symbol: str, batches: list) -> str:
-        """
-        Analyse a batch backtest result list and return an expert summary.
-
-        Parameters
-        ----------
-        results : list of dicts, each with keys:
-            id, name, strategies, trades, wins, losses, win_rate, roi, final_capital
-        symbol  : e.g. "BTCUSDT_15m"
-        batches : e.g. [1, 2, 3]
-        """
         if not results:
             return "No backtest results to analyse."
 
@@ -107,16 +98,16 @@ class TradingBrain:
             f"Bottom 5 strategies:\n" + "\n".join(fmt(r) for r in bottom5)
         )
 
-        messages = [{"role": "user", "content": (
+        prompt = (
             f"Here are the backtest results:\n\n{context}\n\n"
             "Please provide:\n"
             "1. A brief assessment of overall performance\n"
             "2. What makes the top strategies successful\n"
             "3. Why the bottom strategies are underperforming\n"
             "4. 2-3 concrete next steps to improve results"
-        )}]
+        )
 
-        return self._ask(messages, max_tokens=800)
+        return self._ask(prompt, max_tokens=800)
 
     def analyze_optimization(
         self,
@@ -124,7 +115,6 @@ class TradingBrain:
         optimized_results: List[Dict[str, Any]],
         best_params: Dict[str, float],
     ) -> str:
-        """Compare pre/post optimization results and explain the improvement."""
         if not optimized_results:
             return "No optimized results to analyse."
 
@@ -143,30 +133,19 @@ class TradingBrain:
             f"{k}={v*100:.1f}%" for k, v in best_params.items()
         )
 
-        context = (
+        prompt = (
+            f"Auto-optimization just ran on the trading strategies.\n\n"
             f"Before optimization: {summary(original_results)}\n"
             f"After  optimization: {summary(optimized_results)}\n"
-            f"Optimized parameters: {param_str}"
-        )
-
-        messages = [{"role": "user", "content": (
-            f"Auto-optimization just ran on the trading strategies.\n\n{context}\n\n"
+            f"Optimized parameters: {param_str}\n\n"
             "Explain: did the optimization help? Why or why not? "
             "Are the new parameters sensible for crypto trading? "
             "What should the trader watch out for?"
-        )}]
+        )
 
-        return self._ask(messages, max_tokens=600)
+        return self._ask(prompt, max_tokens=600)
 
     def answer_question(self, question: str, bot_context: Dict[str, Any] = None) -> str:
-        """
-        Answer any free-form question the user sends via /ask.
-
-        Parameters
-        ----------
-        question    : the user's message
-        bot_context : optional dict with current bot state (default symbol, last results, etc.)
-        """
         context_block = ""
         if bot_context:
             parts = []
@@ -186,5 +165,4 @@ class TradingBrain:
             if parts:
                 context_block = "Bot context:\n" + "\n".join(f"  - {p}" for p in parts) + "\n\n"
 
-        messages = [{"role": "user", "content": context_block + question}]
-        return self._ask(messages, max_tokens=1000)
+        return self._ask(context_block + question, max_tokens=1000)

@@ -39,8 +39,8 @@ CACHE_DIR.mkdir(parents=True, exist_ok=True)
 # Binance API
 BASE_URL = "https://api.binance.com/api/v3"
 
-# Maximum candles per request (Binance limit)
-MAX_CANDLES_PER_REQUEST = 1500
+# Maximum candles per request (Binance limit is 1000)
+MAX_CANDLES_PER_REQUEST = 1000
 
 # Rate limiting
 REQUEST_DELAY = 0.2  # seconds between requests
@@ -117,23 +117,25 @@ class DataFetcher:
 
         return None
     
-    def _fetch_single_batch(self, symbol: str, timeframe: str, 
-                           end_ts: int, limit: int = None) -> List:
+    def _fetch_single_batch(self, symbol: str, timeframe: str,
+                           end_ts: int = None, start_ts: int = None,
+                           limit: int = None) -> List:
         """Fetch a single batch of klines from Binance."""
         url = f"{BASE_URL}/klines"
-        
-        # Use only endTime for backward pagination (newest to oldest)
+
         params = {
             'symbol': symbol,
             'interval': timeframe,
-            'endTime': end_ts,
             'limit': limit or MAX_CANDLES_PER_REQUEST
         }
-        
+        if start_ts is not None:
+            params['startTime'] = start_ts
+        if end_ts is not None:
+            params['endTime'] = end_ts
+
         try:
             response = self.session.get(url, params=params, timeout=30)
             response.raise_for_status()
-            # Binance already returns candles in ascending order (oldest first)
             return response.json()
         except requests.exceptions.RequestException as e:
             print(f"  [X] API Error: {e}")
@@ -166,41 +168,44 @@ class DataFetcher:
         end_ts = int(datetime.fromisoformat(end_date).timestamp() * 1000)
         
         all_candles = []
-        current_end_ts = end_ts
+        current_start_ts = start_ts
         batch_count = 0
-        
+
         while True:
-            # Fetch batch going backward from current_end_ts
-            batch = self._fetch_single_batch(symbol, timeframe, current_end_ts)
-            
+            # Fetch batch going forward from current_start_ts
+            batch = self._fetch_single_batch(
+                symbol, timeframe,
+                start_ts=current_start_ts, end_ts=end_ts,
+            )
+
             if not batch:
                 break
-                
+
             batch_count += 1
             print(f"  Batch {batch_count}: {len(batch)} candles")
-            
+
             # Add all candles
             all_candles.extend(batch)
 
-            # batch[0][0] = oldest timestamp in this batch (Binance ascending order)
-            oldest_ts = batch[0][0]
+            # batch[-1][0] = newest timestamp in this batch
+            newest_ts = batch[-1][0]
 
-            # Check if we've reached the start date
-            if oldest_ts <= start_ts:
+            # If we've reached the end date, stop
+            if newest_ts >= end_ts:
                 break
 
             # If we got fewer than max candles, no more data available
             if len(batch) < MAX_CANDLES_PER_REQUEST:
                 break
 
-            # Move end-time backward to fetch the next (older) page
-            current_end_ts = oldest_ts - 1
-            
+            # Move start forward past the last candle we got
+            current_start_ts = newest_ts + 1
+
             # Safety check: prevent infinite loops
-            if batch_count > 1000:
+            if batch_count > 2000:
                 print(f"  [WARN] Max iterations reached")
                 break
-            
+
             # Rate limiting
             time.sleep(REQUEST_DELAY)
         

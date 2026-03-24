@@ -1,3 +1,0 @@
-{"timestamp": 1771651552.3174634, "level": "CRITICAL", "message": "SYSTEM_CHECK: Requirement 6.3 testing active."}
-{"timestamp": 1771653274.6553495, "level": "CRITICAL", "message": "SYSTEM_CHECK: Requirement 6.3 testing active."}
-{"timestamp": 1771653277.9738314, "level": "WARNING", "message": "This should be rate-limited"}

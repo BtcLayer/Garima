@@ -14,3 +14,4 @@ pyarrow
 requests
 pandas_ta
 anthropic
+google-generativeai>=0.8.0
