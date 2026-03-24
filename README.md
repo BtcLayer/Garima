@@ -2,10 +2,23 @@
 
 Systematic backtesting engine for 230+ trading strategies across 10 crypto assets and 3 timeframes, with a Telegram bot interface for running optimizations, generating TradingView Pine Scripts, and managing results.
 
-## Setup
+## Quick Start
 
 ```bash
+# 1. Clone the repo
+git clone https://github.com/BtcLayer/Garima.git
+cd Garima
+
+# 2. Create virtual environment
+python -m venv .venv
+source .venv/bin/activate        # Linux/Mac
+# .venv\Scripts\activate         # Windows
+
+# 3. Install dependencies
 pip install -r requirements.txt
+
+# 4. Create .env file
+cp .env.example .env             # then edit with your keys
 ```
 
 Create `.env` with:
@@ -17,15 +30,28 @@ TELEGRAM_CHAT_ID=your_chat_id
 GEMINI_API_KEY=your_gemini_key
 ```
 
-## Run the Bot
-
 ```bash
+# 5. Download 6-year historical data (~80MB)
+python scripts/fetch_6yr_data.py
+
+# 6. Run the bot locally
 python -m src.telegram_backtest_bot
 ```
 
-On server (24/7):
+## Server Deployment (24/7)
+
 ```bash
+# Copy files to server
+scp -i "deploy/harsh_server/key.pem" -r src/ strategies/ run_strategies_batch.py requirements.txt ubuntu@server:/home/ubuntu/Garima/
+
+# Copy data files
+scp -i "deploy/harsh_server/key.pem" storage/historical_data/*.parquet ubuntu@server:/home/ubuntu/Garima/storage/historical_data/
+
+# SSH into server and start
+ssh -i "deploy/harsh_server/key.pem" ubuntu@server
+cd /home/ubuntu/Garima
 sudo systemctl start telegram_bot
+sudo systemctl status telegram_bot   # verify it's running
 ```
 
 ## Bot Commands (Workflow Order)
