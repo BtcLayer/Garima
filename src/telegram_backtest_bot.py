@@ -32,6 +32,36 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# ── Checkpoint system ────────────────────────────────────────────
+CHECKPOINT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "storage", "checkpoints")
+os.makedirs(CHECKPOINT_DIR, exist_ok=True)
+
+def _save_checkpoint(cmd: str, timeframe: str, data: dict) -> None:
+    """Save progress checkpoint for a long-running command."""
+    path = os.path.join(CHECKPOINT_DIR, f"{cmd}_{timeframe}.json")
+    try:
+        with open(path, "w") as f:
+            json.dump(data, f, indent=2, default=str)
+    except Exception:
+        pass
+
+def _load_checkpoint(cmd: str, timeframe: str) -> dict:
+    """Load checkpoint if it exists. Returns {} if none."""
+    path = os.path.join(CHECKPOINT_DIR, f"{cmd}_{timeframe}.json")
+    if os.path.exists(path):
+        try:
+            with open(path) as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+def _clear_checkpoint(cmd: str, timeframe: str) -> None:
+    """Remove checkpoint after successful completion."""
+    path = os.path.join(CHECKPOINT_DIR, f"{cmd}_{timeframe}.json")
+    if os.path.exists(path):
+        os.remove(path)
+
 # Add project root to path so we can import from root-level modules
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _ROOT not in sys.path:
@@ -525,11 +555,21 @@ class TelegramBacktestBot:
         elif command == "restart":
             return self._restart_bot()
 
+        # ── 5b. Live Trading Controls ──
+        elif command == "killswitch":
+            return self._toggle_kill_switch(args)
+        elif command == "paper":
+            return self._toggle_paper_mode(args)
+        elif command == "positions":
+            return self._show_positions()
+        elif command == "closeall":
+            return self._close_all_positions()
+
         # ── 6. Info ──
         elif command == "status":
             return self._get_bot_status()
         elif command == "results":
-            return self._get_last_results()
+            return self._get_last_results(args)
         elif command == "params":
             return self._get_current_params()
         elif command == "stats":
@@ -619,6 +659,12 @@ class TelegramBacktestBot:
             "  `/restart` — reset bot state\n"
             "  `/setdefault BTCUSDT_4h` — set default\n"
             "  `/optdata 6` — set lookback years\n\n"
+
+            "*LIVE TRADING*\n\n"
+            "  `/killswitch` — toggle kill switch (closes all)\n"
+            "  `/paper on|off` — paper/live trading mode\n"
+            "  `/positions` — show open positions & PnL\n"
+            "  `/closeall` — close all open positions\n\n"
 
             "10 assets · 3 TFs · 230+ strategies · 6yr data"
         )
@@ -1535,18 +1581,28 @@ class TelegramBacktestBot:
 
             # ================================================
             # PHASE 1: Run all elite on each asset → top 10
-        # ================================================
-            self.send_message("PHASE 1: Testing all strategies on each asset...")
+            # ================================================
+            # Load checkpoint if resuming
+            ckpt = _load_checkpoint("auto", timeframe)
+            top10_per_asset = ckpt.get("top10_per_asset", {})
+            all_phase1 = ckpt.get("all_phase1", [])
+            done_assets = set(ckpt.get("done_assets", []))
 
-            top10_per_asset = {}  # asset → list of top 10 results
-            all_phase1 = []
+            if done_assets:
+                self.send_message(f"Resuming Phase 1 — {len(done_assets)} assets already done, continuing...")
+            else:
+                self.send_message("PHASE 1: Testing all strategies on each asset...")
 
             for symbol in sorted(symbols):
                 if self._should_stop():
-                    self.send_message("Stopped by user.")
+                    self.send_message("Stopped by user. Progress saved — use /auto to resume.")
                     return
                 _parts = symbol.rsplit("_", 1)
                 _asset = _parts[0] if len(_parts) == 2 else symbol
+
+                # Skip already-completed assets
+                if _asset in done_assets:
+                    continue
 
                 df = load_data(symbol)
                 if df is None:
@@ -1588,7 +1644,6 @@ class TelegramBacktestBot:
                                 "pf": round(pf, 2),
                                 "score": round(score, 2),
                                 "trades": len(trades),
-                                "strat_def": strat,
                             })
                     except Exception:
                         pass
@@ -1597,10 +1652,19 @@ class TelegramBacktestBot:
                 top10 = asset_results[:10]
                 top10_per_asset[_asset] = top10
                 all_phase1.extend(asset_results)
+                done_assets.add(_asset)
+
+                # Save checkpoint after each asset
+                _save_checkpoint("auto", timeframe, {
+                    "phase": 1,
+                    "top10_per_asset": top10_per_asset,
+                    "all_phase1": all_phase1,
+                    "done_assets": list(done_assets),
+                })
 
                 # Report top 3 per asset
                 if top10:
-                    msg = f"{_asset}: "
+                    msg = f"{_asset} ({len(done_assets)}/{len(symbols)}): "
                     for r in top10[:3]:
                         msg += f"{r['name']}({r['roi_annum']}%/yr) "
                     self.send_message(msg)
@@ -1653,15 +1717,32 @@ class TelegramBacktestBot:
             universal_names = {u["name"] for u in universal}
             universal_strats = [s for s in elite_strats if s["name"] in universal_names]
 
-            optimized_results = []
+            # Load Phase 3 checkpoint if exists
+            p3_ckpt = ckpt.get("phase3_done", [])
+            optimized_results = ckpt.get("optimized_results", [])
+            p3_done_names = {r["name"] for r in optimized_results}
+
             total_strats = len(universal_strats)
             for idx, strat in enumerate(universal_strats, 1):
+                # Skip already-optimized strategies
+                if strat["name"] in p3_done_names:
+                    continue
+
                 # Progress message every 2 strategies
                 if idx % 2 == 1:
                     self.send_message(f"Phase 3: Optimizing {idx}/{total_strats} strategies...")
-            
+
                 if self._should_stop():
-                    self.send_message("Stopped by user.")
+                    _save_checkpoint("auto", timeframe, {
+                        "phase": 3,
+                        "top10_per_asset": top10_per_asset,
+                        "all_phase1": all_phase1,
+                        "done_assets": list(done_assets),
+                        "universal": universal,
+                        "optimized_results": optimized_results,
+                        "phase3_done": list(p3_done_names),
+                    })
+                    self.send_message("Stopped by user. Phase 3 progress saved — use /auto to resume.")
                     return
                 
                 best_avg_score = -999
@@ -1708,6 +1789,18 @@ class TelegramBacktestBot:
                     "tp": best_params["tp"],
                     "ts": best_params["ts"],
                 })
+                p3_done_names.add(strat["name"])
+
+                # Save checkpoint after each strategy
+                _save_checkpoint("auto", timeframe, {
+                    "phase": 3,
+                    "top10_per_asset": top10_per_asset,
+                    "all_phase1": all_phase1,
+                    "done_assets": list(done_assets),
+                    "universal": universal,
+                    "optimized_results": optimized_results,
+                    "phase3_done": list(p3_done_names),
+                })
 
             optimized_results.sort(key=lambda x: x["score"], reverse=True)
 
@@ -1721,6 +1814,9 @@ class TelegramBacktestBot:
             remaining = [n for n in ELITE_STRATEGY_NAMES if n not in new_order]
             ELITE_STRATEGY_NAMES = new_order + remaining
             _save_elite_ranking(ELITE_STRATEGY_NAMES, optimized_results)
+
+            # Clear checkpoint — auto completed successfully
+            _clear_checkpoint("auto", timeframe)
 
             # Final report
             msg = (
@@ -1853,6 +1949,14 @@ class TelegramBacktestBot:
                     r["Rank"] = i
 
                 self._last_results = final_results
+
+                # Save results to CSV for persistence across restarts
+                try:
+                    import pandas as _pd_save
+                    _csv_path = os.path.join(_ROOT, f"auto_results_{timeframe}.csv")
+                    _pd_save.DataFrame(final_results).to_csv(_csv_path, index=False)
+                except Exception:
+                    pass
 
                 # Per-strategy avg across assets
                 strat_avg = {}
@@ -3281,6 +3385,47 @@ class TelegramBacktestBot:
         """Check if stop was requested. Workers call this between iterations."""
         return self._stop_flag.is_set()
 
+    # ------------------------------------------------------------------ #
+    # Live Trading Controls
+    # ------------------------------------------------------------------ #
+
+    def _toggle_kill_switch(self, args: list) -> str:
+        from src.manager import activate_kill_switch, deactivate_kill_switch, is_kill_switch_active
+        if args and args[0].lower() == "off":
+            deactivate_kill_switch()
+            return "Kill switch *deactivated*. Trading resumed."
+        elif is_kill_switch_active():
+            deactivate_kill_switch()
+            return "Kill switch *deactivated*. Trading resumed."
+        else:
+            activate_kill_switch(close_all=True)
+            return "🚨 Kill switch *ACTIVATED*. All positions closed, new trades blocked.\nUse `/killswitch off` to resume."
+
+    def _toggle_paper_mode(self, args: list) -> str:
+        import src.manager as mgr
+        if args and args[0].lower() in ("off", "live"):
+            mgr.PAPER_TRADING = False
+            mgr._save_state()
+            return "⚠️ Paper trading *OFF* — LIVE orders will be placed."
+        elif args and args[0].lower() in ("on", "paper"):
+            mgr.PAPER_TRADING = True
+            mgr._save_state()
+            return "Paper trading *ON* — no real orders."
+        else:
+            current = "ON" if mgr.PAPER_TRADING else "OFF"
+            return f"Paper trading is *{current}*.\nUse `/paper on` or `/paper off`."
+
+    def _show_positions(self) -> str:
+        from src.manager import get_status
+        return f"```\n{get_status()}\n```"
+
+    def _close_all_positions(self) -> str:
+        from src.manager import close_all_positions, _active_positions
+        if not _active_positions:
+            return "No open positions."
+        close_all_positions("MANUAL")
+        return "All positions closed."
+
     def _get_bot_status(self) -> str:
         try:
             trades_exist = os.path.exists(TRADES_FILE)
@@ -3754,42 +3899,83 @@ plot(ema50, "EMA50", color.red, linewidth=2)
 plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", shape.triangleup, location.belowbar, color.green, size=size.small)
 """
 
-    def _get_last_results(self) -> str:
-        """Return a summary of the last backtest results from any command."""
-        if not self._last_results:
-            # Try loading from multiple possible CSV files
-            csv_files = [
-                "batch_backtest_results.csv",
-                "auto_optimization_results.csv",
-                "elite_backtest_results.csv",
-            ]
-            for csv_file in csv_files:
-                csv_path = os.path.join(_ROOT, csv_file)
-                if os.path.exists(csv_path):
-                    try:
-                        import pandas as pd
-                        df = pd.read_csv(csv_path)
-                        # Try different column names for ROI
-                        if "roi" in df.columns:
-                            df = df.sort_values("roi", ascending=False)
-                        elif "ROI_Percent" in df.columns:
-                            df = df.sort_values("ROI_Percent", ascending=False)
-                        elif "ROI_per_annum" in df.columns:
-                            df = df.sort_values("ROI_per_annum", ascending=False)
-                        records = df.head(50).to_dict("records")
-                        self._last_results = records
-                        break
-                    except Exception:
-                        pass
+    def _get_last_results(self, args=None) -> str:
+        """Return a summary of the last backtest results from any command.
+        Args: optional timeframe filter like '4h', '1h', '15m'
+        """
+        # Parse timeframe filter from args
+        tf_filter = None
+        if args:
+            tokens = args if isinstance(args, list) else args.split()
+            for token in tokens:
+                if token.lower() in ("15m", "1h", "4h", "1d"):
+                    tf_filter = token.lower()
+                    break
 
-        if not self._last_results:
-            return "No results. Run /backtest, /auto, or /elite first."
+        # Try loading from CSV files
+        all_records = []
+        csv_files = [
+            "batch_backtest_results.csv",
+            "auto_optimization_results.csv",
+            "elite_backtest_results.csv",
+            "auto_results_15m.csv",
+            "auto_results_1h.csv",
+            "auto_results_4h.csv",
+        ]
+        # Also search reports/ directory for result CSVs
+        reports_dir = os.path.join(_ROOT, "reports")
+        if os.path.isdir(reports_dir):
+            for fname in os.listdir(reports_dir):
+                if fname.endswith(".csv") and ("result" in fname.lower() or "combined" in fname.lower() or "elite" in fname.lower()):
+                    csv_files.append(os.path.join("reports", fname))
+        for csv_file in csv_files:
+            csv_path = os.path.join(_ROOT, csv_file)
+            if os.path.exists(csv_path):
+                try:
+                    import pandas as pd
+                    df = pd.read_csv(csv_path)
+                    records = df.to_dict("records")
+                    all_records.extend(records)
+                except Exception:
+                    pass
+
+        # Also include in-memory results
+        if self._last_results:
+            all_records.extend(self._last_results)
+
+        # Deduplicate by name+asset+timeframe
+        seen = set()
+        unique = []
+        for r in all_records:
+            key = (r.get("name", r.get("Strategy", "")),
+                   r.get("asset", r.get("Asset", "")),
+                   r.get("timeframe", r.get("Timeframe", r.get("Candle_Period", ""))))
+            if key not in seen:
+                seen.add(key)
+                unique.append(r)
+        all_records = unique
+
+        # Apply timeframe filter
+        if tf_filter:
+            filtered = []
+            for r in all_records:
+                tf = str(r.get("timeframe", r.get("Timeframe", r.get("Candle_Period", "")))).lower()
+                if tf == tf_filter:
+                    filtered.append(r)
+            all_records = filtered
+
+        if not all_records:
+            msg = "No results"
+            if tf_filter:
+                msg += f" for {tf_filter}"
+            return msg + ". Run /backtest, /auto, or /elite first."
 
         def _norm(r):
             """Normalize result dict to always have consistent keys."""
             out = dict(r)
+            # ROI% = per annum (not total period)
             if "roi" not in out or out["roi"] == 0:
-                out["roi"] = out.get("ROI_Percent") or out.get("ROI_per_annum") or 0
+                out["roi"] = out.get("ROI_per_annum") or out.get("ROI_per_annum_Percent") or out.get("ROI/annum") or out.get("ROI_Percent") or 0
             if "trades" not in out or out["trades"] == 0:
                 out["trades"] = out.get("Total_Trades") or 0
             if "win_rate" not in out or out["win_rate"] == 0:
@@ -3802,15 +3988,18 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
                 out["asset"] = out.get("Asset") or "?"
             if "timeframe" not in out:
                 out["timeframe"] = out.get("Timeframe") or out.get("Candle_Period") or "?"
-            # Drawdown — prefer detailed keys, fall back to Max_Drawdown_Percent
+            # Drawdown — prefer detailed keys, fall back to Max_Drawdown / Max_Drawdown_Percent
             if "gross_dd" not in out or out["gross_dd"] == 0:
-                out["gross_dd"] = out.get("Gross_DD_Percent") or out.get("Max_Drawdown_Percent") or 0
+                out["gross_dd"] = out.get("Gross_DD_Percent") or out.get("Max_Drawdown_Percent") or out.get("Max_Drawdown") or 0
             if "net_dd" not in out or out["net_dd"] == 0:
                 out["net_dd"] = out.get("Net_DD_Percent") or 0
+            # Capital left at worst net drawdown point
+            initial = float(out.get("Initial_Capital_USD", 10000))
+            out["capital_at_net_dd"] = round(initial * (1 - out["net_dd"] / 100), 2) if out["net_dd"] else initial
             return out
 
         results = sorted(
-            [_norm(r) for r in self._last_results],
+            [_norm(r) for r in all_records],
             key=lambda x: x.get("roi", 0),
             reverse=True
         )
@@ -3820,10 +4009,10 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
             f"*Last Backtest Results*\n"
             f"Strategies tested    : {len(results)}\n"
             f"Profitable (ROI>=20%): {len(profitable)}\n\n"
-            "*Top 15 by ROI %:*\n"
+            "*Top 15 by ROI %/yr:*\n"
             "```\n"
-            f"{'#':<3} {'Name':<18} {'Asset':<10} {'TF':<4} {'Tr':<4} {'Win%':<6} {'ROI%':<8} {'GrossDD%':<10} {'NetDD%'}\n"
-            f"{'-'*75}\n"
+            f"{'#':<3} {'Name':<18} {'Asset':<10} {'TF':<4} {'Tr':<4} {'Win%':<6} {'ROI%/yr':<8} {'GDD%':<6} {'NDD%':<6} {'Cap@NDD'}\n"
+            f"{'-'*80}\n"
         )
         for i, r in enumerate(results[:15], 1):
             msg += (
@@ -3834,8 +4023,9 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
                 f"{str(r.get('trades',0)):<4} "
                 f"{str(round(r.get('win_rate',0),1)):<6} "
                 f"{str(round(r.get('roi',0),2)):<8} "
-                f"{str(round(r.get('gross_dd',0),1)):<10} "
-                f"{round(r.get('net_dd',0),1)}\n"
+                f"{str(round(r.get('gross_dd',0),1)):<6} "
+                f"{str(round(r.get('net_dd',0),1)):<6} "
+                f"${r.get('capital_at_net_dd', 10000)}\n"
             )
         msg += "```"
         return msg
