@@ -25,6 +25,8 @@ from strategies.batch_17 import get_strategies as get_batch_17, get_all_strategi
 from strategies.batch_18 import get_strategies as get_batch_18, get_all_strategies_telegram as get_telegram_18
 from strategies.batch_19 import get_strategies as get_batch_19, get_all_strategies_telegram as get_telegram_19
 from strategies.batch_20 import get_strategies as get_batch_20, get_all_strategies_telegram as get_telegram_20
+from strategies.batch_21 import get_strategies as get_batch_21, get_all_strategies_telegram as get_telegram_21
+from strategies.batch_22 import get_strategies as get_batch_22, get_all_strategies_telegram as get_telegram_22
 
 
 def get_all_strategies():
@@ -35,7 +37,8 @@ def get_all_strategies():
         get_batch_01, get_batch_02, get_batch_03, get_batch_04, get_batch_05,
         get_batch_06, get_batch_07, get_batch_08, get_batch_09, get_batch_10,
         get_batch_11, get_batch_12, get_batch_13, get_batch_14, get_batch_15,
-        get_batch_16, get_batch_17, get_batch_18, get_batch_19, get_batch_20
+        get_batch_16, get_batch_17, get_batch_18, get_batch_19, get_batch_20,
+        get_batch_21, get_batch_22,
     ]
     
     for batch_getter in batch_getters:
@@ -46,7 +49,7 @@ def get_all_strategies():
 
 def get_strategy_by_id(strategy_id):
     """Get a specific strategy by ID from all batches"""
-    for batch_num in range(1, 21):
+    for batch_num in range(1, 23):
         module_name = f"strategies.batch_{batch_num:02d}"
         try:
             module = __import__(module_name, fromlist=['get_strategy_by_id'])
@@ -60,7 +63,7 @@ def get_strategy_by_id(strategy_id):
 
 def get_strategies_by_batch(batch_num):
     """Get strategies from a specific batch"""
-    if batch_num < 1 or batch_num > 20:
+    if batch_num < 1 or batch_num > 22:
         return []
 
     module_name = f"strategies.batch_{batch_num:02d}"
@@ -79,7 +82,8 @@ def get_all_telegram_messages():
         get_telegram_01, get_telegram_02, get_telegram_03, get_telegram_04, get_telegram_05,
         get_telegram_06, get_telegram_07, get_telegram_08, get_telegram_09, get_telegram_10,
         get_telegram_11, get_telegram_12, get_telegram_13, get_telegram_14, get_telegram_15,
-        get_telegram_16, get_telegram_17, get_telegram_18, get_telegram_19, get_telegram_20
+        get_telegram_16, get_telegram_17, get_telegram_18, get_telegram_19, get_telegram_20,
+        get_telegram_21, get_telegram_22,
     ]
     
     for i, getter in enumerate(telegram_getters):
@@ -104,4 +108,4 @@ def get_strategy_count():
 # Package info
 __version__ = "1.0.0"
 __author__ = "Trading Bot Team"
-__description__ = "230+ profitable strategy combinations for trading"
+__description__ = "240+ profitable strategy combinations for trading"
