@@ -1,0 +1,52 @@
+//@version=5
+strategy("22_Ichimoku_Trend_Pro", overlay=true, default_qty_type=strategy.percent_of_equity, default_qty_value=95, commission_value=0.1)
+
+// === INPUTS ===
+sl_pct = input.float(2.0, "Stop Loss %", step=0.1) / 100
+tp_pct = input.float(12.0, "Take Profit %", step=0.1) / 100
+ts_pct = input.float(2.0, "Trailing Stop %", step=0.1) / 100
+min_agreement = input.int(3, "Min Signals Required", minval=1, maxval=4)
+
+// === INDICATORS ===
+// 1. Ichimoku Bull: close above cloud
+tenkan_sen = (ta.highest(high, 9) + ta.lowest(low, 9)) / 2
+kijun_sen = (ta.highest(high, 26) + ta.lowest(low, 26)) / 2
+senkou_span_a = (tenkan_sen + kijun_sen) / 2
+senkou_span_b = (ta.highest(high, 52) + ta.lowest(low, 52)) / 2
+sig_ichimoku = (close > senkou_span_a and close > senkou_span_b) ? 1 : 0
+
+// 2. EMA Cross: EMA8 > EMA21
+ema8 = ta.ema(close, 8)
+ema21 = ta.ema(close, 21)
+sig_ema = ema8 > ema21 ? 1 : 0
+
+// 3. ADX Trend: ADX > 25
+[diplus, diminus, adx_val] = ta.dmi(14, 14)
+sig_adx = adx_val > 25 ? 1 : 0
+
+// 4. OBV Rising: OBV > SMA20(OBV)
+obv_val = ta.obv
+obv_sma = ta.sma(obv_val, 20)
+sig_obv = obv_val > obv_sma ? 1 : 0
+
+// === SIGNAL AGREEMENT ===
+total_signals = sig_ichimoku + sig_ema + sig_adx + sig_obv
+long_entry = total_signals >= min_agreement
+exit_signal = total_signals < 1
+
+// === STRATEGY EXECUTION ===
+if long_entry and strategy.position_size == 0
+    strategy.entry("Long", strategy.long, alert_message='{"strategy":"Ichimoku_Trend_Pro","symbol":"' + syminfo.ticker + '","side":"BUY","price":' + str.tostring(close) + ',"sl_pct":' + str.tostring(sl_pct) + ',"tp_pct":' + str.tostring(tp_pct) + ',"ts_pct":' + str.tostring(ts_pct) + ',"timeframe":"' + timeframe.period + '"}')
+
+if strategy.position_size > 0
+    trail_ticks = math.round(strategy.position_avg_price * ts_pct / syminfo.mintick)
+    strategy.exit("SL/TP", "Long", stop=strategy.position_avg_price * (1 - sl_pct), limit=strategy.position_avg_price * (1 + tp_pct), trail_points=1, trail_offset=trail_ticks, alert_message='{"strategy":"Ichimoku_Trend_Pro","symbol":"' + syminfo.ticker + '","side":"SELL","price":' + str.tostring(close) + ',"sl_pct":0,"tp_pct":0,"ts_pct":0,"timeframe":"' + timeframe.period + '"}')
+
+if exit_signal and strategy.position_size > 0
+    strategy.close("Long", comment="Signal Exit", alert_message='{"strategy":"Ichimoku_Trend_Pro","symbol":"' + syminfo.ticker + '","side":"SELL","price":' + str.tostring(close) + ',"sl_pct":0,"tp_pct":0,"ts_pct":0,"timeframe":"' + timeframe.period + '"}')
+
+// === VISUALS ===
+plot(senkou_span_a, "Senkou A", color=color.green, style=plot.style_line)
+plot(senkou_span_b, "Senkou B", color=color.red, style=plot.style_line)
+bgcolor(total_signals >= min_agreement ? color.new(color.green, 90) : na)
+plotshape(long_entry and strategy.position_size == 0, "Buy", shape.triangleup, location.belowbar, color.green, size=size.small)

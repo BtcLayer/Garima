@@ -1,0 +1,49 @@
+//@version=5
+strategy("24_Keltner_Breakout", overlay=true, default_qty_type=strategy.percent_of_equity, default_qty_value=95, commission_value=0.1)
+
+// === INPUTS ===
+sl_pct = input.float(1.5, "Stop Loss %", step=0.1) / 100
+tp_pct = input.float(10.0, "Take Profit %", step=0.1) / 100
+ts_pct = input.float(1.5, "Trailing Stop %", step=0.1) / 100
+min_agreement = input.int(2, "Min Signals Required", minval=1, maxval=4)
+
+// === INDICATORS ===
+// 1. Keltner Lower: close < keltner lower band
+keltner_mid = ta.ema(close, 20)
+keltner_lower = keltner_mid - 2 * ta.atr(10)
+sig_keltner = close < keltner_lower ? 1 : 0
+
+// 2. RSI Oversold: RSI(14) < 30 AND RSI bouncing (RSI > RSI[1])
+rsi_val = ta.rsi(close, 14)
+sig_rsi = (rsi_val < 30 and rsi_val > rsi_val[1]) ? 1 : 0
+
+// 3. Volume Spike: volume > 1.5x SMA20(volume) AND close > close[1]
+vol_ma = ta.sma(volume, 20)
+sig_volume = (volume > vol_ma * 1.5 and close > close[1]) ? 1 : 0
+
+// 4. OBV Rising: OBV > SMA20(OBV)
+obv_val = ta.obv
+obv_sma = ta.sma(obv_val, 20)
+sig_obv = obv_val > obv_sma ? 1 : 0
+
+// === SIGNAL AGREEMENT ===
+total_signals = sig_keltner + sig_rsi + sig_volume + sig_obv
+long_entry = total_signals >= min_agreement
+exit_signal = total_signals < 1
+
+// === STRATEGY EXECUTION ===
+if long_entry and strategy.position_size == 0
+    strategy.entry("Long", strategy.long, alert_message='{"strategy":"Keltner_Breakout","symbol":"' + syminfo.ticker + '","side":"BUY","price":' + str.tostring(close) + ',"sl_pct":' + str.tostring(sl_pct) + ',"tp_pct":' + str.tostring(tp_pct) + ',"ts_pct":' + str.tostring(ts_pct) + ',"timeframe":"' + timeframe.period + '"}')
+
+if strategy.position_size > 0
+    trail_ticks = math.round(strategy.position_avg_price * ts_pct / syminfo.mintick)
+    strategy.exit("SL/TP", "Long", stop=strategy.position_avg_price * (1 - sl_pct), limit=strategy.position_avg_price * (1 + tp_pct), trail_points=1, trail_offset=trail_ticks, alert_message='{"strategy":"Keltner_Breakout","symbol":"' + syminfo.ticker + '","side":"SELL","price":' + str.tostring(close) + ',"sl_pct":0,"tp_pct":0,"ts_pct":0,"timeframe":"' + timeframe.period + '"}')
+
+if exit_signal and strategy.position_size > 0
+    strategy.close("Long", comment="Signal Exit", alert_message='{"strategy":"Keltner_Breakout","symbol":"' + syminfo.ticker + '","side":"SELL","price":' + str.tostring(close) + ',"sl_pct":0,"tp_pct":0,"ts_pct":0,"timeframe":"' + timeframe.period + '"}')
+
+// === VISUALS ===
+plot(keltner_mid, "Keltner Mid", color=color.blue, style=plot.style_line)
+plot(keltner_lower, "Keltner Lower", color=color.orange, style=plot.style_line)
+bgcolor(total_signals >= min_agreement ? color.new(color.green, 90) : na)
+plotshape(long_entry and strategy.position_size == 0, "Buy", shape.triangleup, location.belowbar, color.green, size=size.small)

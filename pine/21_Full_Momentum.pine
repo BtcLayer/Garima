@@ -1,0 +1,57 @@
+//@version=5
+strategy("21_Full_Momentum", overlay=true, default_qty_type=strategy.percent_of_equity, default_qty_value=95, commission_value=0.1)
+
+// === INPUTS ===
+sl_pct = input.float(2.5, "Stop Loss %", step=0.1) / 100
+tp_pct = input.float(15.0, "Take Profit %", step=0.1) / 100
+ts_pct = input.float(2.5, "Trailing Stop %", step=0.1) / 100
+min_agreement = input.int(3, "Min Signals Required", minval=1, maxval=5)
+
+// === INDICATORS ===
+// 1. PSAR Bull: close > Parabolic SAR
+psar_val = ta.sar(0.02, 0.02, 0.2)
+sig_psar = close > psar_val ? 1 : 0
+
+// 2. Ichimoku Bull: close above cloud
+tenkan_sen = (ta.highest(high, 9) + ta.lowest(low, 9)) / 2
+kijun_sen = (ta.highest(high, 26) + ta.lowest(low, 26)) / 2
+senkou_span_a = (tenkan_sen + kijun_sen) / 2
+senkou_span_b = (ta.highest(high, 52) + ta.lowest(low, 52)) / 2
+sig_ichimoku = (close > senkou_span_a and close > senkou_span_b) ? 1 : 0
+
+// 3. MACD Cross: MACD line crosses above signal
+ema21 = ta.ema(close, 21)
+ema50 = ta.ema(close, 50)
+macd_line = ema21 - ema50
+signal_line = ta.ema(macd_line, 9)
+sig_macd = (macd_line > signal_line and macd_line[1] <= signal_line[1]) ? 1 : 0
+
+// 4. ADX Trend: ADX > 25
+[diplus, diminus, adx_val] = ta.dmi(14, 14)
+sig_adx = adx_val > 25 ? 1 : 0
+
+// 5. OBV Rising: OBV > SMA20(OBV)
+obv_val = ta.obv
+obv_sma = ta.sma(obv_val, 20)
+sig_obv = obv_val > obv_sma ? 1 : 0
+
+// === SIGNAL AGREEMENT ===
+total_signals = sig_psar + sig_ichimoku + sig_macd + sig_adx + sig_obv
+long_entry = total_signals >= min_agreement
+exit_signal = total_signals < 1
+
+// === STRATEGY EXECUTION ===
+if long_entry and strategy.position_size == 0
+    strategy.entry("Long", strategy.long, alert_message='{"strategy":"Full_Momentum","symbol":"' + syminfo.ticker + '","side":"BUY","price":' + str.tostring(close) + ',"sl_pct":' + str.tostring(sl_pct) + ',"tp_pct":' + str.tostring(tp_pct) + ',"ts_pct":' + str.tostring(ts_pct) + ',"timeframe":"' + timeframe.period + '"}')
+
+if strategy.position_size > 0
+    trail_ticks = math.round(strategy.position_avg_price * ts_pct / syminfo.mintick)
+    strategy.exit("SL/TP", "Long", stop=strategy.position_avg_price * (1 - sl_pct), limit=strategy.position_avg_price * (1 + tp_pct), trail_points=1, trail_offset=trail_ticks, alert_message='{"strategy":"Full_Momentum","symbol":"' + syminfo.ticker + '","side":"SELL","price":' + str.tostring(close) + ',"sl_pct":0,"tp_pct":0,"ts_pct":0,"timeframe":"' + timeframe.period + '"}')
+
+if exit_signal and strategy.position_size > 0
+    strategy.close("Long", comment="Signal Exit", alert_message='{"strategy":"Full_Momentum","symbol":"' + syminfo.ticker + '","side":"SELL","price":' + str.tostring(close) + ',"sl_pct":0,"tp_pct":0,"ts_pct":0,"timeframe":"' + timeframe.period + '"}')
+
+// === VISUALS ===
+plot(psar_val, "PSAR", color=color.orange, style=plot.style_cross)
+bgcolor(total_signals >= min_agreement ? color.new(color.green, 90) : na)
+plotshape(long_entry and strategy.position_size == 0, "Buy", shape.triangleup, location.belowbar, color.green, size=size.small)

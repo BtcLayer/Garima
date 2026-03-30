@@ -1,0 +1,86 @@
+//@version=5
+strategy("14_High_Momentum_Entry", overlay=true, default_qty_type=strategy.percent_of_equity, default_qty_value=95, commission_value=0.1)
+
+sl_pct = input.float(1.5, "Stop Loss %", step=0.1) / 100
+tp_pct = input.float(15.0, "Take Profit %", step=0.1) / 100
+ts_pct = input.float(1.5, "Trailing Stop %", step=0.1) / 100
+min_agreement = input.int(3, "Min Signals Required (Long)", minval=1, maxval=5)
+min_agreement_short = input.int(2, "Min Signals Required (Short)", minval=1, maxval=4)
+
+// EMA_Cross
+ema8 = ta.ema(close, 8)
+ema21 = ta.ema(close, 21)
+sig_ema = ema8 > ema21 ? 1 : 0
+
+// MACD_Cross
+ema50 = ta.ema(close, 50)
+macd_line = ema21 - ema50
+signal_line = ta.ema(macd_line, 9)
+sig_macd = (macd_line > signal_line and macd_line[1] <= signal_line[1]) ? 1 : 0
+
+// Volume_Spike
+vol_ma = ta.sma(volume, 20)
+sig_volume = (volume > vol_ma * 1.5 and close > close[1]) ? 1 : 0
+
+// ADX_Trend
+[diplus, diminus, adx_val] = ta.dmi(14, 14)
+sig_adx = adx_val > 25 ? 1 : 0
+
+// Breakout_20
+high_20 = ta.highest(high[1], 20)
+sig_breakout = close > high_20 ? 1 : 0
+
+// === LONG SIGNALS ===
+total_signals = sig_ema + sig_macd + sig_volume + sig_adx + sig_breakout
+long_entry = total_signals >= min_agreement
+exit_signal = total_signals < 1
+
+// === SHORT INDICATORS (reversed conditions) ===
+// EMA_Cross_Short: EMA8 < EMA21
+sig_ema_short = ema8 < ema21 ? 1 : 0
+
+// MACD_Short: MACD below signal (persistent, not crossover — easier to trigger)
+sig_macd_short = macd_line < signal_line ? 1 : 0
+
+// Breakdown_20: price breaks below 20-bar low
+low_20 = ta.lowest(low[1], 20)
+sig_breakdown = close < low_20 ? 1 : 0
+
+// ADX_Trend_Short: ADX > 25 (same — trend strength, direction-agnostic)
+sig_adx_short = adx_val > 25 ? 1 : 0
+
+// === SHORT SIGNALS ===
+total_signals_short = sig_ema_short + sig_macd_short + sig_breakdown + sig_adx_short
+short_entry = total_signals_short >= min_agreement_short
+exit_signal_short = total_signals_short < 1
+
+// === LONG STRATEGY EXECUTION ===
+if long_entry and strategy.position_size == 0
+    strategy.entry("Long", strategy.long, alert_message='{"strategy":"High_Momentum_Entry","symbol":"' + syminfo.ticker + '","side":"BUY","price":' + str.tostring(close) + ',"sl_pct":' + str.tostring(sl_pct) + ',"tp_pct":' + str.tostring(tp_pct) + ',"ts_pct":' + str.tostring(ts_pct) + ',"timeframe":"' + timeframe.period + '"}')
+
+if strategy.position_size > 0
+    trail_ticks = math.round(strategy.position_avg_price * ts_pct / syminfo.mintick)
+    strategy.exit("SL/TP", "Long", stop=strategy.position_avg_price * (1 - sl_pct), limit=strategy.position_avg_price * (1 + tp_pct), trail_points=1, trail_offset=trail_ticks, alert_message='{"strategy":"High_Momentum_Entry","symbol":"' + syminfo.ticker + '","side":"SELL","price":' + str.tostring(close) + ',"sl_pct":0,"tp_pct":0,"ts_pct":0,"timeframe":"' + timeframe.period + '"}')
+
+if exit_signal and strategy.position_size > 0
+    strategy.close("Long", comment="Signal Exit", alert_message='{"strategy":"High_Momentum_Entry","symbol":"' + syminfo.ticker + '","side":"SELL","price":' + str.tostring(close) + ',"sl_pct":0,"tp_pct":0,"ts_pct":0,"timeframe":"' + timeframe.period + '"}')
+
+// === SHORT STRATEGY EXECUTION ===
+if short_entry and strategy.position_size == 0
+    strategy.entry("Short", strategy.short, alert_message='{"strategy":"High_Momentum_Entry","symbol":"' + syminfo.ticker + '","side":"SELL","price":' + str.tostring(close) + ',"sl_pct":' + str.tostring(sl_pct) + ',"tp_pct":' + str.tostring(tp_pct) + ',"ts_pct":' + str.tostring(ts_pct) + ',"timeframe":"' + timeframe.period + '"}')
+
+if strategy.position_size < 0
+    trail_ticks_short = math.round(math.abs(strategy.position_avg_price) * ts_pct / syminfo.mintick)
+    strategy.exit("SL/TP Short", "Short", stop=strategy.position_avg_price * (1 + sl_pct), limit=strategy.position_avg_price * (1 - tp_pct), trail_points=1, trail_offset=trail_ticks_short, alert_message='{"strategy":"High_Momentum_Entry","symbol":"' + syminfo.ticker + '","side":"BUY","price":' + str.tostring(close) + ',"sl_pct":0,"tp_pct":0,"ts_pct":0,"timeframe":"' + timeframe.period + '"}')
+
+if exit_signal_short and strategy.position_size < 0
+    strategy.close("Short", comment="Short Signal Exit", alert_message='{"strategy":"High_Momentum_Entry","symbol":"' + syminfo.ticker + '","side":"BUY","price":' + str.tostring(close) + ',"sl_pct":0,"tp_pct":0,"ts_pct":0,"timeframe":"' + timeframe.period + '"}')
+
+// === VISUALS ===
+plot(ema8, "EMA8", color=color.blue)
+plot(ema21, "EMA21", color=color.orange)
+plot(high_20, "20-bar High", color=color.gray, style=plot.style_stepline)
+plot(low_20, "20-bar Low", color=color.gray, style=plot.style_stepline)
+bgcolor(total_signals >= min_agreement ? color.new(color.green, 90) : total_signals_short >= min_agreement_short ? color.new(color.red, 90) : na)
+plotshape(long_entry and strategy.position_size == 0, "Buy", shape.triangleup, location.belowbar, color.green, size=size.small)
+plotshape(short_entry and strategy.position_size == 0, "Sell", shape.triangledown, location.abovebar, color.red, size=size.small)
