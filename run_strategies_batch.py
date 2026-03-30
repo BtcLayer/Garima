@@ -34,7 +34,7 @@ for _sym in _SYMBOLS:
 
 # Trading parameters
 INITIAL_CAPITAL = 10000
-FEE = 0.001
+FEE = 0.0003  # 0.03% per side = 0.06% round-trip (matches TradingView 0.06%)
 
 
 def load_data(symbol_key):
@@ -124,7 +124,83 @@ def calculate_indicators(df):
     # Price channels
     df["high_20"] = df["high"].rolling(20).max()
     df["low_20"] = df["low"].rolling(20).min()
-    
+
+    # ── New indicators (batch 21+) ──────────────────────────────────
+
+    # OBV (On Balance Volume)
+    obv_sign = np.sign(df["close"].diff())
+    df["obv"] = (obv_sign * df["volume"]).fillna(0).cumsum()
+    df["obv_sma20"] = df["obv"].rolling(20).mean()
+
+    # CCI (Commodity Channel Index, period=20)
+    typical_price = (df["high"] + df["low"] + df["close"]) / 3
+    tp_sma = typical_price.rolling(20).mean()
+    tp_mad = typical_price.rolling(20).apply(lambda x: np.mean(np.abs(x - x.mean())), raw=True)
+    df["cci"] = (typical_price - tp_sma) / (0.015 * tp_mad)
+
+    # Ichimoku Cloud
+    df["tenkan_sen"] = (df["high"].rolling(9).max() + df["low"].rolling(9).min()) / 2
+    df["kijun_sen"] = (df["high"].rolling(26).max() + df["low"].rolling(26).min()) / 2
+    df["senkou_span_a"] = ((df["tenkan_sen"] + df["kijun_sen"]) / 2).shift(26)
+    df["senkou_span_b"] = ((df["high"].rolling(52).max() + df["low"].rolling(52).min()) / 2).shift(26)
+
+    # PSAR (Parabolic SAR) — simplified vectorised implementation
+    psar = np.full(len(df), np.nan)
+    bull = True
+    psar[0] = df["low"].iloc[0]
+    ep = df["high"].iloc[0]
+    af = 0.02
+    for i in range(1, len(df)):
+        prev_psar = psar[i - 1] if not np.isnan(psar[i - 1]) else df["low"].iloc[i]
+        if bull:
+            psar[i] = prev_psar + af * (ep - prev_psar)
+            psar[i] = min(psar[i], df["low"].iloc[i - 1])
+            if i >= 2:
+                psar[i] = min(psar[i], df["low"].iloc[i - 2])
+            if df["low"].iloc[i] < psar[i]:
+                bull = False
+                psar[i] = ep
+                ep = df["low"].iloc[i]
+                af = 0.02
+            else:
+                if df["high"].iloc[i] > ep:
+                    ep = df["high"].iloc[i]
+                    af = min(af + 0.02, 0.2)
+        else:
+            psar[i] = prev_psar + af * (ep - prev_psar)
+            psar[i] = max(psar[i], df["high"].iloc[i - 1])
+            if i >= 2:
+                psar[i] = max(psar[i], df["high"].iloc[i - 2])
+            if df["high"].iloc[i] > psar[i]:
+                bull = True
+                psar[i] = ep
+                ep = df["high"].iloc[i]
+                af = 0.02
+            else:
+                if df["low"].iloc[i] < ep:
+                    ep = df["low"].iloc[i]
+                    af = min(af + 0.02, 0.2)
+    df["psar"] = psar
+
+    # MFI (Money Flow Index, period=14)
+    tp = typical_price
+    raw_money_flow = tp * df["volume"]
+    pos_flow = raw_money_flow.where(tp > tp.shift(1), 0)
+    neg_flow = raw_money_flow.where(tp < tp.shift(1), 0)
+    pos_sum = pos_flow.rolling(14).sum()
+    neg_sum = neg_flow.rolling(14).sum()
+    mfr = pos_sum / neg_sum.replace(0, float("nan"))
+    df["mfi"] = 100 - (100 / (1 + mfr))
+
+    # Keltner Channel (EMA20 +/- 2*ATR10)
+    df["keltner_mid"] = df["close"].ewm(span=20).mean()
+    atr10 = tr.rolling(10).mean()
+    df["keltner_upper"] = df["keltner_mid"] + 2 * atr10
+    df["keltner_lower"] = df["keltner_mid"] - 2 * atr10
+
+    # Williams %R (period=14)
+    df["williams_r"] = ((high14 - df["close"]) / (high14 - low14)) * -100
+
     return df
 
 
@@ -166,6 +242,38 @@ def get_signal_trend_ma(df):
     return (df["close"] > df["ema50"]).astype(int)
 
 
+
+# ── New signal functions (batch 21+) ─────────────────────────────
+
+def get_signal_obv_rising(df):
+    """OBV above its 20-period SMA (bullish volume trend)"""
+    return (df["obv"] > df["obv_sma20"]).astype(int)
+
+def get_signal_cci_oversold(df):
+    """CCI bouncing from oversold (< -100 and rising)"""
+    return ((df["cci"] < -100) & (df["cci"] > df["cci"].shift(1))).astype(int)
+
+def get_signal_ichimoku_bull(df):
+    """Price above Ichimoku cloud (above both senkou spans)"""
+    return ((df["close"] > df["senkou_span_a"]) & (df["close"] > df["senkou_span_b"])).astype(int)
+
+def get_signal_psar_bull(df):
+    """Price above Parabolic SAR (uptrend)"""
+    return (df["close"] > df["psar"]).astype(int)
+
+def get_signal_mfi_oversold(df):
+    """MFI oversold (< 20) and turning up"""
+    return ((df["mfi"] < 20) & (df["mfi"] > df["mfi"].shift(1))).astype(int)
+
+def get_signal_keltner_lower(df):
+    """Price below Keltner lower channel"""
+    return (df["close"] < df["keltner_lower"]).astype(int)
+
+def get_signal_williams_oversold(df):
+    """Williams %R oversold (< -80) and turning up"""
+    return ((df["williams_r"] < -80) & (df["williams_r"] > df["williams_r"].shift(1))).astype(int)
+
+
 SIGNAL_FUNCTIONS = {
     "EMA_Cross": get_signal_ema_cross,
     "RSI_Oversold": get_signal_rsi_oversold,
@@ -179,7 +287,144 @@ SIGNAL_FUNCTIONS = {
     "VWAP": get_signal_vwap,
     "ADX_Trend": get_signal_adx_trend,
     "Trend_MA50": get_signal_trend_ma,
+    # New signals (batch 21+)
+    "OBV_Rising": get_signal_obv_rising,
+    "CCI_Oversold": get_signal_cci_oversold,
+    "Ichimoku_Bull": get_signal_ichimoku_bull,
+    "PSAR_Bull": get_signal_psar_bull,
+    "MFI_Oversold": get_signal_mfi_oversold,
+    "Keltner_Lower": get_signal_keltner_lower,
+    "Williams_Oversold": get_signal_williams_oversold,
 }
+
+
+# ── Short (bearish) signal functions ────────────────────────────────
+def get_signal_ema_cross_short(df):
+    """EMA8 crosses below EMA21 (bearish EMA cross)"""
+    return ((df["ema8"] < df["ema21"]) & (df["ema8"].shift(1) >= df["ema21"].shift(1))).astype(int)
+
+def get_signal_rsi_overbought(df):
+    """RSI overbought and turning down"""
+    return ((df["rsi"] > 70) & (df["rsi"] < df["rsi"].shift(1))).astype(int)
+
+def get_signal_macd_cross_short(df):
+    """MACD crosses below signal line (bearish)"""
+    return ((df["macd"] < df["macd_signal"]) & (df["macd"].shift(1) >= df["macd_signal"].shift(1))).astype(int)
+
+def get_signal_bb_upper_short(df):
+    """Price above upper Bollinger Band (overbought, short signal)"""
+    return (df["close"] > df["bb_upper"]).astype(int)
+
+def get_signal_bb_lower_short(df):
+    """Price below lower Bollinger Band (breakdown continuation)"""
+    return (df["close"] < df["bb_lower"]).astype(int)
+
+def get_signal_volume_short(df):
+    """Volume spike with bearish candle"""
+    return ((df["vol_ratio"] > 1.5) & (df["close"] < df["close"].shift(1))).astype(int)
+
+def get_signal_breakdown(df):
+    """Price breaks below 20-bar low (bearish breakout)"""
+    return (df["close"] < df["low_20"]).astype(int)
+
+def get_signal_stochastic_short(df):
+    """Stochastic overbought cross down"""
+    return ((df["stoch_k"] > 80) & (df["stoch_k"] < df["stoch_k"].shift(1))).astype(int)
+
+def get_signal_supertrend_short(df):
+    """Price below supertrend (bearish)"""
+    return (df["close"] < df["supertrend"]).astype(int)
+
+def get_signal_vwap_short(df):
+    """Price below VWAP (bearish)"""
+    return (df["close"] < df["vwap"]).astype(int)
+
+def get_signal_adx_trend_short(df):
+    """ADX strong trend (same for both sides — trend strength)"""
+    return (df["adx"] > 25).astype(int)
+
+def get_signal_trend_ma_short(df):
+    """Price below EMA50 (bearish trend)"""
+    return (df["close"] < df["ema50"]).astype(int)
+
+
+# ── New short (bearish) signal functions (batch 21+) ─────────────
+
+def get_signal_obv_falling(df):
+    """OBV below its 20-period SMA (bearish volume trend)"""
+    return (df["obv"] < df["obv_sma20"]).astype(int)
+
+def get_signal_cci_overbought(df):
+    """CCI overbought (> 100) and turning down"""
+    return ((df["cci"] > 100) & (df["cci"] < df["cci"].shift(1))).astype(int)
+
+def get_signal_ichimoku_bear(df):
+    """Price below Ichimoku cloud"""
+    return ((df["close"] < df["senkou_span_a"]) & (df["close"] < df["senkou_span_b"])).astype(int)
+
+def get_signal_psar_bear(df):
+    """Price below Parabolic SAR (downtrend)"""
+    return (df["close"] < df["psar"]).astype(int)
+
+def get_signal_mfi_overbought(df):
+    """MFI overbought (> 80) and turning down"""
+    return ((df["mfi"] > 80) & (df["mfi"] < df["mfi"].shift(1))).astype(int)
+
+def get_signal_keltner_upper(df):
+    """Price above Keltner upper channel"""
+    return (df["close"] > df["keltner_upper"]).astype(int)
+
+def get_signal_williams_overbought(df):
+    """Williams %R overbought (> -20) and turning down"""
+    return ((df["williams_r"] > -20) & (df["williams_r"] < df["williams_r"].shift(1))).astype(int)
+
+
+# Maps each long signal name to its short (bearish) counterpart
+SHORT_SIGNAL_FUNCTIONS = {
+    "EMA_Cross": get_signal_ema_cross_short,
+    "RSI_Oversold": get_signal_rsi_overbought,
+    "MACD_Cross": get_signal_macd_cross_short,
+    "BB_Lower": get_signal_bb_lower_short,
+    "BB_Upper": get_signal_bb_upper_short,
+    "Volume_Spike": get_signal_volume_short,
+    "Breakout_20": get_signal_breakdown,
+    "Stochastic": get_signal_stochastic_short,
+    "Supertrend": get_signal_supertrend_short,
+    "VWAP": get_signal_vwap_short,
+    "ADX_Trend": get_signal_adx_trend_short,
+    "Trend_MA50": get_signal_trend_ma_short,
+    # New short signals (batch 21+)
+    "OBV_Rising": get_signal_obv_falling,
+    "CCI_Oversold": get_signal_cci_overbought,
+    "Ichimoku_Bull": get_signal_ichimoku_bear,
+    "PSAR_Bull": get_signal_psar_bear,
+    "MFI_Oversold": get_signal_mfi_overbought,
+    "Keltner_Lower": get_signal_keltner_upper,
+    "Williams_Oversold": get_signal_williams_overbought,
+}
+
+
+def apply_strategy_short(df, strategy_combo, min_agreement=1):
+    """Apply bearish (short) version of a strategy combination.
+
+    Returns the same df with ``entry_signal`` and ``exit_signal`` columns
+    populated for short entries.  Uses the mirrored signal functions defined
+    in ``SHORT_SIGNAL_FUNCTIONS``.
+    """
+    signals = pd.DataFrame(index=df.index)
+
+    for strat_name in strategy_combo:
+        if strat_name in SHORT_SIGNAL_FUNCTIONS:
+            signals[strat_name] = SHORT_SIGNAL_FUNCTIONS[strat_name](df)
+
+    if len(signals.columns) > 0:
+        df["combo_signal"] = signals.sum(axis=1)
+        df["entry_signal"] = (df["combo_signal"] >= min_agreement).astype(int)
+    else:
+        df["entry_signal"] = 0
+
+    df["exit_signal"] = (df["combo_signal"] < 1).astype(int)
+    return df
 
 
 def apply_strategy(df, strategy_combo, min_agreement=1):
@@ -200,57 +445,138 @@ def apply_strategy(df, strategy_combo, min_agreement=1):
     return df
 
 
-def run_backtest(df, stop_loss, take_profit, trailing_stop, use_tight=False):
-    """Run backtest on a single strategy"""
-    # Use tighter parameters for better results
+def run_backtest(df, stop_loss, take_profit, trailing_stop, use_tight=False,
+                 side="long", slippage_pct=0.0):
+    """Run backtest matching TradingView execution logic.
+
+    TV differences implemented:
+    1. Entry at NEXT bar open (not current close)
+    2. Position sizing compounds (95% of current equity, not initial)
+    3. SL/TP checked on high/low with priority: SL first, then TP
+    4. Trailing stop uses trail_offset from peak (like TV trail_points)
+    5. Exit price = SL/TP level (not close) when SL/TP triggers
+    6. Fees as % of trade value (matching TV commission)
+
+    Args:
+        side: "long" (default) or "short"
+        slippage_pct: simulated slippage as fraction
+    """
     if use_tight:
         stop_loss = stop_loss / 2
         take_profit = take_profit / 2
         trailing_stop = trailing_stop / 2
-    
+
+    is_short = (side == "short")
     capital = INITIAL_CAPITAL
     position = 0
     position_size = 0
     entry_price = 0
+    peak_price = 0
     trades = []
-    
-    for idx, row in df.iterrows():
-        if row["entry_signal"] == 1 and position == 0:
-            entry_price = row["close"]
+    pending_entry = False  # TV enters on NEXT bar
+
+    rows = list(df.iterrows())
+    for i, (idx, row) in enumerate(rows):
+        current_price = row["close"]
+        high = row.get("high", current_price)
+        low = row.get("low", current_price)
+        bar_open = row.get("open", current_price)
+
+        # Execute pending entry at this bar's open (TV behavior)
+        if pending_entry and position == 0:
+            entry_price = bar_open * (1 + slippage_pct if not is_short else 1 - slippage_pct)
+            # TV compounds: 95% of CURRENT equity, not initial
             position_size = capital * 0.95 / entry_price
             position = 1
-            
-        elif position == 1:
-            current_price = row["close"]
-            peak_price = max(entry_price, current_price)
-            trailing_stop_price = peak_price * (1 - trailing_stop)
-            
-            should_exit = False
-            
-            if row["exit_signal"] == 1:
-                should_exit = True
-            if current_price <= entry_price * (1 - stop_loss):
-                should_exit = True
-            if current_price >= entry_price * (1 + take_profit):
-                should_exit = True
-            if current_price <= trailing_stop_price:
-                should_exit = True
-            
-            if should_exit:
-                exit_price = row["close"]
-                pnl = position_size * exit_price * (1 - FEE) - position_size * entry_price
+            peak_price = entry_price
+            pending_entry = False
+
+        # Check for new entry signal (will execute next bar)
+        if row["entry_signal"] == 1 and position == 0 and not pending_entry:
+            pending_entry = True
+            continue
+
+        if position == 1:
+            exit_price = None
+            exit_reason = None
+
+            if is_short:
+                # Track trough for trailing stop
+                if low < peak_price:
+                    peak_price = low
+                trailing_stop_price = peak_price * (1 + trailing_stop) if trailing_stop > 0 else float('inf')
+                sl_price = entry_price * (1 + stop_loss)
+                tp_price = entry_price * (1 - take_profit)
+
+                # Priority: SL first (worst case), then TP, then trailing, then signal
+                if high >= sl_price:
+                    exit_price = sl_price  # Exit at SL level, not close
+                    exit_reason = "SL"
+                elif low <= tp_price:
+                    exit_price = tp_price  # Exit at TP level
+                    exit_reason = "TP"
+                elif high >= trailing_stop_price and trailing_stop > 0:
+                    exit_price = trailing_stop_price
+                    exit_reason = "TS"
+                elif row["exit_signal"] == 1:
+                    exit_price = current_price
+                    exit_reason = "SIGNAL"
+            else:
+                # Long: track peak for trailing stop
+                if high > peak_price:
+                    peak_price = high  # TV tracks peak from HIGH, not close
+                trailing_stop_price = peak_price * (1 - trailing_stop) if trailing_stop > 0 else 0
+                sl_price = entry_price * (1 - stop_loss)
+                tp_price = entry_price * (1 + take_profit)
+
+                # Priority: SL first (worst case), then TP, then trailing, then signal
+                if low <= sl_price:
+                    exit_price = sl_price  # Exit at SL level
+                    exit_reason = "SL"
+                elif high >= tp_price:
+                    exit_price = tp_price  # Exit at TP level
+                    exit_reason = "TP"
+                elif low <= trailing_stop_price and trailing_stop > 0:
+                    exit_price = trailing_stop_price
+                    exit_reason = "TS"
+                elif row["exit_signal"] == 1:
+                    exit_price = current_price
+                    exit_reason = "SIGNAL"
+
+            if exit_price is not None:
+                # Apply slippage
+                if not is_short:
+                    exit_price = exit_price * (1 - slippage_pct)
+                else:
+                    exit_price = exit_price * (1 + slippage_pct)
+
+                # PnL calculation matching TV
+                trade_value_entry = position_size * entry_price
+                trade_value_exit = position_size * exit_price
+                fee_entry = trade_value_entry * FEE
+                fee_exit = trade_value_exit * FEE
+
+                if is_short:
+                    pnl = (entry_price - exit_price) * position_size - fee_entry - fee_exit
+                else:
+                    pnl = (exit_price - entry_price) * position_size - fee_entry - fee_exit
+
                 capital += pnl
                 exit_date = str(row.get("timestamp", row.get("open_time", idx)))[:10]
+                ret_pct = ((entry_price - exit_price) / entry_price * 100) if is_short else ((exit_price - entry_price) / entry_price * 100)
                 trades.append({
-                    "entry": entry_price,
-                    "exit": exit_price,
+                    "entry": round(entry_price, 6),
+                    "exit": round(exit_price, 6),
                     "pnl": pnl,
-                    "return_pct": (exit_price - entry_price) / entry_price * 100,
+                    "return_pct": ret_pct,
+                    "side": side,
                     "exit_date": exit_date,
+                    "exit_reason": exit_reason,
                     "capital_after": round(capital, 2),
                 })
                 position = 0
-    
+                peak_price = 0
+
     return capital, trades
 
 

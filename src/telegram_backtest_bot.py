@@ -355,6 +355,9 @@ class TelegramBacktestBot:
         self._default_batches: List[int] = [1]
         self._load_default_trade()
 
+        # Auto Alpha Hunter flag
+        self._auto_hunt_running = False
+
         # AI brain — disabled silently if ANTHROPIC_API_KEY is missing
         self._brain = None
         if _BRAIN_AVAILABLE:
@@ -515,6 +518,10 @@ class TelegramBacktestBot:
         command = command.lower().strip("/").split("@")[0]
         args = args or []
 
+        # Auto-pause hunt if another command comes in (except autohunt itself)
+        if self._auto_hunt_running and command != "autohunt":
+            self._auto_hunt_paused = True
+
         # ── 1. Greetings ──
         if command in ("start", "help"):
             return self._get_help_message()
@@ -564,6 +571,8 @@ class TelegramBacktestBot:
             return self._show_positions()
         elif command == "closeall":
             return self._close_all_positions()
+        elif command == "autohunt":
+            return self._start_auto_hunt(args)
 
         # ── 6. Info ──
         elif command == "status":
@@ -596,7 +605,21 @@ class TelegramBacktestBot:
             return self._generate_pine_script(args)
 
         else:
-            return f"Unknown command: `/{command}` — try /help"
+            result = f"Unknown command: `/{command}` — try /help"
+            return result
+
+        # After any command: if hunt was paused, ask about resuming
+        # (handled below in the caller since this returns a string)
+
+    def _post_command_hook(self):
+        """Called after sending command result. If hunt was paused, prompt resume."""
+        if getattr(self, '_auto_hunt_paused', False) and self._auto_hunt_running:
+            self._auto_hunt_paused = False  # unpause so it continues
+            self.send_message(
+                "Alpha Hunter was paused for your command.\n"
+                "Resuming automatically...\n"
+                "Use `/autohunt stop` to stop."
+            )
 
     # ------------------------------------------------------------------ #
     # Greetings
@@ -639,6 +662,7 @@ class TelegramBacktestBot:
 
             "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             "*INDIVIDUAL RUNS*\n\n"
+            "  `/elite BNB 4h` — elite strats, one asset\n"
             "  `/backtest BTCUSDT_4h` — all strats, one asset\n"
             "  `/comprehensive` — all assets x all TFs\n"
             "  `/optimize BTCUSDT_4h` — tune one asset\n"
@@ -647,7 +671,10 @@ class TelegramBacktestBot:
             "  `/pine BTCUSDT 1h` — paste & run Pine\n\n"
 
             "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-            "*STATUS & AI*\n\n"
+            "*RESULTS & AI*\n\n"
+            "  `/results` — last run summary\n"
+            "  `/results 4h` — results filtered by timeframe\n"
+            "  `/analysis` — full strategy breakdown\n"
             "  `/status` — bot health check\n"
             "  `/stats` — trade statistics\n"
             "  `/params` — current parameters\n"
@@ -665,6 +692,10 @@ class TelegramBacktestBot:
             "  `/paper on|off` — paper/live trading mode\n"
             "  `/positions` — show open positions & PnL\n"
             "  `/closeall` — close all open positions\n\n"
+
+            "*AUTO HUNT*\n\n"
+            "  `/autohunt` — auto-find ALPHA strategies (runs in background)\n"
+            "  `/autohunt stop` — stop hunting\n\n"
 
             "10 assets · 3 TFs · 230+ strategies · 6yr data"
         )
@@ -837,8 +868,21 @@ class TelegramBacktestBot:
             returns = [t.get("return_pct", t["pnl"] / INITIAL_CAPITAL * 100) for t in trades]
             avg_trade = sum(returns) / len(returns) if returns else 0
             import numpy as _np
-            std = _np.std(returns) if len(returns) > 1 else 1
-            sharpe = (avg_trade / std) * _np.sqrt(len(trades)) if std > 0 else 0
+            # TV-style daily Sharpe
+            from collections import defaultdict as _dd_s
+            _daily_pnl = _dd_s(float)
+            for t in trades:
+                _d = t.get("exit_date", "")[:10]
+                if _d:
+                    _daily_pnl[_d] += t["pnl"] / INITIAL_CAPITAL * 100
+            _total_d = max(int(_years * 365), 30)
+            _all_d = [0.0] * _total_d
+            for _i, (_d, _v) in enumerate(sorted(_daily_pnl.items())):
+                if _i < _total_d:
+                    _all_d[_i] = _v
+            _m = _np.mean(_all_d)
+            _s = _np.std(_all_d) if len(_all_d) > 1 else 1
+            sharpe = (_m / _s) * _np.sqrt(252) if _s > 0 else 0
 
             # Gross DD (compounding equity curve — peak to trough %)
             equity = INITIAL_CAPITAL
@@ -1891,19 +1935,40 @@ class TelegramBacktestBot:
                             pf = total_w / total_l if total_l > 0 else 0
                             returns = [t.get("return_pct", t["pnl"] / INITIAL_CAPITAL * 100) for t in trades]
                             avg_trade = sum(returns) / len(returns) if returns else 0
-                            std = _np2.std(returns) if len(returns) > 1 else 1
-                            sharpe = (avg_trade / std) * _np2.sqrt(len(trades)) if std > 0 else 0
+                            # TV-style daily Sharpe
+                            from collections import defaultdict as _dd_a
+                            _daily_a = _dd_a(float)
+                            for t in trades:
+                                _da = t.get("exit_date", "")[:10]
+                                if _da:
+                                    _daily_a[_da] += t["pnl"] / INITIAL_CAPITAL * 100
+                            _td = max(int(_years * 365), 30)
+                            _ad = [0.0] * _td
+                            for _ii, (_dd2, _vv) in enumerate(sorted(_daily_a.items())):
+                                if _ii < _td:
+                                    _ad[_ii] = _vv
+                            _mm = _np2.mean(_ad)
+                            _ss = _np2.std(_ad) if len(_ad) > 1 else 1
+                            sharpe = (_mm / _ss) * _np2.sqrt(252) if _ss > 0 else 0
                             # Drawdowns
                             equity = INITIAL_CAPITAL
                             peak = equity
                             gross_dd = 0
+                            gross_dd_date = "N/A"
+                            gross_dd_capital = INITIAL_CAPITAL
                             min_capital = INITIAL_CAPITAL
+                            net_dd_date = "N/A"
                             for t in trades:
                                 equity += t["pnl"]
                                 peak = max(peak, equity)
                                 dd = (peak - equity) / peak * 100
-                                gross_dd = max(gross_dd, dd)
-                                min_capital = min(min_capital, equity)
+                                if dd > gross_dd:
+                                    gross_dd = dd
+                                    gross_dd_date = t.get("exit_date", "N/A")
+                                    gross_dd_capital = round(equity, 2)
+                                if equity < min_capital:
+                                    min_capital = equity
+                                    net_dd_date = t.get("exit_date", "N/A")
                             net_dd = max(0, (INITIAL_CAPITAL - min_capital) / INITIAL_CAPITAL * 100)
                             grade = _grade_performance(roi, wr / 100, pf)
                             deploy = _deployment_status(grade, len(trades), gross_dd)
@@ -1928,7 +1993,11 @@ class TelegramBacktestBot:
                                 "Sharpe_Ratio": round(sharpe, 2),
                                 "Avg_Trade_Percent": round(avg_trade, 4),
                                 "Gross_DD_Percent": round(gross_dd, 2),
+                                "Gross_DD_Date": gross_dd_date,
+                                "Gross_DD_Capital": gross_dd_capital,
                                 "Net_DD_Percent": round(net_dd, 2),
+                                "Net_DD_Date": net_dd_date,
+                                "Capital_At_Net_DD": round(min_capital, 2),
                                 "Performance_Grade": grade,
                                 "Deployment_Status": deploy,
                                 "Score": round(score, 2),
@@ -2797,9 +2866,9 @@ class TelegramBacktestBot:
         self, symbol: str, batches: List[int], results: List[dict], label: str
     ) -> None:
         """Format and send a backtest results summary to Telegram."""
-        profitable = [r for r in results if r.get("roi", 0) >= 20]
+        profitable = [r for r in results if r.get("ROI_per_annum", r.get("roi", 0)) >= 20]
         pct = len(profitable)/len(results)*100 if results else 0
-        best_roi = results[0].get('roi', 0) if results else 0
+        best_roi = results[0].get('ROI_per_annum', results[0].get('roi', 0)) if results else 0
 
         # Contextual flair
         if best_roi > 500:
@@ -2822,29 +2891,71 @@ class TelegramBacktestBot:
             f"Best ROI: {roi_tag}\n\n"
         )
 
-        # Top 15 with DD columns
+        # Top 15 with tier classification
         msg += "*Top 15:*\n```\n"
-        msg += f"{'#':<3} {'Name':<18} {'Asset':<9} {'TF':<3} {'Tr':<5} {'WR%':<5} {'ROI%':<7} {'GDD%':<6} {'NDD%':<5}\n"
-        msg += f"{'-'*64}\n"
+        msg += f"{'#':<3} {'Name':<16} {'Asset':<8} {'TF':<3} {'ROI%/yr':<7} {'WR%':<5} {'Sharpe':<6} {'GDD%':<5} {'Tier'}\n"
+        msg += f"{'-'*65}\n"
         for i, r in enumerate(results[:15], 1):
-            roi = r.get('roi', 0)
+            roi = r.get('ROI_per_annum', r.get('roi', 0))
             asset = r.get('Asset', r.get('asset', ''))
             tf = r.get('Timeframe', r.get('timeframe', ''))
-            gdd = r.get('Gross_DD_Percent', 0)
-            ndd = r.get('Net_DD_Percent', 0)
-            name = r['name'][:17]
+            wr = r.get('Win_Rate_Percent', r.get('win_rate', 0))
+            sharpe = r.get('Sharpe_Ratio', r.get('sharpe', 0))
+            gdd = r.get('Gross_DD_Percent', r.get('gross_dd', 0))
+            daily = roi / 365 if roi else 0
+
+            # Classify tier
+            a_pp = (daily >= 0.5 and sharpe >= 3.5 and wr >= 45 and gdd < 35) or \
+                   (daily >= 0.6 and sharpe >= 4.0 and wr >= 45 and gdd < 30) or \
+                   (sharpe >= 6.0 and daily >= 0.3 and gdd < 30)
+            a = (daily >= 0.25 and sharpe >= 2.5 and wr >= 45 and gdd < 45) or \
+                (daily >= 0.3 and sharpe >= 3.0 and wr >= 45 and gdd < 40) or \
+                (sharpe >= 5.0 and daily >= 0.2 and gdd < 40)
+            avg = (daily >= 0.1 and sharpe >= 1.5) or daily >= 0.05
+
+            if a_pp:
+                tier = "ALPHA++"
+            elif a:
+                tier = "ALPHA"
+            elif avg and roi > 0:
+                tier = "AVERAGE"
+            elif roi > 0:
+                tier = "OK"
+            else:
+                tier = "REJECT"
+
+            name = r['name'][:15]
             msg += (
                 f"{i:<3} "
-                f"{name:<18} "
-                f"{asset[:8]:<9} "
+                f"{name:<16} "
+                f"{asset[:7]:<8} "
                 f"{tf:<3} "
-                f"{r['trades']:<5} "
-                f"{r['win_rate']:<5} "
                 f"{roi:<7.1f} "
-                f"{gdd:<6.1f} "
-                f"{ndd:<5.1f}\n"
+                f"{wr:<5.1f} "
+                f"{sharpe:<6.2f} "
+                f"{gdd:<5.1f} "
+                f"{tier}\n"
             )
-        msg += "```"
+        msg += "```\n"
+
+        # Benchmark comparison
+        if results:
+            best = results[0]
+            best_roi = round(best.get("ROI_per_annum", best.get("roi", 0)), 1)
+            best_daily = round(best_roi / 365, 3)
+            safest = min(results[:15], key=lambda x: x.get("Net_DD_Percent", x.get("net_dd", 100)))
+            safest_ndd = round(safest.get("Net_DD_Percent", safest.get("net_dd", 0)), 1)
+            safest_cap = int(safest.get("Net_DD_Capital", safest.get("Capital_At_Net_DD", 10000)))
+            avg_roi = round(sum(r.get("ROI_per_annum", r.get("roi", 0)) for r in results[:15]) / min(len(results), 15), 1)
+
+            msg += (
+                f"*Benchmark:*\n"
+                f"Best: `{best['name']}` = `{best_roi}%/yr` (`{best_daily}%/day`)\n"
+                f"Safest: `{safest['name']}` NDD=`{safest_ndd}%` Cap=`${safest_cap}`\n"
+                f"Avg top 15: `{avg_roi}%/yr`\n"
+                f"Cat1 (2%/day): {'YES' if best_daily >= 2.0 else 'NO'} | "
+                f"Cat2 (0.5%/day): {'YES' if best_daily >= 0.5 else 'NO'}"
+            )
         self.send_message(msg)
 
         # Send worst-case DD detail for top 5
@@ -3435,22 +3546,55 @@ class TelegramBacktestBot:
                     trades_count = sum(1 for line in f if line.strip())
 
             running_jobs = [k for k, t in self._running.items() if t.is_alive()]
-
-            batch_str = self._format_batches(self._default_batches)
             jobs_str = ", ".join(running_jobs) if running_jobs else "Idle"
+            batch_str = self._format_batches(self._default_batches)
             params_str = "Loaded" if os.path.exists(OPTIMIZED_PARAMS_FILE) else "Not set"
 
+            # Result CSV counts
+            result_counts = {}
+            for tf in ["15m", "1h", "4h"]:
+                csv_path = os.path.join(_ROOT, f"auto_results_{tf}.csv")
+                if os.path.exists(csv_path):
+                    try:
+                        with open(csv_path) as f:
+                            result_counts[tf] = sum(1 for _ in f) - 1
+                    except Exception:
+                        result_counts[tf] = 0
+
+            # Trading system status
+            try:
+                from src import manager as mgr
+                mode = "PAPER" if mgr.PAPER_TRADING else "LIVE"
+                kill = "ACTIVE" if mgr.is_kill_switch_active() else "OFF"
+                positions = len(mgr._active_positions)
+                monitor = "Running" if mgr._monitor_running else "Stopped"
+                daily_pnl = mgr._daily_pnl
+                weekly_pnl = mgr._weekly_pnl
+            except Exception:
+                mode = "N/A"
+                kill = "N/A"
+                positions = 0
+                monitor = "N/A"
+                daily_pnl = 0
+                weekly_pnl = 0
+
             msg = "*Bot Status*\n"
-            msg += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            msg += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             msg += f"*Config*\n"
-            msg += f"  Symbol: `{self._default_symbol}`\n"
-            msg += f"  Batches: `{batch_str}`\n"
-            msg += f"  Lookback: `{self._opt_lookback_years}yr`\n\n"
-            msg += f"*System*\n"
-            msg += f"  Trades: `{trades_count}` {'(file OK)' if trades_exist else '(no file)'}\n"
-            msg += f"  Params: `{params_str}`\n"
-            msg += f"  AI Brain: `{'ON' if self._brain else 'OFF'}`\n"
-            msg += f"  Jobs: *{jobs_str}*\n\n"
+            msg += f"Symbol: `{self._default_symbol}`\n"
+            msg += f"Batches: `{batch_str}` | Lookback: `{self._opt_lookback_years}yr`\n"
+            msg += f"Params: `{params_str}` | AI: `{'ON' if self._brain else 'OFF'}`\n"
+            msg += f"Jobs: *{jobs_str}*\n\n"
+            msg += f"*Backtest Results*\n"
+            for tf in ["15m", "1h", "4h"]:
+                count = result_counts.get(tf, 0)
+                status = f"`{count}` results" if count > 0 else "not run"
+                msg += f"{tf}: {status}\n"
+            msg += f"\n*Trading System*\n"
+            msg += f"Mode: `{mode}` | Kill Switch: `{kill}`\n"
+            msg += f"Positions: `{positions}` | SL/TP Monitor: `{monitor}`\n"
+            msg += f"Daily PnL: `${daily_pnl:.2f}` | Weekly PnL: `${weekly_pnl:.2f}`\n"
+            msg += f"Trades logged: `{trades_count}`\n\n"
             msg += f"_Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}_"
             return msg
 
@@ -3994,8 +4138,16 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
             if "net_dd" not in out or out["net_dd"] == 0:
                 out["net_dd"] = out.get("Net_DD_Percent") or 0
             # Capital left at worst net drawdown point
-            initial = float(out.get("Initial_Capital_USD", 10000))
-            out["capital_at_net_dd"] = round(initial * (1 - out["net_dd"] / 100), 2) if out["net_dd"] else initial
+            if "capital_at_net_dd" not in out or out["capital_at_net_dd"] == 0:
+                cap = out.get("Capital_At_Net_DD")
+                if cap and cap > 0:
+                    out["capital_at_net_dd"] = cap
+                else:
+                    initial = float(out.get("Initial_Capital_USD", 10000))
+                    out["capital_at_net_dd"] = round(initial * (1 - out["net_dd"] / 100), 2) if out["net_dd"] else initial
+            # NDD date
+            if "net_dd_date" not in out:
+                out["net_dd_date"] = out.get("Net_DD_Date", "")
             return out
 
         results = sorted(
@@ -4007,28 +4159,433 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
 
         msg = (
             f"*Last Backtest Results*\n"
-            f"Strategies tested    : {len(results)}\n"
+            f"Strategies tested: {len(results)}\n"
             f"Profitable (ROI>=20%): {len(profitable)}\n\n"
             "*Top 15 by ROI %/yr:*\n"
             "```\n"
-            f"{'#':<3} {'Name':<18} {'Asset':<10} {'TF':<4} {'Tr':<4} {'Win%':<6} {'ROI%/yr':<8} {'GDD%':<6} {'NDD%':<6} {'Cap@NDD'}\n"
-            f"{'-'*80}\n"
+            f"{'#':<3} {'Name':<16} {'Asset':<8} {'TF':<3} {'ROI%/yr':<7} {'WR%':<5} {'GDD%':<5} {'Tier'}\n"
+            f"{'-'*55}\n"
         )
         for i, r in enumerate(results[:15], 1):
+            roi_v = round(r.get("roi", 0), 1)
+            daily_v = roi_v / 365
+            wr_v = round(r.get("win_rate", 0), 1)
+            sh_v = r.get("sharpe", 0)
+            gdd_v = round(r.get("gross_dd", 0), 1)
+
+            a_pp = (daily_v >= 0.5 and sh_v >= 3.5 and wr_v >= 45 and gdd_v < 35) or \
+                   (daily_v >= 0.6 and sh_v >= 4.0 and wr_v >= 45 and gdd_v < 30) or \
+                   (sh_v >= 6.0 and daily_v >= 0.3 and gdd_v < 30)
+            a = (daily_v >= 0.25 and sh_v >= 2.5 and wr_v >= 45 and gdd_v < 45) or \
+                (daily_v >= 0.3 and sh_v >= 3.0 and wr_v >= 45 and gdd_v < 40) or \
+                (sh_v >= 5.0 and daily_v >= 0.2 and gdd_v < 40)
+            avg = (daily_v >= 0.1 and sh_v >= 1.5) or daily_v >= 0.05
+
+            if a_pp:
+                tier = "ALPHA++"
+            elif a:
+                tier = "ALPHA"
+            elif avg and roi_v > 0:
+                tier = "AVERAGE"
+            elif roi_v > 0:
+                tier = "OK"
+            else:
+                tier = "REJECT"
+
             msg += (
                 f"{str(i):<3} "
-                f"{str(r.get('name',''))[:18]:<18} "
-                f"{str(r.get('asset','?')):<10} "
-                f"{str(r.get('timeframe','?')):<4} "
-                f"{str(r.get('trades',0)):<4} "
-                f"{str(round(r.get('win_rate',0),1)):<6} "
-                f"{str(round(r.get('roi',0),2)):<8} "
-                f"{str(round(r.get('gross_dd',0),1)):<6} "
-                f"{str(round(r.get('net_dd',0),1)):<6} "
-                f"${r.get('capital_at_net_dd', 10000)}\n"
+                f"{str(r.get('name',''))[:15]:<16} "
+                f"{str(r.get('asset','?'))[:7]:<8} "
+                f"{str(r.get('timeframe','?')):<3} "
+                f"{str(roi_v):<7} "
+                f"{str(wr_v):<5} "
+                f"{str(gdd_v):<5} "
+                f"{tier}\n"
             )
-        msg += "```"
+        msg += "```\n"
+
+        # Benchmark comparison
+        if results:
+            best = results[0]
+            best_roi = round(best.get("roi", 0), 1)
+            best_daily = round(best_roi / 365, 3)
+            best_name = best.get("name", "?")
+            best_asset = best.get("asset", "?")
+            safest = min(results[:15], key=lambda x: x.get("net_dd", 100))
+            safest_ndd = round(safest.get("net_dd", 0), 1)
+            safest_cap = int(safest.get("capital_at_net_dd", 10000))
+            safest_name = safest.get("name", "?")
+            avg_roi = round(sum(r.get("roi", 0) for r in results[:15]) / min(len(results), 15), 1)
+            profitable_pct = round(len(profitable) / len(results) * 100, 0) if results else 0
+
+            msg += (
+                f"*Benchmark:*\n"
+                f"Best: `{best_name}` on `{best_asset}` = `{best_roi}%/yr` (`{best_daily}%/day`)\n"
+                f"Safest: `{safest_name}` NDD=`{safest_ndd}%` Cap=`${safest_cap}`\n"
+                f"Avg top 15: `{avg_roi}%/yr` | Profitable: `{profitable_pct:.0f}%`\n"
+                f"Cat1 (2%/day): {'YES' if best_daily >= 2.0 else 'NO'} | "
+                f"Cat2 (0.5%/day): {'YES' if best_daily >= 0.5 else 'NO'}"
+            )
         return msg
+
+    # ------------------------------------------------------------------ #
+    # Auto Alpha Hunter (with checkpoints + pause/resume)
+    # ------------------------------------------------------------------ #
+
+    _HUNT_CHECKPOINT = os.path.join(_ROOT, "storage", "autohunt_checkpoint.json")
+    _HUNT_RESULTS = os.path.join(_ROOT, "storage", "autohunt_results.json")
+
+    def _start_auto_hunt(self, args: list) -> str:
+        """Start/stop/resume autonomous strategy hunting."""
+        if args and args[0].lower() == "stop":
+            self._auto_hunt_running = False
+            return "Auto hunt stopped. Progress saved. Use `/autohunt resume` to continue."
+
+        if args and args[0].lower() == "resume":
+            if self._auto_hunt_running:
+                return "Auto hunt already running."
+            self._auto_hunt_running = True
+            self._auto_hunt_paused = False
+            t = threading.Thread(target=self._auto_hunt_worker, args=(True,), daemon=True)
+            t.start()
+            return "Auto hunt *RESUMED* from checkpoint."
+
+        if args and args[0].lower() == "status":
+            cp = self._load_hunt_checkpoint()
+            if cp:
+                return (
+                    f"*Auto Hunt Status*\n"
+                    f"Running: `{self._auto_hunt_running}`\n"
+                    f"Paused: `{getattr(self, '_auto_hunt_paused', False)}`\n"
+                    f"Tested: `{cp.get('total', 0)}` combos\n"
+                    f"Winners: `{cp.get('winners', 0)}`\n"
+                    f"Last combo size: `{cp.get('combo_size', '?')}`\n"
+                    f"Last combo idx: `{cp.get('combo_idx', '?')}`"
+                )
+            return "No checkpoint found. Start with `/autohunt`"
+
+        if self._auto_hunt_running:
+            return "Auto hunt already running. Use `/autohunt stop` to stop."
+
+        self._auto_hunt_running = True
+        self._auto_hunt_paused = False
+        t = threading.Thread(target=self._auto_hunt_worker, args=(False,), daemon=True)
+        t.start()
+        return (
+            "*Auto Alpha Hunter STARTED*\n"
+            "Testing all signal combinations across assets.\n"
+            "Will message you when ALPHA/ALPHA++ found.\n\n"
+            "Commands while hunting:\n"
+            "  Any command → hunt auto-pauses, runs command, asks to resume\n"
+            "  `/autohunt stop` → stop and save checkpoint\n"
+            "  `/autohunt resume` → resume from checkpoint\n"
+            "  `/autohunt status` → check progress"
+        )
+
+    def _save_hunt_checkpoint(self, data):
+        os.makedirs(os.path.dirname(self._HUNT_CHECKPOINT), exist_ok=True)
+        with open(self._HUNT_CHECKPOINT, "w") as f:
+            json.dump(data, f)
+
+    def _load_hunt_checkpoint(self):
+        if os.path.exists(self._HUNT_CHECKPOINT):
+            with open(self._HUNT_CHECKPOINT) as f:
+                return json.load(f)
+        return None
+
+    def _save_hunt_result(self, result):
+        os.makedirs(os.path.dirname(self._HUNT_RESULTS), exist_ok=True)
+        results = []
+        if os.path.exists(self._HUNT_RESULTS):
+            with open(self._HUNT_RESULTS) as f:
+                results = json.load(f)
+        results.append(result)
+        with open(self._HUNT_RESULTS, "w") as f:
+            json.dump(results, f, indent=2)
+
+    def _auto_hunt_worker(self, resume=False):
+        """Background worker with checkpoints and pause support."""
+        import numpy as np
+        from itertools import combinations
+        from datetime import datetime as _dt
+
+        self.send_message("Alpha Hunter: Loading data...")
+
+        PERSISTENT = ["EMA_Cross", "Supertrend", "PSAR_Bull", "ADX_Trend", "Trend_MA50",
+                       "OBV_Rising", "Ichimoku_Bull", "VWAP"]
+        MOMENTARY = ["Volume_Spike", "MACD_Cross", "Breakout_20"]
+        all_sigs = PERSISTENT + MOMENTARY
+
+        ASSETS = ["ETHUSDT", "BTCUSDT", "ADAUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT"]
+        TIMEFRAMES = ["4h"]
+        # TP 3-12% sweep (proven range: TP3% = TIER_2, TP8% = TIER_1)
+        PARAMS = [
+            (0.008, 0.03, 0.004), (0.01, 0.04, 0.005),
+            (0.01, 0.05, 0.005), (0.012, 0.06, 0.006),
+            (0.012, 0.07, 0.006), (0.015, 0.08, 0.007),
+            (0.015, 0.09, 0.007), (0.015, 0.10, 0.008),
+            (0.02, 0.12, 0.01),
+        ]
+
+        # PHASE 0: Test PROVEN combos first (these actually work on TV)
+        PROVEN_COMBOS = [
+            (["PSAR_Bull", "Volume_Spike", "EMA_Cross", "Supertrend", "Trend_MA50"], 5),
+            (["PSAR_Bull", "EMA_Cross", "Volume_Spike", "OBV_Rising"], 4),
+            (["Ichimoku_Bull", "PSAR_Bull", "OBV_Rising", "EMA_Cross", "Trend_MA50"], 5),
+            (["Ichimoku_Bull", "PSAR_Bull", "EMA_Cross", "Supertrend", "OBV_Rising"], 5),
+            (["PSAR_Bull", "EMA_Cross", "Supertrend", "ADX_Trend", "Trend_MA50", "OBV_Rising"], 5),
+        ]
+
+        data_cache = {}
+        for asset in ASSETS:
+            for tf in TIMEFRAMES:
+                symbol = f"{asset}_{tf}"
+                df = load_data(symbol)
+                if df is not None:
+                    df = calculate_indicators(df)
+                    data_cache[symbol] = df
+
+        self.send_message(f"Alpha Hunter: {len(data_cache)} datasets loaded.\nPhase 0: Testing proven combos on all assets...\nPhase 1: Brute force new combos...")
+
+        # ── PHASE 0: Sweep proven combos on all assets ──
+        for combo, min_ag in PROVEN_COMBOS:
+            if not self._auto_hunt_running:
+                self._save_hunt_checkpoint({"combo_size": 0, "combo_idx": 0, "total": total, "winners": winners})
+                self.send_message(f"Alpha Hunter: Paused. {total} tested, {winners} winners.")
+                return
+
+            for sl, tp, ts in PARAMS:
+                for symbol, df in data_cache.items():
+                    total += 1
+                    asset = symbol.split("_")[0]
+                    tf_str = symbol.split("_")[1]
+
+                    if "timestamp" in df.columns:
+                        t_s = str(df["timestamp"].iloc[0])[:10]
+                        t_e = str(df["timestamp"].iloc[-1])[:10]
+                    else:
+                        t_s, t_e = "2020-01-01", "2026-03-20"
+                    try:
+                        yrs = max((_dt.fromisoformat(t_e) - _dt.fromisoformat(t_s)).days / 365.25, 0.01)
+                    except Exception:
+                        yrs = 6.0
+
+                    try:
+                        dc = apply_strategy(df.copy(), list(combo), min_ag)
+                        cap, trades = run_backtest(dc, sl, tp, ts)
+                        if len(trades) < 20:
+                            continue
+
+                        roi_a = ((cap / INITIAL_CAPITAL) ** (1 / yrs) - 1) * 100 if cap > 0 else -100
+                        daily = roi_a / 365
+                        if daily < 0.01:
+                            continue
+
+                        w = [t for t in trades if t["pnl"] > 0]
+                        wr = len(w) / len(trades) * 100
+                        if wr < 40:
+                            continue
+
+                        tw = sum(t["pnl"] for t in trades if t["pnl"] > 0)
+                        tl = abs(sum(t["pnl"] for t in trades if t["pnl"] <= 0))
+                        pf = tw / tl if tl > 0 else 0
+                        if pf < 1.2:
+                            continue
+
+                        eq = INITIAL_CAPITAL
+                        pk = eq
+                        gdd = 0
+                        for t in trades:
+                            eq += t["pnl"]
+                            pk = max(pk, eq)
+                            dd = (pk - eq) / pk * 100
+                            gdd = max(gdd, dd)
+
+                        if pf >= 1.8 and wr >= 50 and gdd < 40:
+                            tier = "TIER_1"
+                        elif pf >= 1.6 and wr >= 50 and gdd < 45:
+                            tier = "TIER_2_DEPLOY"
+                        elif pf >= 1.4 and wr >= 50:
+                            tier = "TIER_2_TEST"
+                        elif pf >= 1.2 and wr >= 45:
+                            tier = "PAPER_TRADE"
+                        else:
+                            tier = None
+
+                        if tier is not None:
+                            winners += 1
+                            sig_str = " + ".join(combo)
+                            result = {
+                                "tier": tier, "signals": list(combo), "min_ag": min_ag,
+                                "asset": asset, "tf": tf_str, "sl": sl, "tp": tp, "ts": ts,
+                                "roi_a": round(roi_a, 1), "daily": round(daily, 3),
+                                "wr": round(wr, 1), "pf": round(pf, 2), "gdd": round(gdd, 1),
+                                "trades": len(trades),
+                            }
+                            self._save_hunt_result(result)
+                            self.send_message(
+                                f"*{tier} FOUND!*\n\n"
+                                f"Signals: `{sig_str}`\n"
+                                f"Asset: `{asset}` TF: `{tf_str}`\n"
+                                f"ROI: `{roi_a:.1f}%/yr` PF: `{pf:.2f}` WR: `{wr:.1f}%`\n"
+                                f"GDD: `{gdd:.1f}%` Trades: `{len(trades)}`\n"
+                                f"Params: SL={sl*100}% TP={tp*100}% TS={ts*100}%"
+                            )
+                    except Exception:
+                        pass
+
+        self.send_message(f"Phase 0 done: {total} tested, {winners} winners. Starting Phase 1...")
+
+        # Load checkpoint if resuming
+        cp = self._load_hunt_checkpoint() if resume else None
+        skip_to_size = cp.get("combo_size", 3) if cp else 3
+        skip_to_idx = cp.get("combo_idx", 0) if cp else 0
+        total = cp.get("total", 0) if cp else 0
+        winners = cp.get("winners", 0) if cp else 0
+
+        for combo_size in [3, 4, 5, 6]:
+            if combo_size < skip_to_size:
+                continue
+
+            combo_list = list(combinations(all_sigs, combo_size))
+            start_idx = skip_to_idx if combo_size == skip_to_size else 0
+
+            for cidx, combo in enumerate(combo_list):
+                if cidx < start_idx:
+                    continue
+
+                # Check pause/stop
+                if not self._auto_hunt_running:
+                    self._save_hunt_checkpoint({"combo_size": combo_size, "combo_idx": cidx, "total": total, "winners": winners})
+                    self.send_message(f"Alpha Hunter: Paused at combo {cidx}/{len(combo_list)} (size {combo_size}). {total} tested, {winners} winners. `/autohunt resume` to continue.")
+                    return
+
+                # Pause if another command is being processed
+                if getattr(self, '_auto_hunt_paused', False):
+                    self._save_hunt_checkpoint({"combo_size": combo_size, "combo_idx": cidx, "total": total, "winners": winners})
+                    while self._auto_hunt_paused and self._auto_hunt_running:
+                        import time
+                        time.sleep(1)
+                    if not self._auto_hunt_running:
+                        return
+
+                for min_ag in range(max(combo_size - 1, 2), combo_size + 1):
+                    for sl, tp, ts in PARAMS:
+                        for symbol, df in data_cache.items():
+                            total += 1
+                            asset = symbol.split("_")[0]
+                            tf_str = symbol.split("_")[1]
+
+                            if "timestamp" in df.columns:
+                                t_s = str(df["timestamp"].iloc[0])[:10]
+                                t_e = str(df["timestamp"].iloc[-1])[:10]
+                            else:
+                                t_s, t_e = "2020-01-01", "2026-03-20"
+                            try:
+                                yrs = max((_dt.fromisoformat(t_e) - _dt.fromisoformat(t_s)).days / 365.25, 0.01)
+                            except Exception:
+                                yrs = 6.0
+
+                            try:
+                                dc = apply_strategy(df.copy(), list(combo), min_ag)
+                                cap, trades = run_backtest(dc, sl, tp, ts)
+                                if len(trades) < 30:
+                                    continue
+
+                                roi_a = ((cap / INITIAL_CAPITAL) ** (1 / yrs) - 1) * 100 if cap > 0 else -100
+                                daily = roi_a / 365
+                                if daily < 0.01:
+                                    continue
+
+                                w = [t for t in trades if t["pnl"] > 0]
+                                wr = len(w) / len(trades) * 100
+                                if wr < 40:
+                                    continue
+
+                                tw = sum(t["pnl"] for t in trades if t["pnl"] > 0)
+                                tl = abs(sum(t["pnl"] for t in trades if t["pnl"] <= 0))
+                                pf = tw / tl if tl > 0 else 0
+                                if pf < 1.2:
+                                    continue
+
+                                # TV-style daily Sharpe: build daily returns including non-trading days
+                                from collections import defaultdict as _dd
+                                _daily = _dd(float)
+                                for t in trades:
+                                    _d = t.get("exit_date", "")[:10]
+                                    if _d:
+                                        _daily[_d] += t["pnl"] / INITIAL_CAPITAL * 100
+                                _total_days = int(yrs * 365)
+                                _all_days = [0.0] * _total_days
+                                for _i, (_d, _v) in enumerate(sorted(_daily.items())):
+                                    if _i < _total_days:
+                                        _all_days[_i] = _v
+                                _mean_d = np.mean(_all_days) if _all_days else 0
+                                _std_d = np.std(_all_days) if len(_all_days) > 1 else 1
+                                sharpe = (_mean_d / _std_d) * np.sqrt(252) if _std_d > 0 else 0
+
+                                eq = INITIAL_CAPITAL
+                                pk = eq
+                                gdd = 0
+                                for t in trades:
+                                    eq += t["pnl"]
+                                    pk = max(pk, eq)
+                                    dd = (pk - eq) / pk * 100
+                                    gdd = max(gdd, dd)
+
+                                # Tier based on PF + WR (what alert bot actually uses)
+                                if pf >= 2.0 and wr >= 50 and gdd < 30:
+                                    tier = "TIER_1"
+                                elif pf >= 1.6 and wr >= 50 and gdd < 35:
+                                    tier = "TIER_2_DEPLOY"
+                                elif pf >= 1.4 and wr >= 50:
+                                    tier = "TIER_2_TEST"
+                                elif pf >= 1.2 and wr >= 45:
+                                    tier = "PAPER_TRADE"
+                                else:
+                                    tier = None
+                                a_pp = tier in ("TIER_1",)
+                                a = tier in ("TIER_2_DEPLOY", "TIER_2_TEST")
+
+                                if tier is not None:
+                                    winners += 1
+                                    sig_str = " + ".join(combo)
+                                    result = {
+                                        "tier": tier, "signals": list(combo), "min_ag": min_ag,
+                                        "asset": asset, "tf": tf_str, "sl": sl, "tp": tp, "ts": ts,
+                                        "roi_a": round(roi_a, 1), "daily": round(daily, 3),
+                                        "sharpe": round(sharpe, 2), "wr": round(wr, 1),
+                                        "pf": round(pf, 2), "gdd": round(gdd, 1), "trades": len(trades),
+                                    }
+                                    self._save_hunt_result(result)
+                                    self.send_message(
+                                        f"*{tier} FOUND!*\n\n"
+                                        f"Signals: `{sig_str}`\n"
+                                        f"Asset: `{asset}` TF: `{tf_str}` min={min_ag}\n"
+                                        f"ROI: `{roi_a:.1f}%/yr` Daily: `{daily:.3f}%`\n"
+                                        f"Sharpe: `{sharpe:.2f}` WR: `{wr:.1f}%` PF: `{pf:.2f}`\n"
+                                        f"GDD: `{gdd:.1f}%` Trades: `{len(trades)}`\n"
+                                        f"Params: SL={sl*100}% TP={tp*100}% TS={ts*100}%"
+                                    )
+
+                            except Exception:
+                                pass
+
+                # Checkpoint every 100 combos
+                if cidx % 100 == 0:
+                    self._save_hunt_checkpoint({"combo_size": combo_size, "combo_idx": cidx, "total": total, "winners": winners})
+
+                if total % 25000 == 0 and total > 0:
+                    self.send_message(f"Alpha Hunter: `{total}` tested | `{winners}` winners | combo size `{combo_size}` ({cidx}/{len(combo_list)})")
+
+        self._auto_hunt_running = False
+        self._save_hunt_checkpoint({"combo_size": 7, "combo_idx": 0, "total": total, "winners": winners, "complete": True})
+        self.send_message(
+            f"*Alpha Hunter COMPLETE*\n\n"
+            f"Total tested: `{total}`\n"
+            f"TIER_1/TIER_2 found: `{winners}`\n"
+            f"Results saved to storage/autohunt_results.json"
+        )
 
     # ------------------------------------------------------------------ #
     # Apply custom parameters
@@ -4119,11 +4676,13 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
                         self.send_typing_action()
                         response = self.process_command(command, args)
                         self.send_message(response)
+                        self._post_command_hook()
                     elif command.startswith("/"):
                         logger.info(f"Command: {command} {args}")
                         self.send_typing_action()
                         response = self.process_command(command, args)
                         self.send_message(response)
+                        self._post_command_hook()
 
             except KeyboardInterrupt:
                 print("Bot stopped.")

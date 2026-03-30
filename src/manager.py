@@ -9,9 +9,20 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dotenv import load_dotenv
 import requests
-from binance_client import BinanceClient
 
 load_dotenv()
+
+try:
+    from src.logger import get_logger
+    _log = get_logger("manager")
+except Exception:
+    import logging
+    _log = logging.getLogger("manager")
+
+try:
+    from binance_client import BinanceClient
+except ImportError:
+    BinanceClient = None
 
 TRADE_LOG = "storage/trades.jsonl"
 STATE_FILE = "storage/manager_state.json"
@@ -28,7 +39,7 @@ MAX_TOTAL_EXPOSURE_PCT = 0.30   # Max 30% of equity across all positions
 MAX_DAILY_LOSS_USD = 500.0      # Daily loss circuit breaker
 MAX_WEEKLY_LOSS_USD = 1000.0    # Weekly loss circuit breaker
 SL_TP_MONITOR_INTERVAL = 10    # Seconds between SL/TP price checks
-PAPER_TRADING = True            # Paper trading mode (no real orders)
+PAPER_TRADING = os.getenv("TRADING_MODE", "PAPER").upper() != "LIVE"  # Default: PAPER (safe)
 
 
 # ── State ────────────────────────────────────────────────────────────
@@ -43,9 +54,9 @@ _monitor_running = False
 
 # Initialize Binance client safely
 try:
-    bnc = BinanceClient()
+    bnc = BinanceClient() if BinanceClient else None
 except Exception as e:
-    print(f"Warning: BinanceClient init failed: {e}")
+    _log.warning("BinanceClient init failed: %s", e)
     bnc = None
 
 
@@ -66,7 +77,7 @@ def _save_state():
         with open(STATE_FILE, "w") as f:
             json.dump(state, f, indent=2)
     except Exception as e:
-        print(f"Warning: state save failed: {e}")
+        _log.warning("State save failed: %s", e)
 
 
 def _load_state():
@@ -85,7 +96,7 @@ def _load_state():
         _weekly_reset_date = datetime.fromisoformat(state["weekly_reset"]).date() if "weekly_reset" in state else datetime.utcnow().date()
         PAPER_TRADING = state.get("paper_trading", True)
     except Exception as e:
-        print(f"Warning: state load failed: {e}")
+        _log.warning("State load failed: %s", e)
 
 
 # ── Telegram ─────────────────────────────────────────────────────────
@@ -97,7 +108,7 @@ def send_telegram(message):
         url = f"{TELEGRAM_API_URL}/sendMessage"
         requests.post(url, data={"chat_id": TELEGRAM_CHAT_ID, "text": message}, timeout=10)
     except Exception as e:
-        print(f"Warning: Telegram send failed: {e}")
+        _log.warning("Telegram send failed: %s", e)
 
 
 # ── Kill Switch ──────────────────────────────────────────────────────
@@ -106,7 +117,7 @@ def activate_kill_switch(close_all=True):
     global _kill_switch_active
     _kill_switch_active = True
     msg = "KILL SWITCH ACTIVATED — all new trades blocked."
-    print(msg)
+    _log.critical("Kill switch activated")
     send_telegram(f"🚨 {msg}")
     if close_all:
         close_all_positions("KILL_SWITCH")
@@ -117,7 +128,7 @@ def deactivate_kill_switch():
     global _kill_switch_active
     _kill_switch_active = False
     msg = "Kill switch deactivated — trading resumed."
-    print(msg)
+    _log.info("Kill switch deactivated")
     send_telegram(f"✅ {msg}")
     _save_state()
 
@@ -211,7 +222,7 @@ def process_signal(signal: dict):
     _reset_pnl_counters()
 
     if _kill_switch_active:
-        print(f"Kill switch active — ignoring {side} signal for {symbol}")
+        _log.info("Kill switch active — ignoring %s signal", symbol, extra={"symbol": symbol, "side": side})
         return
 
     # OPEN
@@ -227,7 +238,7 @@ def process_signal(signal: dict):
 
         if not PAPER_TRADING:
             if not bnc:
-                print("BinanceClient not available, skipping order.")
+                _log.error("BinanceClient not available, skipping order", extra={"symbol": symbol})
                 return
             order = bnc.place_order(symbol=symbol, side="BUY", order_type="MARKET", quantity=quantity)
             if not order:
@@ -256,7 +267,7 @@ def process_signal(signal: dict):
         )
         if ts_pct > 0:
             msg += f" | TS: {ts_pct*100:.1f}%"
-        print(msg)
+        _log.info("Position opened", extra={"symbol": symbol, "side": "BUY", "price": entry_price, "qty": quantity, "mode": mode})
         send_telegram(msg)
 
     # CLOSE on signal
@@ -294,10 +305,10 @@ def _execute_exit(symbol: str, price: float, reason: str):
         with open(TRADE_LOG, "a") as f:
             f.write(json.dumps(trade_record) + "\n")
     except Exception as e:
-        print(f"Warning: trade log write failed: {e}")
+        _log.error("Trade log write failed: %s", e)
 
     msg = f"[{mode}] CLOSED {symbol} — {reason}\nPnL: ${pnl:.2f}"
-    print(msg)
+    _log.info("Position closed", extra={"symbol": symbol, "pnl": round(pnl, 4), "reason": reason, "mode": mode})
     send_telegram(msg)
     _save_state()
 
@@ -326,7 +337,7 @@ def _monitor_loop():
         try:
             _check_positions()
         except Exception as e:
-            print(f"Monitor error: {e}")
+            _log.error("Monitor error: %s", e)
         time.sleep(SL_TP_MONITOR_INTERVAL)
 
 
@@ -367,13 +378,13 @@ def start_monitor():
     _monitor_running = True
     _monitor_thread = threading.Thread(target=_monitor_loop, daemon=True)
     _monitor_thread.start()
-    print(f"SL/TP monitor started (every {SL_TP_MONITOR_INTERVAL}s)")
+    _log.info("SL/TP monitor started (every %ds)", SL_TP_MONITOR_INTERVAL)
 
 
 def stop_monitor():
     global _monitor_running
     _monitor_running = False
-    print("SL/TP monitor stopped.")
+    _log.info("SL/TP monitor stopped")
 
 
 # ── Status ───────────────────────────────────────────────────────────
