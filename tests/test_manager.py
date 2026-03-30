@@ -13,8 +13,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 @pytest.fixture(autouse=True)
 def reset_manager(tmp_path):
     """Reset manager state before each test."""
-    # Patch BinanceClient so it never makes real API calls
-    with patch("src.manager.BinanceClient"):
+    # Patch BinanceClient and send_telegram so tests don't make real calls
+    with patch("src.manager.BinanceClient"), \
+         patch("src.manager.send_telegram"):
         # Reimport to reset module-level state
         import src.manager as mgr
         mgr._kill_switch_active = False
