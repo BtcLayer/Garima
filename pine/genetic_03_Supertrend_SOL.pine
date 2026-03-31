@@ -1,0 +1,35 @@
+//@version=5
+// GENETIC ALGO RESULT #3 — SOLUSDT 4h
+// OOS: 2.778%/day | PF=7.66 | WR=84.0% | GDD=13.0% | Trades=1843
+strategy("Genetic_Supertrend_SOL",
+     overlay=true, initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, defau
+    lt_qty_value=95,
+     commission_type=strategy.commission.percent, commission_value=0.06)
+
+[st_val, st_dir] = ta.supertrend(3, 14)
+supertrend_bull = close > st_val
+
+sl_pct = input.float(5.0, "Stop Loss %", step=0.1) / 100
+tp_pct = input.float(24.8, "Take Profit %", step=0.1) / 100
+ts_pct = input.float(0.2, "Trailing Stop %", step=0.1) / 100
+
+start_time = timestamp(2024, 01, 01, 00, 00)
+if time >= start_time
+    if supertrend_bull and strategy.position_size == 0
+        strategy.entry("Long", strategy.long)
+        strategy.exit("Exit", "Long",
+             stop=strategy.position_avg_price * (1 - sl_pct),
+             limit=strategy.position_avg_price * (1 + tp_pct),
+             trail_points=strategy.position_avg_price * ts_pct / syminfo.mintick,
+             trail_offset=strategy.position_avg_price * ts_pct / syminfo.mintick)
+
+    if not supertrend_bull and strategy.position_size > 0
+        strategy.close("Long")
+
+plot(st_val, "Supertrend", supertrend_bull ? color.green : color.red, 2)
+plotshape(supertrend_bull and not supertrend_bull[1], "Buy", shape.triangleup, location.belowbar, color.lime, size=size.small)
+
+tf_str = timeframe.period == "240" ? "4h" : timeframe.period == "60" ? "1h" : timeframe.period
+if supertrend_bull and strategy.position_size[1] == 0
+    alert('{"strategy":"Genetic_Supertrend","side":"BUY","symbol":"SOLUSDT","timeframe":"' + tf_str + '","price":' + str.tostring(close) + '}', alert.freq_once_per_bar_close)

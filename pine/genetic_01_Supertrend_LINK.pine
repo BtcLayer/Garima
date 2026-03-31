@@ -1,0 +1,43 @@
+//@version=5
+// GENETIC ALGO RESULT #1 — LINKUSDT 4h
+// OOS: 2.993%/day | PF=8.9 | WR=85.1% | GDD=13.7% | Trades=2044
+// VALIDATE THIS ON TV — if numbers match, it's real. If not, it's overfit.
+strategy("Genetic_Supertrend_LINK",
+     overlay=true, initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=95,
+     commission_type=strategy.commission.percent, commission_value=0.06)
+
+// Supertrend (ATR multiplier=3, length=14)
+[st_val, st_dir] = ta.supertrend(3, 14)
+supertrend_bull = close > st_val
+
+// Entry: Supertrend bullish
+long_entry = supertrend_bull and not supertrend_bull[1]  // fresh cross above
+
+// Params from genetic algo
+sl_pct = input.float(5.0, "Stop Loss %", step=0.1) / 100
+tp_pct = input.float(24.8, "Take Profit %", step=0.1) / 100
+ts_pct = input.float(0.2, "Trailing Stop %", step=0.1) / 100
+
+// Execution
+start_time = timestamp(2024, 01, 01, 00, 00)
+if time >= start_time
+    if supertrend_bull and strategy.position_size == 0
+        strategy.entry("Long", strategy.long)
+        strategy.exit("Exit", "Long",
+             stop=strategy.position_avg_price * (1 - sl_pct),
+             limit=strategy.position_avg_price * (1 + tp_pct),
+             trail_points=strategy.position_avg_price * ts_pct / syminfo.mintick,
+             trail_offset=strategy.position_avg_price * ts_pct / syminfo.mintick)
+
+    if not supertrend_bull and strategy.position_size > 0
+        strategy.close("Long")
+
+// Visuals
+plot(st_val, "Supertrend", supertrend_bull ? color.green : color.red, 2)
+plotshape(supertrend_bull and not supertrend_bull[1], "Buy", shape.triangleup, location.belowbar, color.lime, size=size.small)
+
+// Webhook
+tf_str = timeframe.period == "240" ? "4h" : timeframe.period == "60" ? "1h" : timeframe.period
+if supertrend_bull and strategy.position_size[1] == 0
+    alert('{"strategy":"Genetic_Supertrend","side":"BUY","symbol":"LINKUSDT","timeframe":"' + tf_str + '","price":' + str.tostring(close) + '}', alert.freq_once_per_bar_close)
