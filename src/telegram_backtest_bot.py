@@ -113,8 +113,14 @@ from src.comprehensive_backtest import (
 # Multi-year historical data fetcher
 from src.data_fetcher import DataFetcher
 
-# Pine Script parser & backtester
-from src.pine_backtest import run_pine_backtest, format_pine_result
+# Pine Script parser & backtester (optional)
+try:
+    from src.pine_backtest import run_pine_backtest, format_pine_result
+    _PINE_BT_AVAILABLE = True
+except ImportError:
+    _PINE_BT_AVAILABLE = False
+    run_pine_backtest = None
+    format_pine_result = None
 
 # AI brain (optional — disabled gracefully if GEMINI_API_KEY is missing)
 try:
@@ -573,6 +579,12 @@ class TelegramBacktestBot:
             return self._close_all_positions()
         elif command == "autohunt":
             return self._start_auto_hunt(args)
+        elif command == "generate":
+            return self._start_generate(args)
+        elif command == "ml":
+            return self._start_ml(args)
+        elif command == "evolve":
+            return self._evolve_cmd(args)
 
         # ── 6. Info ──
         elif command == "status":
@@ -697,7 +709,18 @@ class TelegramBacktestBot:
             "  `/autohunt` — auto-find ALPHA strategies (runs in background)\n"
             "  `/autohunt stop` — stop hunting\n\n"
 
-            "10 assets · 3 TFs · 230+ strategies · 6yr data"
+            "*STRATEGY GENERATOR*\n\n"
+            "  `/generate` — generate NEW strategies targeting 1%/day\n"
+            "  `/generate stop` — stop generator\n"
+            "  Methods: ATR-adaptive, mean reversion, random mutation, high-TP, trend+dip hybrid\n\n"
+
+            "*ML SCANNER (Advanced)*\n\n"
+            "  `/ml` — ML strategy scanner (Random Forest + GBM, 40+ features)\n"
+            "  `/ml 1h` — scan on 1h timeframe\n"
+            "  `/ml stop` — stop scanner\n"
+            "  Walk-forward validated (70/30 train/test, OOS results only)\n\n"
+
+            "10 assets · 3 TFs · 260+ strategies · 6yr data"
         )
 
     # ------------------------------------------------------------------ #
@@ -4317,24 +4340,76 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
         all_sigs = PERSISTENT + MOMENTARY
 
         ASSETS = ["ETHUSDT", "BTCUSDT", "ADAUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT"]
-        TIMEFRAMES = ["4h"]
-        # TP 3-12% sweep (proven range: TP3% = TIER_2, TP8% = TIER_1)
-        PARAMS = [
-            (0.008, 0.03, 0.004), (0.01, 0.04, 0.005),
-            (0.01, 0.05, 0.005), (0.012, 0.06, 0.006),
-            (0.012, 0.07, 0.006), (0.015, 0.08, 0.007),
-            (0.015, 0.09, 0.007), (0.015, 0.10, 0.008),
-            (0.02, 0.12, 0.01),
-        ]
+        TIMEFRAMES = ["1h", "4h"]
+        # TF-specific SL/TP/TS params (tighter for shorter TFs)
+        PARAMS_BY_TF = {
+            "4h": [
+                (0.008, 0.03, 0.004), (0.01, 0.04, 0.005),
+                (0.01, 0.05, 0.005), (0.012, 0.06, 0.006),
+                (0.012, 0.07, 0.006), (0.015, 0.08, 0.007),
+                (0.015, 0.09, 0.007), (0.015, 0.10, 0.008),
+                (0.02, 0.12, 0.01),
+            ],
+            "1h": [
+                (0.004, 0.012, 0.003), (0.005, 0.015, 0.003),
+                (0.005, 0.02, 0.004), (0.006, 0.025, 0.004),
+                (0.007, 0.03, 0.005), (0.008, 0.035, 0.005),
+                (0.008, 0.04, 0.006), (0.01, 0.05, 0.006),
+                (0.01, 0.06, 0.007),
+            ],
+            "15m": [
+                (0.002, 0.006, 0.002), (0.003, 0.008, 0.002),
+                (0.003, 0.01, 0.003), (0.004, 0.012, 0.003),
+                (0.004, 0.015, 0.003), (0.005, 0.018, 0.004),
+                (0.005, 0.02, 0.004), (0.006, 0.025, 0.005),
+                (0.007, 0.03, 0.005),
+            ],
+        }
 
-        # PHASE 0: Test PROVEN combos first (these actually work on TV)
-        PROVEN_COMBOS = [
+        # PHASE 0: Test PROVEN combos — includes RELAXED agreement for MORE TRADES
+        PROVEN_COMBOS_4H = [
+            # Original strict combos (low trades, high PF)
             (["PSAR_Bull", "Volume_Spike", "EMA_Cross", "Supertrend", "Trend_MA50"], 5),
             (["PSAR_Bull", "EMA_Cross", "Volume_Spike", "OBV_Rising"], 4),
             (["Ichimoku_Bull", "PSAR_Bull", "OBV_Rising", "EMA_Cross", "Trend_MA50"], 5),
             (["Ichimoku_Bull", "PSAR_Bull", "EMA_Cross", "Supertrend", "OBV_Rising"], 5),
             (["PSAR_Bull", "EMA_Cross", "Supertrend", "ADX_Trend", "Trend_MA50", "OBV_Rising"], 5),
+            # RELAXED agreement — same combos but 3-of-5, 3-of-4 for MORE TRADES
+            (["PSAR_Bull", "Volume_Spike", "EMA_Cross", "Supertrend", "Trend_MA50"], 4),
+            (["PSAR_Bull", "Volume_Spike", "EMA_Cross", "Supertrend", "Trend_MA50"], 3),
+            (["PSAR_Bull", "EMA_Cross", "Volume_Spike", "OBV_Rising"], 3),
+            (["Ichimoku_Bull", "PSAR_Bull", "OBV_Rising", "EMA_Cross", "Trend_MA50"], 4),
+            (["Ichimoku_Bull", "PSAR_Bull", "OBV_Rising", "EMA_Cross", "Trend_MA50"], 3),
+            (["PSAR_Bull", "EMA_Cross", "Supertrend", "ADX_Trend", "Trend_MA50", "OBV_Rising"], 4),
+            (["PSAR_Bull", "EMA_Cross", "Supertrend", "ADX_Trend", "Trend_MA50", "OBV_Rising"], 3),
+            # Small combos (2-3 signals) — maximum trades
+            (["PSAR_Bull", "EMA_Cross", "Supertrend"], 3),
+            (["PSAR_Bull", "EMA_Cross", "Supertrend"], 2),
+            (["PSAR_Bull", "EMA_Cross", "Trend_MA50"], 2),
+            (["EMA_Cross", "Supertrend", "ADX_Trend"], 2),
+            (["PSAR_Bull", "OBV_Rising"], 2),
+            (["EMA_Cross", "Supertrend"], 2),
+            (["PSAR_Bull", "Trend_MA50"], 2),
         ]
+        # Shorter TF combos — momentum-based signals that work on 1h/15m
+        PROVEN_COMBOS_SHORT = [
+            (["EMA_Cross", "MACD_Cross", "Volume_Spike"], 2),
+            (["EMA_Cross", "MACD_Cross", "ADX_Trend"], 2),
+            (["EMA_Cross", "Supertrend", "MACD_Cross"], 2),
+            (["EMA_Cross", "RSI_Oversold", "Volume_Spike"], 2),
+            (["PSAR_Bull", "EMA_Cross", "MACD_Cross"], 2),
+            (["PSAR_Bull", "EMA_Cross", "MACD_Cross"], 3),
+            (["Supertrend", "MACD_Cross", "Volume_Spike"], 2),
+            (["Supertrend", "ADX_Trend", "EMA_Cross"], 2),
+            (["Supertrend", "ADX_Trend", "EMA_Cross"], 3),
+            (["PSAR_Bull", "Supertrend", "EMA_Cross", "MACD_Cross"], 3),
+            (["PSAR_Bull", "Supertrend", "EMA_Cross", "MACD_Cross"], 2),
+            (["EMA_Cross", "Breakout_20", "Volume_Spike"], 2),
+            (["PSAR_Bull", "EMA_Cross", "Stochastic"], 2),
+            (["MACD_Cross", "ADX_Trend", "OBV_Rising"], 2),
+            (["EMA_Cross", "VWAP", "Volume_Spike"], 2),
+        ]
+        PROVEN_COMBOS = PROVEN_COMBOS_4H
 
         data_cache = {}
         for asset in ASSETS:
@@ -4345,105 +4420,126 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
                     df = calculate_indicators(df)
                     data_cache[symbol] = df
 
-        self.send_message(f"Alpha Hunter: {len(data_cache)} datasets loaded.\nPhase 0: Testing proven combos on all assets...\nPhase 1: Brute force new combos...")
+        self.send_message(f"Alpha Hunter: {len(data_cache)} datasets loaded.\nPhase 0: Testing proven combos on ALL timeframes...\nPhase 1: Brute force new combos...")
 
-        # ── PHASE 0: Sweep proven combos on all assets ──
-        for combo, min_ag in PROVEN_COMBOS:
+        # TF-specific tier criteria (relaxed for shorter TFs)
+        def get_tier(pf, wr, gdd, tf_str):
+            if tf_str == "4h":
+                if pf >= 1.8 and wr >= 50 and gdd < 40: return "TIER_1"
+                if pf >= 1.6 and wr >= 50 and gdd < 45: return "TIER_2_DEPLOY"
+                if pf >= 1.4 and wr >= 50: return "TIER_2_TEST"
+                if pf >= 1.2 and wr >= 45: return "PAPER_TRADE"
+            elif tf_str == "1h":
+                if pf >= 1.6 and wr >= 48 and gdd < 45: return "TIER_1"
+                if pf >= 1.4 and wr >= 48 and gdd < 50: return "TIER_2_DEPLOY"
+                if pf >= 1.25 and wr >= 46: return "TIER_2_TEST"
+                if pf >= 1.15 and wr >= 44: return "PAPER_TRADE"
+            else:  # 15m
+                if pf >= 1.5 and wr >= 47 and gdd < 50: return "TIER_1"
+                if pf >= 1.3 and wr >= 46 and gdd < 55: return "TIER_2_DEPLOY"
+                if pf >= 1.2 and wr >= 45: return "TIER_2_TEST"
+                if pf >= 1.1 and wr >= 43: return "PAPER_TRADE"
+            return None
+
+        def _eval_result(df, combo, min_ag, sl, tp, ts, symbol, yrs, tf_str):
+            """Evaluate a single combo — returns result dict or None"""
+            nonlocal total, winners
+            total += 1
+            asset = symbol.split("_")[0]
+            min_trades = {"4h": 20, "1h": 50, "15m": 100}.get(tf_str, 20)
+            try:
+                dc = apply_strategy(df.copy(), list(combo), min_ag)
+                cap, trades = run_backtest(dc, sl, tp, ts)
+                if len(trades) < min_trades:
+                    return None
+                roi_a = ((cap / INITIAL_CAPITAL) ** (1 / yrs) - 1) * 100 if cap > 0 else -100
+                daily = roi_a / 365
+                if daily < 0.005:
+                    return None
+                w = [t for t in trades if t["pnl"] > 0]
+                wr = len(w) / len(trades) * 100
+                if wr < 40:
+                    return None
+                tw = sum(t["pnl"] for t in trades if t["pnl"] > 0)
+                tl = abs(sum(t["pnl"] for t in trades if t["pnl"] <= 0))
+                pf = tw / tl if tl > 0 else 0
+                if pf < 1.1:
+                    return None
+                eq = INITIAL_CAPITAL
+                pk = eq
+                gdd = 0
+                for t in trades:
+                    eq += t["pnl"]
+                    pk = max(pk, eq)
+                    dd = (pk - eq) / pk * 100
+                    gdd = max(gdd, dd)
+                tier = get_tier(pf, wr, gdd, tf_str)
+                if tier is not None:
+                    winners += 1
+                    sig_str = " + ".join(combo)
+                    result = {
+                        "tier": tier, "signals": list(combo), "min_ag": min_ag,
+                        "asset": asset, "tf": tf_str, "sl": sl, "tp": tp, "ts": ts,
+                        "roi_a": round(roi_a, 1), "daily": round(daily, 3),
+                        "wr": round(wr, 1), "pf": round(pf, 2), "gdd": round(gdd, 1),
+                        "trades": len(trades),
+                    }
+                    self._save_hunt_result(result)
+                    self.send_message(
+                        f"*{tier} FOUND!*\n\n"
+                        f"Signals: `{sig_str}`\n"
+                        f"Asset: `{asset}` TF: `{tf_str}` min={min_ag}\n"
+                        f"ROI: `{roi_a:.1f}%/yr` PF: `{pf:.2f}` WR: `{wr:.1f}%`\n"
+                        f"GDD: `{gdd:.1f}%` Trades: `{len(trades)}`\n"
+                        f"Params: SL={sl*100}% TP={tp*100}% TS={ts*100}%"
+                    )
+                    return result
+            except Exception:
+                pass
+            return None
+
+        # ── PHASE 0: Sweep proven combos on ALL assets + ALL timeframes ──
+        for symbol, df in data_cache.items():
             if not self._auto_hunt_running:
                 self._save_hunt_checkpoint({"combo_size": 0, "combo_idx": 0, "total": total, "winners": winners})
                 self.send_message(f"Alpha Hunter: Paused. {total} tested, {winners} winners.")
                 return
 
-            for sl, tp, ts in PARAMS:
-                for symbol, df in data_cache.items():
-                    total += 1
-                    asset = symbol.split("_")[0]
-                    tf_str = symbol.split("_")[1]
+            tf_str = symbol.split("_")[1]
+            asset = symbol.split("_")[0]
+            params = PARAMS_BY_TF.get(tf_str, PARAMS_BY_TF["4h"])
+            # Use 4h combos for 4h, short combos for 1h/15m, plus all combos on all TFs
+            combos = PROVEN_COMBOS_4H if tf_str == "4h" else PROVEN_COMBOS_SHORT + PROVEN_COMBOS_4H[:5]
 
-                    if "timestamp" in df.columns:
-                        t_s = str(df["timestamp"].iloc[0])[:10]
-                        t_e = str(df["timestamp"].iloc[-1])[:10]
-                    else:
-                        t_s, t_e = "2020-01-01", "2026-03-20"
-                    try:
-                        yrs = max((_dt.fromisoformat(t_e) - _dt.fromisoformat(t_s)).days / 365.25, 0.01)
-                    except Exception:
-                        yrs = 6.0
+            if "timestamp" in df.columns:
+                t_s = str(df["timestamp"].iloc[0])[:10]
+                t_e = str(df["timestamp"].iloc[-1])[:10]
+            else:
+                t_s, t_e = "2020-01-01", "2026-03-20"
+            try:
+                yrs = max((_dt.fromisoformat(t_e) - _dt.fromisoformat(t_s)).days / 365.25, 0.01)
+            except Exception:
+                yrs = 6.0
 
-                    try:
-                        dc = apply_strategy(df.copy(), list(combo), min_ag)
-                        cap, trades = run_backtest(dc, sl, tp, ts)
-                        if len(trades) < 20:
-                            continue
-
-                        roi_a = ((cap / INITIAL_CAPITAL) ** (1 / yrs) - 1) * 100 if cap > 0 else -100
-                        daily = roi_a / 365
-                        if daily < 0.01:
-                            continue
-
-                        w = [t for t in trades if t["pnl"] > 0]
-                        wr = len(w) / len(trades) * 100
-                        if wr < 40:
-                            continue
-
-                        tw = sum(t["pnl"] for t in trades if t["pnl"] > 0)
-                        tl = abs(sum(t["pnl"] for t in trades if t["pnl"] <= 0))
-                        pf = tw / tl if tl > 0 else 0
-                        if pf < 1.2:
-                            continue
-
-                        eq = INITIAL_CAPITAL
-                        pk = eq
-                        gdd = 0
-                        for t in trades:
-                            eq += t["pnl"]
-                            pk = max(pk, eq)
-                            dd = (pk - eq) / pk * 100
-                            gdd = max(gdd, dd)
-
-                        if pf >= 1.8 and wr >= 50 and gdd < 40:
-                            tier = "TIER_1"
-                        elif pf >= 1.6 and wr >= 50 and gdd < 45:
-                            tier = "TIER_2_DEPLOY"
-                        elif pf >= 1.4 and wr >= 50:
-                            tier = "TIER_2_TEST"
-                        elif pf >= 1.2 and wr >= 45:
-                            tier = "PAPER_TRADE"
-                        else:
-                            tier = None
-
-                        if tier is not None:
-                            winners += 1
-                            sig_str = " + ".join(combo)
-                            result = {
-                                "tier": tier, "signals": list(combo), "min_ag": min_ag,
-                                "asset": asset, "tf": tf_str, "sl": sl, "tp": tp, "ts": ts,
-                                "roi_a": round(roi_a, 1), "daily": round(daily, 3),
-                                "wr": round(wr, 1), "pf": round(pf, 2), "gdd": round(gdd, 1),
-                                "trades": len(trades),
-                            }
-                            self._save_hunt_result(result)
-                            self.send_message(
-                                f"*{tier} FOUND!*\n\n"
-                                f"Signals: `{sig_str}`\n"
-                                f"Asset: `{asset}` TF: `{tf_str}`\n"
-                                f"ROI: `{roi_a:.1f}%/yr` PF: `{pf:.2f}` WR: `{wr:.1f}%`\n"
-                                f"GDD: `{gdd:.1f}%` Trades: `{len(trades)}`\n"
-                                f"Params: SL={sl*100}% TP={tp*100}% TS={ts*100}%"
-                            )
-                    except Exception:
-                        pass
+            for combo, min_ag in combos:
+                for sl, tp, ts in params:
+                    _eval_result(df, combo, min_ag, sl, tp, ts, symbol, yrs, tf_str)
 
         self.send_message(f"Phase 0 done: {total} tested, {winners} winners. Starting Phase 1...")
 
         # Load checkpoint if resuming
         cp = self._load_hunt_checkpoint() if resume else None
-        skip_to_size = cp.get("combo_size", 3) if cp else 3
+        skip_to_size = cp.get("combo_size", 2) if cp else 2
         skip_to_idx = cp.get("combo_idx", 0) if cp else 0
-        total = cp.get("total", 0) if cp else 0
-        winners = cp.get("winners", 0) if cp else 0
+        if not resume:
+            # Keep Phase 0 totals
+            pass
+        else:
+            total = cp.get("total", 0) if cp else 0
+            winners = cp.get("winners", 0) if cp else 0
 
-        for combo_size in [3, 4, 5, 6]:
+        # Phase 1: combo sizes 2-6 (was 3-6), lower min_agreement
+        for combo_size in [2, 3, 4, 5, 6]:
             if combo_size < skip_to_size:
                 continue
 
@@ -4469,113 +4565,31 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
                     if not self._auto_hunt_running:
                         return
 
-                for min_ag in range(max(combo_size - 1, 2), combo_size + 1):
-                    for sl, tp, ts in PARAMS:
-                        for symbol, df in data_cache.items():
-                            total += 1
-                            asset = symbol.split("_")[0]
-                            tf_str = symbol.split("_")[1]
+                # Test min_agreement from max(combo_size-2, 2) to combo_size
+                # This means: 2of2, 2of3, 3of3, 2of4, 3of4, 4of4, etc.
+                for min_ag in range(max(combo_size - 2, 2), combo_size + 1):
+                    for symbol, df in data_cache.items():
+                        tf_str = symbol.split("_")[1]
+                        params = PARAMS_BY_TF.get(tf_str, PARAMS_BY_TF["4h"])
 
-                            if "timestamp" in df.columns:
-                                t_s = str(df["timestamp"].iloc[0])[:10]
-                                t_e = str(df["timestamp"].iloc[-1])[:10]
-                            else:
-                                t_s, t_e = "2020-01-01", "2026-03-20"
-                            try:
-                                yrs = max((_dt.fromisoformat(t_e) - _dt.fromisoformat(t_s)).days / 365.25, 0.01)
-                            except Exception:
-                                yrs = 6.0
+                        if "timestamp" in df.columns:
+                            t_s = str(df["timestamp"].iloc[0])[:10]
+                            t_e = str(df["timestamp"].iloc[-1])[:10]
+                        else:
+                            t_s, t_e = "2020-01-01", "2026-03-20"
+                        try:
+                            yrs = max((_dt.fromisoformat(t_e) - _dt.fromisoformat(t_s)).days / 365.25, 0.01)
+                        except Exception:
+                            yrs = 6.0
 
-                            try:
-                                dc = apply_strategy(df.copy(), list(combo), min_ag)
-                                cap, trades = run_backtest(dc, sl, tp, ts)
-                                if len(trades) < 30:
-                                    continue
+                        for sl, tp, ts in params:
+                            _eval_result(df, combo, min_ag, sl, tp, ts, symbol, yrs, tf_str)
 
-                                roi_a = ((cap / INITIAL_CAPITAL) ** (1 / yrs) - 1) * 100 if cap > 0 else -100
-                                daily = roi_a / 365
-                                if daily < 0.01:
-                                    continue
-
-                                w = [t for t in trades if t["pnl"] > 0]
-                                wr = len(w) / len(trades) * 100
-                                if wr < 40:
-                                    continue
-
-                                tw = sum(t["pnl"] for t in trades if t["pnl"] > 0)
-                                tl = abs(sum(t["pnl"] for t in trades if t["pnl"] <= 0))
-                                pf = tw / tl if tl > 0 else 0
-                                if pf < 1.2:
-                                    continue
-
-                                # TV-style daily Sharpe: build daily returns including non-trading days
-                                from collections import defaultdict as _dd
-                                _daily = _dd(float)
-                                for t in trades:
-                                    _d = t.get("exit_date", "")[:10]
-                                    if _d:
-                                        _daily[_d] += t["pnl"] / INITIAL_CAPITAL * 100
-                                _total_days = int(yrs * 365)
-                                _all_days = [0.0] * _total_days
-                                for _i, (_d, _v) in enumerate(sorted(_daily.items())):
-                                    if _i < _total_days:
-                                        _all_days[_i] = _v
-                                _mean_d = np.mean(_all_days) if _all_days else 0
-                                _std_d = np.std(_all_days) if len(_all_days) > 1 else 1
-                                sharpe = (_mean_d / _std_d) * np.sqrt(252) if _std_d > 0 else 0
-
-                                eq = INITIAL_CAPITAL
-                                pk = eq
-                                gdd = 0
-                                for t in trades:
-                                    eq += t["pnl"]
-                                    pk = max(pk, eq)
-                                    dd = (pk - eq) / pk * 100
-                                    gdd = max(gdd, dd)
-
-                                # Tier based on PF + WR (what alert bot actually uses)
-                                if pf >= 2.0 and wr >= 50 and gdd < 30:
-                                    tier = "TIER_1"
-                                elif pf >= 1.6 and wr >= 50 and gdd < 35:
-                                    tier = "TIER_2_DEPLOY"
-                                elif pf >= 1.4 and wr >= 50:
-                                    tier = "TIER_2_TEST"
-                                elif pf >= 1.2 and wr >= 45:
-                                    tier = "PAPER_TRADE"
-                                else:
-                                    tier = None
-                                a_pp = tier in ("TIER_1",)
-                                a = tier in ("TIER_2_DEPLOY", "TIER_2_TEST")
-
-                                if tier is not None:
-                                    winners += 1
-                                    sig_str = " + ".join(combo)
-                                    result = {
-                                        "tier": tier, "signals": list(combo), "min_ag": min_ag,
-                                        "asset": asset, "tf": tf_str, "sl": sl, "tp": tp, "ts": ts,
-                                        "roi_a": round(roi_a, 1), "daily": round(daily, 3),
-                                        "sharpe": round(sharpe, 2), "wr": round(wr, 1),
-                                        "pf": round(pf, 2), "gdd": round(gdd, 1), "trades": len(trades),
-                                    }
-                                    self._save_hunt_result(result)
-                                    self.send_message(
-                                        f"*{tier} FOUND!*\n\n"
-                                        f"Signals: `{sig_str}`\n"
-                                        f"Asset: `{asset}` TF: `{tf_str}` min={min_ag}\n"
-                                        f"ROI: `{roi_a:.1f}%/yr` Daily: `{daily:.3f}%`\n"
-                                        f"Sharpe: `{sharpe:.2f}` WR: `{wr:.1f}%` PF: `{pf:.2f}`\n"
-                                        f"GDD: `{gdd:.1f}%` Trades: `{len(trades)}`\n"
-                                        f"Params: SL={sl*100}% TP={tp*100}% TS={ts*100}%"
-                                    )
-
-                            except Exception:
-                                pass
-
-                # Checkpoint every 100 combos
-                if cidx % 100 == 0:
+                # Checkpoint every 50 combos
+                if cidx % 50 == 0:
                     self._save_hunt_checkpoint({"combo_size": combo_size, "combo_idx": cidx, "total": total, "winners": winners})
 
-                if total % 25000 == 0 and total > 0:
+                if total % 10000 == 0 and total > 0:
                     self.send_message(f"Alpha Hunter: `{total}` tested | `{winners}` winners | combo size `{combo_size}` ({cidx}/{len(combo_list)})")
 
         self._auto_hunt_running = False
@@ -4583,8 +4597,673 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
         self.send_message(
             f"*Alpha Hunter COMPLETE*\n\n"
             f"Total tested: `{total}`\n"
-            f"TIER_1/TIER_2 found: `{winners}`\n"
+            f"Winners found: `{winners}`\n"
             f"Results saved to storage/autohunt_results.json"
+        )
+
+    # ------------------------------------------------------------------ #
+    # /generate — New strategy generation engine (5 methods)
+    # ------------------------------------------------------------------ #
+
+    def _start_generate(self, args: list) -> str:
+        """Launch autonomous strategy generator targeting 1%/day."""
+        if args and args[0] == "stop":
+            self._generate_running = False
+            return "Strategy generator stopped."
+
+        if getattr(self, '_generate_running', False):
+            return "Generator already running. `/generate stop` to stop."
+
+        self._generate_running = True
+        t = threading.Thread(target=self._generate_worker, daemon=True)
+        t.start()
+        return (
+            "*Strategy Generator Started*\n\n"
+            "Target: `1%/day (365%/yr)`\n"
+            "Timeframe: `4h`\n\n"
+            "Methods:\n"
+            "1. ATR-adaptive SL/TP (volatility-based)\n"
+            "2. Mean reversion (buy dips)\n"
+            "3. Random mutation (genetic-style)\n"
+            "4. High-TP hunter (15-40%)\n"
+            "5. Trend + dip hybrid\n\n"
+            "Will message you when strategies are found.\n"
+            "`/generate stop` to stop."
+        )
+
+    def _generate_worker(self):
+        import random
+        import math
+        from datetime import datetime as _dt
+
+        ASSETS = ["ETHUSDT", "BTCUSDT", "ADAUSDT", "SOLUSDT", "LINKUSDT", "BNBUSDT"]
+        ALL_SIGNALS = list(SIGNAL_FUNCTIONS.keys())
+        # Trend signals (persistent — stay on for multiple bars)
+        TREND_SIGS = ["EMA_Cross", "Supertrend", "PSAR_Bull", "Trend_MA50",
+                      "Ichimoku_Bull", "VWAP", "OBV_Rising", "ADX_Trend"]
+        # Dip/mean-reversion signals (momentary — fire on specific conditions)
+        DIP_SIGS = ["RSI_Oversold", "BB_Lower", "Stochastic", "CCI_Oversold",
+                    "MFI_Oversold", "Keltner_Lower", "Williams_Oversold"]
+        # Momentum signals
+        MOM_SIGS = ["MACD_Cross", "Volume_Spike", "Breakout_20"]
+
+        results = []
+        total = 0
+        best_daily = 0
+
+        # Load 4h data
+        data_cache = {}
+        for asset in ASSETS:
+            key = f"{asset}_4h"
+            df = load_data(key)
+            if df is not None:
+                df = calculate_indicators(df)
+                data_cache[key] = df
+
+        self.send_message(f"Generator: {len(data_cache)} datasets loaded. Starting 5 methods...")
+
+        def get_years(df):
+            if "timestamp" in df.columns:
+                t_s = str(df["timestamp"].iloc[0])[:10]
+                t_e = str(df["timestamp"].iloc[-1])[:10]
+                try:
+                    return max((_dt.fromisoformat(t_e) - _dt.fromisoformat(t_s)).days / 365.25, 0.01)
+                except:
+                    pass
+            return 6.0
+
+        def eval_and_report(df, combo, min_ag, sl, tp, ts, asset, yrs, method_name):
+            nonlocal total, best_daily, results
+            total += 1
+            try:
+                dc = apply_strategy(df.copy(), list(combo), min_ag)
+                cap, trades = run_backtest(dc, sl, tp, ts)
+                if len(trades) < 10:
+                    return
+                roi_a = ((cap / INITIAL_CAPITAL) ** (1 / yrs) - 1) * 100 if cap > 0 else -100
+                daily = roi_a / 365
+                if daily < 0.2:
+                    return
+                w = [t for t in trades if t["pnl"] > 0]
+                wr = len(w) / len(trades) * 100
+                tw = sum(t["pnl"] for t in trades if t["pnl"] > 0)
+                tl = abs(sum(t["pnl"] for t in trades if t["pnl"] <= 0))
+                pf = tw / tl if tl > 0 else 0
+                eq = INITIAL_CAPITAL
+                pk = eq
+                gdd = 0
+                for t in trades:
+                    eq += t["pnl"]
+                    pk = max(pk, eq)
+                    dd = (pk - eq) / pk * 100
+                    gdd = max(gdd, dd)
+
+                sig_str = " + ".join(combo)
+                r = {
+                    "method": method_name, "signals": sig_str, "min_ag": min_ag,
+                    "asset": asset, "sl": sl, "tp": tp, "ts": ts,
+                    "roi_day": round(daily, 4), "roi_yr": round(roi_a, 1),
+                    "pf": round(pf, 2), "wr": round(wr, 1), "gdd": round(gdd, 1),
+                    "trades": len(trades), "final_cap": round(cap, 0),
+                }
+                results.append(r)
+
+                # Report anything >= 0.5%/day immediately
+                if daily >= 0.5 or daily > best_daily:
+                    best_daily = max(best_daily, daily)
+                    tag = "1%+ TARGET HIT!" if daily >= 1.0 else "NEW BEST" if daily >= best_daily else "0.5%+"
+                    self.send_message(
+                        f"*{tag}*  `{daily:.3f}%/day` ({roi_a:.1f}%/yr)\n\n"
+                        f"Method: `{method_name}`\n"
+                        f"Signals: `{sig_str}` (min={min_ag})\n"
+                        f"Asset: `{asset}` 4h\n"
+                        f"PF: `{pf:.2f}` WR: `{wr:.1f}%` GDD: `{gdd:.1f}%`\n"
+                        f"Trades: `{len(trades)}` Final: `${cap:,.0f}`\n"
+                        f"Params: SL={sl*100:.1f}% TP={tp*100:.1f}% TS={ts*100:.1f}%"
+                    )
+            except:
+                pass
+
+        # ══════════════════════════════════════════════════════════════
+        # METHOD 1: ATR-Adaptive SL/TP
+        # Instead of fixed %, use ATR multiples for volatility-adaptive stops
+        # ══════════════════════════════════════════════════════════════
+        if self._generate_running:
+            self.send_message("Method 1/5: ATR-Adaptive SL/TP...")
+            combos_m1 = [
+                (["PSAR_Bull", "EMA_Cross", "Supertrend"], 2),
+                (["PSAR_Bull", "EMA_Cross"], 2),
+                (["EMA_Cross", "Supertrend"], 2),
+                (["PSAR_Bull", "Trend_MA50"], 2),
+                (["Ichimoku_Bull", "PSAR_Bull", "EMA_Cross"], 2),
+                (["PSAR_Bull", "MACD_Cross", "EMA_Cross"], 2),
+                (["EMA_Cross", "Supertrend", "ADX_Trend"], 2),
+                (["PSAR_Bull", "Supertrend", "MACD_Cross", "EMA_Cross"], 2),
+            ]
+            for key, df in data_cache.items():
+                if not self._generate_running:
+                    break
+                asset = key.split("_")[0]
+                yrs = get_years(df)
+                # Use ATR to set dynamic SL/TP per asset
+                avg_atr_pct = (df["atr"] / df["close"]).mean() * 100  # avg ATR as % of price
+                for combo, min_ag in combos_m1:
+                    # SL = 1-3x ATR, TP = 3-12x ATR, TS = 0.5-2x ATR
+                    for sl_mult in [1.0, 1.5, 2.0, 2.5, 3.0]:
+                        for tp_mult in [3, 5, 8, 10, 12, 15, 20]:
+                            for ts_mult in [0.5, 1.0, 1.5]:
+                                sl = avg_atr_pct * sl_mult / 100
+                                tp = avg_atr_pct * tp_mult / 100
+                                ts = avg_atr_pct * ts_mult / 100
+                                if tp <= sl or tp < 0.02:
+                                    continue
+                                eval_and_report(df, combo, min_ag, sl, tp, ts, asset, yrs, "ATR_Adaptive")
+
+        # ══════════════════════════════════════════════════════════════
+        # METHOD 2: Mean Reversion (Buy the Dip)
+        # Use oversold signals — completely different from trend-following
+        # ══════════════════════════════════════════════════════════════
+        if self._generate_running:
+            self.send_message("Method 2/5: Mean Reversion (buy dips)...")
+            dip_combos = [
+                (["RSI_Oversold"], 1), (["BB_Lower"], 1), (["CCI_Oversold"], 1),
+                (["MFI_Oversold"], 1), (["Stochastic"], 1), (["Keltner_Lower"], 1),
+                (["Williams_Oversold"], 1),
+                (["RSI_Oversold", "BB_Lower"], 1), (["RSI_Oversold", "CCI_Oversold"], 1),
+                (["BB_Lower", "Stochastic"], 1), (["MFI_Oversold", "RSI_Oversold"], 1),
+                (["Keltner_Lower", "Williams_Oversold"], 1),
+                (["RSI_Oversold", "Volume_Spike"], 1), (["BB_Lower", "Volume_Spike"], 1),
+                (["CCI_Oversold", "MFI_Oversold"], 1),
+                (["RSI_Oversold", "BB_Lower", "Stochastic"], 1),
+                (["RSI_Oversold", "BB_Lower", "Stochastic"], 2),
+                (["CCI_Oversold", "MFI_Oversold", "Williams_Oversold"], 1),
+                (["CCI_Oversold", "MFI_Oversold", "Williams_Oversold"], 2),
+                # Dip + trend filter (buy dip only when overall trend is up)
+                (["RSI_Oversold", "Trend_MA50"], 2),
+                (["BB_Lower", "EMA_Cross"], 2),
+                (["Stochastic", "PSAR_Bull"], 2),
+                (["CCI_Oversold", "Supertrend"], 2),
+                (["MFI_Oversold", "Trend_MA50"], 2),
+            ]
+            dip_params = [
+                (0.005, 0.015, 0.003), (0.005, 0.02, 0.004), (0.008, 0.03, 0.005),
+                (0.008, 0.04, 0.005), (0.01, 0.05, 0.006), (0.01, 0.06, 0.006),
+                (0.012, 0.08, 0.007), (0.015, 0.10, 0.008), (0.015, 0.12, 0.008),
+                (0.02, 0.15, 0.01), (0.02, 0.20, 0.01),
+            ]
+            for key, df in data_cache.items():
+                if not self._generate_running:
+                    break
+                asset = key.split("_")[0]
+                yrs = get_years(df)
+                for combo, min_ag in dip_combos:
+                    for sl, tp, ts in dip_params:
+                        eval_and_report(df, combo, min_ag, sl, tp, ts, asset, yrs, "Mean_Reversion")
+
+        # ══════════════════════════════════════════════════════════════
+        # METHOD 3: Random Mutation (Genetic-style)
+        # Randomly combine signals + params, keep winners, mutate them
+        # ══════════════════════════════════════════════════════════════
+        if self._generate_running:
+            self.send_message("Method 3/5: Random Mutation (1000 random strategies)...")
+            random.seed(42)
+            for _ in range(1000):
+                if not self._generate_running:
+                    break
+                # Random combo: 1-5 signals
+                n_sigs = random.randint(1, 5)
+                combo = random.sample(ALL_SIGNALS, min(n_sigs, len(ALL_SIGNALS)))
+                min_ag = random.randint(1, max(1, len(combo) - 1))
+                # Random params
+                sl = random.uniform(0.005, 0.03)
+                tp = random.uniform(0.02, 0.40)
+                ts = random.uniform(0.003, 0.02)
+                if tp <= sl:
+                    continue
+                # Random asset
+                key = random.choice(list(data_cache.keys()))
+                df = data_cache[key]
+                asset = key.split("_")[0]
+                yrs = get_years(df)
+                eval_and_report(df, combo, min_ag, sl, tp, ts, asset, yrs, "Random_Mutation")
+
+        # ══════════════════════════════════════════════════════════════
+        # METHOD 4: High-TP Hunter (15-40%)
+        # Specifically target huge TP for maximum ROI per trade
+        # ══════════════════════════════════════════════════════════════
+        if self._generate_running:
+            self.send_message("Method 4/5: High-TP Hunter (15-40%)...")
+            high_tp_combos = [
+                (["PSAR_Bull", "EMA_Cross", "Supertrend"], 2),
+                (["EMA_Cross", "Supertrend"], 2),
+                (["PSAR_Bull", "Trend_MA50"], 2),
+                (["Ichimoku_Bull", "PSAR_Bull", "EMA_Cross"], 2),
+                (["EMA_Cross", "Breakout_20"], 2),
+                (["Breakout_20", "Volume_Spike"], 2),
+                (["PSAR_Bull", "ADX_Trend", "Volume_Spike"], 2),
+                (["EMA_Cross", "ADX_Trend", "MACD_Cross"], 2),
+                (["PSAR_Bull", "EMA_Cross", "MACD_Cross"], 2),
+                (["Supertrend", "ADX_Trend"], 2),
+                (["PSAR_Bull", "Supertrend"], 2),
+                (["EMA_Cross", "MACD_Cross", "Volume_Spike"], 2),
+            ]
+            high_tp_params = [
+                (0.01, 0.15, 0.008), (0.012, 0.18, 0.01), (0.015, 0.20, 0.01),
+                (0.015, 0.25, 0.012), (0.02, 0.30, 0.015), (0.02, 0.35, 0.015),
+                (0.025, 0.40, 0.02), (0.03, 0.45, 0.02), (0.03, 0.50, 0.025),
+            ]
+            for key, df in data_cache.items():
+                if not self._generate_running:
+                    break
+                asset = key.split("_")[0]
+                yrs = get_years(df)
+                for combo, min_ag in high_tp_combos:
+                    for sl, tp, ts in high_tp_params:
+                        eval_and_report(df, combo, min_ag, sl, tp, ts, asset, yrs, "High_TP")
+
+        # ══════════════════════════════════════════════════════════════
+        # METHOD 5: Trend + Dip Hybrid
+        # Use trend signals as filter, dip signals as entry trigger
+        # ══════════════════════════════════════════════════════════════
+        if self._generate_running:
+            self.send_message("Method 5/5: Trend + Dip Hybrid...")
+            # Combine 1 trend filter + 1 dip entry — both must fire (min_ag=2)
+            hybrid_combos = []
+            for trend_sig in TREND_SIGS:
+                for dip_sig in DIP_SIGS:
+                    hybrid_combos.append(([trend_sig, dip_sig], 2))
+            # Also 1 trend + 2 dips (min_ag=2 — trend + at least 1 dip)
+            for trend_sig in ["PSAR_Bull", "EMA_Cross", "Supertrend", "Trend_MA50"]:
+                for i in range(len(DIP_SIGS)):
+                    for j in range(i + 1, len(DIP_SIGS)):
+                        hybrid_combos.append(([trend_sig, DIP_SIGS[i], DIP_SIGS[j]], 2))
+
+            hybrid_params = [
+                (0.008, 0.03, 0.004), (0.01, 0.05, 0.005), (0.01, 0.06, 0.006),
+                (0.012, 0.08, 0.007), (0.015, 0.10, 0.008), (0.015, 0.12, 0.008),
+                (0.02, 0.15, 0.01), (0.02, 0.20, 0.01), (0.025, 0.25, 0.012),
+            ]
+            for key, df in data_cache.items():
+                if not self._generate_running:
+                    break
+                asset = key.split("_")[0]
+                yrs = get_years(df)
+                for combo, min_ag in hybrid_combos:
+                    for sl, tp, ts in hybrid_params:
+                        eval_and_report(df, combo, min_ag, sl, tp, ts, asset, yrs, "Trend_Dip_Hybrid")
+
+        # ══════════════════════════════════════════════════════════════
+        # FINAL SUMMARY
+        # ══════════════════════════════════════════════════════════════
+        self._generate_running = False
+
+        # Sort by ROI/day
+        results.sort(key=lambda x: -x["roi_day"])
+
+        # Save to file
+        import json
+        gen_path = os.path.join(_ROOT, "storage", "generate_results.json")
+        with open(gen_path, "w") as f:
+            json.dump(results, f, indent=2)
+
+        # Build summary message
+        above_1 = [r for r in results if r["roi_day"] >= 1.0]
+        above_05 = [r for r in results if r["roi_day"] >= 0.5]
+        above_03 = [r for r in results if r["roi_day"] >= 0.3]
+
+        msg = (
+            f"*Strategy Generator COMPLETE*\n\n"
+            f"Total tested: `{total}`\n"
+            f"Total with ROI > 0.2%/day: `{len(results)}`\n\n"
+            f"*>= 1.0%/day: `{len(above_1)}`*\n"
+            f">= 0.5%/day: `{len(above_05)}`\n"
+            f">= 0.3%/day: `{len(above_03)}`\n"
+            f"Best: `{results[0]['roi_day']:.3f}%/day` ({results[0]['roi_yr']:.1f}%/yr)\n\n" if results else ""
+        )
+
+        # Top 10
+        if results:
+            msg += "*TOP 10:*\n"
+            seen = set()
+            n = 0
+            for r in results:
+                k = (r["asset"], r["signals"], r["min_ag"])
+                if k in seen:
+                    continue
+                seen.add(k)
+                n += 1
+                if n > 10:
+                    break
+                tag = "***" if r["roi_day"] >= 1.0 else ""
+                msg += (
+                    f"\n`{n}. {r['roi_day']:.3f}%/day` ({r['roi_yr']:.1f}%/yr) {tag}\n"
+                    f"   {r['method']} | {r['asset']}\n"
+                    f"   `{r['signals']}` min={r['min_ag']}\n"
+                    f"   PF={r['pf']} WR={r['wr']}% Trades={r['trades']}\n"
+                    f"   SL={r['sl']*100:.1f}% TP={r['tp']*100:.1f}%\n"
+                )
+
+        msg += f"\nResults saved to storage/generate_results.json"
+        self.send_message(msg)
+
+    # ------------------------------------------------------------------ #
+    # /ml — Machine Learning strategy scanner
+    # ------------------------------------------------------------------ #
+
+    def _start_ml(self, args: list) -> str:
+        """Launch ML strategy scanner."""
+        if args and args[0] == "stop":
+            self._ml_running = False
+            return "ML scanner stopped."
+
+        if args and args[0] == "status":
+            return self._ml_status()
+
+        if args and args[0] == "results":
+            return self._ml_results()
+
+        if getattr(self, '_ml_running', False):
+            return "ML scanner already running.\n`/ml status` — check progress\n`/ml results` — see results\n`/ml stop` — stop scanner"
+
+        # Parse args: /ml [assets] [tf]
+        assets = ["ETHUSDT", "BTCUSDT", "ADAUSDT", "SOLUSDT", "LINKUSDT", "BNBUSDT"]
+        tf_list = ["4h"]
+        if args:
+            if args[0] in ("1h", "4h", "15m"):
+                tf_list = [args[0]]
+            elif args[0].upper().endswith("USDT"):
+                assets = [a.upper() for a in args]
+
+        self._ml_running = True
+        self._ml_progress = {"total": 0, "hits": 0, "current_asset": "", "current_model": "", "started": datetime.now().isoformat()}
+        t = threading.Thread(target=self._ml_worker, args=(assets, tf_list), daemon=True)
+        t.start()
+        return (
+            f"*ML Strategy Scanner Started*\n\n"
+            f"Models: `Random Forest` + `Gradient Boosting`\n"
+            f"Features: `40+ indicators` (EMA, RSI, MACD, BB, ATR, Ichimoku, PSAR, etc.)\n"
+            f"Assets: `{', '.join(assets)}`\n"
+            f"Timeframe: `{', '.join(tf_list)}`\n"
+            f"Validation: `Walk-forward (70% train / 30% OOS test)`\n\n"
+            f"Testing 10 TP/SL combos x 2 models per asset...\n"
+            f"Results are OUT-OF-SAMPLE only (no overfitting).\n\n"
+            f"`/ml stop` to stop.\n"
+            f"`/ml status` — check progress\n"
+            f"`/ml results` — see completed results"
+        )
+
+    def _ml_status(self) -> str:
+        """Show ML scanner progress."""
+        prog = getattr(self, '_ml_progress', {})
+        running = getattr(self, '_ml_running', False)
+
+        if not prog and not running:
+            return "ML scanner not running. Start with `/ml`"
+
+        # Load results count
+        ml_path = os.path.join(_ROOT, "storage", "ml_results.json")
+        results = []
+        try:
+            with open(ml_path) as f:
+                results = json.load(f)
+        except:
+            pass
+
+        status = "Running" if running else "Completed"
+        return (
+            f"*ML Scanner Status: {status}*\n\n"
+            f"Tests completed: `{prog.get('total', 0)}`\n"
+            f"Strategies found: `{prog.get('hits', 0)}`\n"
+            f"Current: `{prog.get('current_asset', '—')} {prog.get('current_model', '')}`\n"
+            f"Started: `{prog.get('started', '—')}`\n\n"
+            f"Saved results: `{len(results)}`\n"
+            f"Use `/ml results` to see them."
+        )
+
+    def _ml_results(self) -> str:
+        """Show ML scanner results."""
+        ml_path = os.path.join(_ROOT, "storage", "ml_results.json")
+        try:
+            with open(ml_path) as f:
+                results = json.load(f)
+        except:
+            return "No ML results yet. Run `/ml` first."
+
+        if not results:
+            return "No ML results yet. Run `/ml` first."
+
+        # Sort by ROI/day
+        results.sort(key=lambda x: -x.get("roi_day", 0))
+
+        above1 = len([r for r in results if r.get("roi_day", 0) >= 1.0])
+        above05 = len([r for r in results if r.get("roi_day", 0) >= 0.5])
+        above03 = len([r for r in results if r.get("roi_day", 0) >= 0.3])
+
+        msg = (
+            f"*ML Scanner Results*\n\n"
+            f"Total found: `{len(results)}`\n"
+            f">= 1.0%/day: `{above1}`\n"
+            f">= 0.5%/day: `{above05}`\n"
+            f">= 0.3%/day: `{above03}`\n\n"
+            f"*TOP 10:*\n"
+        )
+
+        seen = set()
+        n = 0
+        for r in results:
+            k = (r.get("asset", ""), r.get("model", ""))
+            if k in seen:
+                continue
+            seen.add(k)
+            n += 1
+            if n > 10:
+                break
+            tag = " ***" if r.get("roi_day", 0) >= 1.0 else ""
+            msg += (
+                f"\n`{n}. {r.get('roi_day', 0):.3f}%/day` ({r.get('roi_yr', 0):.0f}%/yr){tag}\n"
+                f"   {r.get('model', '').upper()} | {r.get('asset', '')} {r.get('tf', '')}\n"
+                f"   PF={r.get('pf', 0)} WR={r.get('wr', 0)}% Trades={r.get('trades', 0)}\n"
+                f"   TP={r.get('tp_pct', 0)*100:.0f}% SL={r.get('sl_pct', 0)*100:.0f}%\n"
+                f"   Acc={r.get('accuracy', 0)}% Prec={r.get('precision', 0)}%\n"
+            )
+
+        return msg
+
+    def _ml_worker(self, assets, tf_list):
+        try:
+            from src.ml_strategy import train_and_evaluate
+        except ImportError:
+            try:
+                from ml_strategy import train_and_evaluate
+            except ImportError:
+                self.send_message("ML module not found. Ensure src/ml_strategy.py exists.")
+                self._ml_running = False
+                return
+
+        param_grid = [
+            (0.015, 0.008, 12), (0.02, 0.01, 12), (0.03, 0.015, 12),
+            (0.04, 0.02, 12), (0.05, 0.025, 18), (0.06, 0.03, 18),
+            (0.08, 0.04, 24), (0.10, 0.05, 24), (0.15, 0.07, 30),
+            (0.20, 0.10, 36),
+        ]
+        models = ["rf", "gbm"]
+        results = []
+        total = 0
+        best_daily = 0
+
+        for asset in assets:
+            if not self._ml_running:
+                break
+            for tf in tf_list:
+                for model_type in models:
+                    for tp, sl, horizon in param_grid:
+                        if not self._ml_running:
+                            break
+                        total += 1
+                        self._ml_progress = {
+                            "total": total, "hits": len(results),
+                            "current_asset": asset, "current_model": f"{model_type} TP={tp*100:.0f}%",
+                            "started": getattr(self, '_ml_progress', {}).get('started', ''),
+                        }
+                        try:
+                            r = train_and_evaluate(asset, tf, tp_pct=tp, sl_pct=sl,
+                                                   horizon=horizon, model_type=model_type)
+                            if r and r["roi_day"] > 0.1:
+                                results.append(r)
+                                # Report good ones immediately
+                                if r["roi_day"] >= 0.5 or r["roi_day"] > best_daily:
+                                    best_daily = max(best_daily, r["roi_day"])
+                                    tag = "1%+ TARGET!" if r["roi_day"] >= 1.0 else "NEW BEST" if r["roi_day"] >= best_daily else "0.5%+"
+                                    self.send_message(
+                                        f"*ML {tag}*  `{r['roi_day']:.3f}%/day` ({r['roi_yr']:.0f}%/yr)\n\n"
+                                        f"Model: `{r['model'].upper()}`\n"
+                                        f"Asset: `{asset}` TF: `{tf}`\n"
+                                        f"PF: `{r['pf']}` WR: `{r['wr']}%` GDD: `{r['gdd']}%`\n"
+                                        f"Trades: `{r['trades']}` ({r['trades_per_day']:.1f}/day)\n"
+                                        f"TP: `{r['tp_pct']*100}%` SL: `{r['sl_pct']*100}%`\n"
+                                        f"Accuracy: `{r['accuracy']}%` Precision: `{r['precision']}%`\n"
+                                        f"Final: `${r['final_cap']:,.0f}` | Test: `{r['test_years']:.1f}yr OOS`\n"
+                                        f"Top features: `{', '.join(f[0] for f in r['top_features'][:5])}`"
+                                    )
+                        except Exception as e:
+                            pass
+
+                self.send_message(f"ML: `{asset} {tf}` done — {total} tested, {len(results)} hits")
+
+        self._ml_running = False
+
+        # Final summary
+        results.sort(key=lambda x: -x["roi_day"])
+
+        # Save
+        import json
+        gen_path = os.path.join(_ROOT, "storage", "ml_results.json")
+        with open(gen_path, "w") as f:
+            json.dump([{k: v for k, v in r.items() if k != "top_features"} for r in results], f, indent=2)
+
+        above1 = [r for r in results if r["roi_day"] >= 1.0]
+        above05 = [r for r in results if r["roi_day"] >= 0.5]
+
+        msg = (
+            f"*ML Scanner COMPLETE*\n\n"
+            f"Total tested: `{total}`\n"
+            f"Profitable: `{len(results)}`\n\n"
+            f"*>= 1.0%/day: `{len(above1)}`*\n"
+            f">= 0.5%/day: `{len(above05)}`\n\n"
+        )
+
+        if results:
+            msg += "*TOP 5 (OUT-OF-SAMPLE):*\n"
+            seen = set()
+            n = 0
+            for r in results:
+                k = (r["asset"], r["model"])
+                if k in seen:
+                    continue
+                seen.add(k)
+                n += 1
+                if n > 5:
+                    break
+                msg += (
+                    f"\n`{n}. {r['roi_day']:.3f}%/day` ({r['roi_yr']:.0f}%/yr)\n"
+                    f"   {r['model'].upper()} | {r['asset']} {r['tf']}\n"
+                    f"   PF={r['pf']} WR={r['wr']}% Trades={r['trades']}\n"
+                    f"   TP={r['tp_pct']*100}% SL={r['sl_pct']*100}%\n"
+                    f"   Acc={r['accuracy']}% Prec={r['precision']}%\n"
+                )
+
+        msg += f"\nResults saved to storage/ml_results.json"
+        self.send_message(msg)
+
+    # ------------------------------------------------------------------ #
+    # /evolve — Genetic Algorithm status & control
+    # ------------------------------------------------------------------ #
+
+    def _evolve_cmd(self, args: list) -> str:
+        """Check genetic evolution status and results."""
+        gen_path = os.path.join(_ROOT, "storage", "genetic_results.json")
+
+        if args and args[0] == "start":
+            # Start genetic evolution in background
+            if getattr(self, '_evolve_running', False):
+                return "Evolution already running. `/evolve status` to check."
+            self._evolve_running = True
+            def run_evolve():
+                try:
+                    from src.genetic_strategy import evolve
+                except ImportError:
+                    from genetic_strategy import evolve
+                def cb(gen, info, best):
+                    if gen % 5 == 0 or info["best_roi_day"] >= 1.0:
+                        self.send_message(
+                            f"*Gen {gen}* | Best: `{info['best_roi_day']:.3f}%/day`\n"
+                            f"All-time: `{best[2]['roi_day']:.3f}%/day`\n"
+                            f">= 1%: `{info.get('above_1pct', 0)}` | >= 0.5%: `{info.get('above_05pct', 0)}`\n"
+                            f"Total viable: `{info.get('total_viable', 0)}`\n"
+                            f"Asset: `{info['best_asset']}` [{info['best_signals'][:40]}]"
+                        )
+                evolve(pop_size=100, generations=50, target_roi_day=3.0, callback=cb)
+                self._evolve_running = False
+                self.send_message("*Evolution COMPLETE.* Use `/evolve results` to see all strategies.")
+            t = threading.Thread(target=run_evolve, daemon=True)
+            t.start()
+            return "Genetic evolution started! 100 strategies x 50 generations.\nUpdates every 5 generations. `/evolve status` to check."
+
+        if args and args[0] == "results":
+            try:
+                with open(gen_path) as f:
+                    data = json.load(f)
+            except:
+                return "No results yet. Start with `/evolve start`"
+
+            strats = data.get("all_strategies", [])
+            counts = data.get("counts", {})
+            msg = (
+                f"*Genetic Evolution Results*\n\n"
+                f"Status: `{data.get('status', 'unknown')}`\n"
+                f"Generation: `{data.get('generation', 0)}/{data.get('total_generations', 0)}`\n\n"
+                f"*Counts:*\n"
+                f">= 3%/day: `{counts.get('above_3pct', 0)}`\n"
+                f">= 1%/day: `{counts.get('above_1pct', 0)}`\n"
+                f">= 0.5%/day: `{counts.get('above_05pct', 0)}`\n"
+                f">= 0.3%/day: `{counts.get('above_03pct', 0)}`\n"
+                f"Total viable: `{counts.get('total', 0)}`\n\n"
+                f"*TOP 10:*\n"
+            )
+            for i, r in enumerate(strats[:10]):
+                tag = " ***" if r.get("roi_day", 0) >= 1.0 else ""
+                msg += (
+                    f"\n`{i+1}. {r.get('roi_day',0):.3f}%/day` ({r.get('roi_yr',0):.0f}%/yr){tag}\n"
+                    f"   {r.get('asset','')} | PF={r.get('pf',0)} WR={r.get('wr',0)}% GDD={r.get('gdd',0)}%\n"
+                    f"   `{r.get('signals','')[:50]}`\n"
+                    f"   SL={r.get('sl',0)*100:.1f}% TP={r.get('tp',0)*100:.1f}% Trades={r.get('trades',0)}\n"
+                )
+            return msg
+
+        # Default: status
+        try:
+            with open(gen_path) as f:
+                data = json.load(f)
+        except:
+            return "No evolution data. Start with `/evolve start`"
+
+        best = data.get("all_time_best", {})
+        counts = data.get("counts", {})
+        running = getattr(self, '_evolve_running', False)
+        return (
+            f"*Genetic Evolution Status*\n\n"
+            f"Status: `{'Running' if running else data.get('status', 'unknown')}`\n"
+            f"Generation: `{data.get('generation', 0)}/{data.get('total_generations', 0)}`\n\n"
+            f"*All-time best:* `{best.get('roi_day', 0):.3f}%/day`\n"
+            f"Asset: `{best.get('asset', '')}` | PF={best.get('pf', 0)} WR={best.get('wr', 0)}%\n"
+            f"Signals: `{best.get('signals', '')[:50]}`\n\n"
+            f"*Found so far:*\n"
+            f">= 3%/day: `{counts.get('above_3pct', 0)}`\n"
+            f">= 1%/day: `{counts.get('above_1pct', 0)}`\n"
+            f">= 0.5%/day: `{counts.get('above_05pct', 0)}`\n"
+            f"Total: `{counts.get('total', 0)}`\n\n"
+            f"`/evolve results` — see top strategies\n"
+            f"`/evolve start` — start new evolution"
         )
 
     # ------------------------------------------------------------------ #
