@@ -361,7 +361,7 @@ class TelegramBacktestBot:
         self._default_batches: List[int] = [1]
         self._load_default_trade()
 
-        # Auto Alpha Hunter flag
+        # Auto strategy hunt flag
         self._auto_hunt_running = False
 
         # AI brain — disabled silently if ANTHROPIC_API_KEY is missing
@@ -578,7 +578,7 @@ class TelegramBacktestBot:
         elif command == "closeall":
             return self._close_all_positions()
         elif command == "autohunt":
-            return self._start_auto_hunt(args)
+            return "Autohunt removed — use `/ml` instead (smarter ML-based search)."
         elif command == "generate":
             return self._start_generate(args)
         elif command == "ml":
@@ -628,7 +628,7 @@ class TelegramBacktestBot:
         if getattr(self, '_auto_hunt_paused', False) and self._auto_hunt_running:
             self._auto_hunt_paused = False  # unpause so it continues
             self.send_message(
-                "Alpha Hunter was paused for your command.\n"
+                "Strategy search was paused for your command.\n"
                 "Resuming automatically...\n"
                 "Use `/autohunt stop` to stop."
             )
@@ -705,17 +705,13 @@ class TelegramBacktestBot:
             "  `/positions` — show open positions & PnL\n"
             "  `/closeall` — close all open positions\n\n"
 
-            "*AUTO HUNT*\n\n"
-            "  `/autohunt` — auto-find ALPHA strategies (runs in background)\n"
-            "  `/autohunt stop` — stop hunting\n\n"
-
             "*STRATEGY GENERATOR*\n\n"
             "  `/generate` — generate NEW strategies targeting 1%/day\n"
             "  `/generate stop` — stop generator\n"
             "  Methods: ATR-adaptive, mean reversion, random mutation, high-TP, trend+dip hybrid\n\n"
 
-            "*ML SCANNER (Advanced)*\n\n"
-            "  `/ml` — ML strategy scanner (Random Forest + GBM, 40+ features)\n"
+            "*ML SCANNER*\n\n"
+            "  `/ml` — ML strategy scanner (Neural Network + RF + GBM ensemble)\n"
             "  `/ml 1h` — scan on 1h timeframe\n"
             "  `/ml stop` — stop scanner\n"
             "  Walk-forward validated (70/30 train/test, OOS results only)\n\n"
@@ -2937,9 +2933,9 @@ class TelegramBacktestBot:
             avg = (daily >= 0.1 and sharpe >= 1.5) or daily >= 0.05
 
             if a_pp:
-                tier = "ALPHA++"
+                tier = "TIER_1"
             elif a:
-                tier = "ALPHA"
+                tier = "TIER_2"
             elif avg and roi > 0:
                 tier = "AVERAGE"
             elif roi > 0:
@@ -4205,9 +4201,9 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
             avg = (daily_v >= 0.1 and sh_v >= 1.5) or daily_v >= 0.05
 
             if a_pp:
-                tier = "ALPHA++"
+                tier = "TIER_1"
             elif a:
-                tier = "ALPHA"
+                tier = "TIER_2"
             elif avg and roi_v > 0:
                 tier = "AVERAGE"
             elif roi_v > 0:
@@ -5062,9 +5058,8 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
             msg += (
                 f"\n`{n}. {r.get('roi_day', 0):.3f}%/day` ({r.get('roi_yr', 0):.0f}%/yr){tag}\n"
                 f"   {r.get('model', '').upper()} | {r.get('asset', '')} {r.get('tf', '')}\n"
-                f"   PF={r.get('pf', 0)} WR={r.get('wr', 0)}% Trades={r.get('trades', 0)}\n"
-                f"   TP={r.get('tp_pct', 0)*100:.0f}% SL={r.get('sl_pct', 0)*100:.0f}%\n"
-                f"   Acc={r.get('accuracy', 0)}% Prec={r.get('precision', 0)}%\n"
+                f"   PF={r.get('pf', 0)} WR={r.get('wr', 0)}% GDD={r.get('gdd', 0)}%\n"
+                f"   Trades={r.get('trades', 0)} | TP={r.get('tp_pct', 0)*100:.0f}% SL={r.get('sl_pct', 0)*100:.0f}%\n"
             )
 
         return msg

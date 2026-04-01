@@ -1,0 +1,45 @@
+//@version=5
+// TV-FIRST Strategy 03: EMA Cross + Volume Spike + RSI Filter
+// Test on: NEARUSDT, FILUSDT, LDOUSDT, OPUSDT — 15m timeframe
+strategy("EMA Volume Surge", overlay=true,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     commission_type=strategy.commission.percent, commission_value=0.1)
+
+// Inputs
+fast_len = input.int(9, "Fast EMA")
+slow_len = input.int(21, "Slow EMA")
+vol_mult = input.float(1.5, "Volume Multiplier")
+rsi_len = input.int(14, "RSI Length")
+
+// Indicators
+fast = ta.ema(close, fast_len)
+slow = ta.ema(close, slow_len)
+rsi = ta.rsi(close, rsi_len)
+vol_sma = ta.sma(volume, 20)
+vol_spike = volume > vol_sma * vol_mult
+[diplus, diminus, adx] = ta.dmi(14, 14)
+
+// Entry
+long_entry = ta.crossover(fast, slow) and rsi > 50 and vol_spike and adx > 20
+short_entry = ta.crossunder(fast, slow) and rsi < 50 and vol_spike and adx > 20
+
+// Exit
+long_exit = ta.crossunder(fast, slow) or ta.crossunder(rsi, 40)
+short_exit = ta.crossover(fast, slow) or ta.crossover(rsi, 60)
+
+// Execution
+if long_entry and strategy.position_size <= 0
+    strategy.entry("Long", strategy.long)
+if short_entry and strategy.position_size >= 0
+    strategy.entry("Short", strategy.short)
+if long_exit and strategy.position_size > 0
+    strategy.close("Long")
+if short_exit and strategy.position_size < 0
+    strategy.close("Short")
+
+// Visuals
+plot(fast, "Fast", color.blue)
+plot(slow, "Slow", color.orange)
+plotshape(long_entry, "Buy", shape.triangleup, location.belowbar, color.lime, size=size.tiny)
+plotshape(short_entry, "Sell", shape.triangledown, location.abovebar, color.red, size=size.tiny)

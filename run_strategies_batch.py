@@ -681,6 +681,185 @@ def run_backtest(df, stop_loss=0, take_profit=0, trailing_stop=0, use_tight=Fals
     return capital, trades
 
 
+# ══════════════════════════════════════════════════════════════════
+# TOURNAMENT-STYLE BACKTESTER — matches strategy_tournament.py exactly
+# Signal × bar_return model (no individual trade tracking)
+# ══════════════════════════════════════════════════════════════════
+
+def calculate_adx(df, n=14):
+    """ADX calculation matching tournament's my_strategies.py."""
+    h, l, c = df["high"], df["low"], df["close"]
+    tr = np.maximum(h - l, np.maximum(abs(h - c.shift(1)), abs(l - c.shift(1))))
+    atr = tr.rolling(n).mean()
+    upmove = (h - h.shift(1)).clip(lower=0)
+    downmove = (l.shift(1) - l).clip(lower=0)
+    plus_di = 100 * (upmove.rolling(n).mean() / atr)
+    minus_di = 100 * (downmove.rolling(n).mean() / atr)
+    dx = 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di)
+    return dx.rolling(n).mean().fillna(0)
+
+
+def tournament_apply_strategy(df, strategy_name, mult=2.5, length=14):
+    """Apply strategy matching tournament's my_strategies.py — returns signal array (1/-1/0)."""
+    close, high, low = df["close"], df["high"], df["low"]
+    name_upper = strategy_name.upper()
+    ema_200 = close.rolling(200).mean()
+    adx = calculate_adx(df, n=int(length))
+    strong_trend = adx > 18
+
+    # Category 1: Trend Following
+    if any(k in name_upper for k in ["SUPERTREND", "ATR", "SMA", "EMA", "RIBBON", "CROSS",
+                                      "AGGRESSIVE", "KELTNER"]):
+        atr_val = (high - low).rolling(int(length)).mean()
+        adj_mult = mult * 1.1 if "RIBBON" in name_upper else mult
+        upper = (high + low) / 2 + (adj_mult * atr_val)
+        lower = (high + low) / 2 - (adj_mult * atr_val)
+        raw = np.where(close > upper.shift(1), 1, np.where(close < lower.shift(1), -1, 0))
+        return np.where((raw == 1) & (close > ema_200), 1, np.where((raw == -1) & (close < ema_200), -1, 0))
+
+    # Category 2: Mean Reversion / ML
+    elif any(k in name_upper for k in ["SQUEEZE", "REVERSION", "LORENTZIAN", "ML", "MATRIX"]):
+        basis = close.rolling(int(length)).mean()
+        dev = mult * close.rolling(int(length)).std()
+        return np.where(close < basis - dev, 1, np.where(close > basis + dev, -1, 0))
+
+    # Category 3: Volume & Momentum
+    elif any(k in name_upper for k in ["OBV", "WAVETREND", "MACD", "MOMENTUM", "FLOW"]):
+        obv = (np.sign(close.diff()) * df["volume"]).fillna(0).cumsum()
+        obv_ema = obv.rolling(int(length)).mean()
+        raw = np.where(obv > obv_ema, 1, -1)
+        return np.where(strong_trend, raw, 0)
+
+    # Category 4: SMC & Liquidity
+    elif any(k in name_upper for k in ["SMC", "LIQUIDITY", "INSTITUTIONAL", "HYBRID"]):
+        lookback = int(length)
+        raw = np.where(close > close.shift(lookback), 1, np.where(close < close.shift(lookback), -1, 0))
+        return np.where(strong_trend, raw, 0)
+
+    # Category 5: Ichimoku
+    elif "ICHIMOKU" in name_upper:
+        tenkan = (high.rolling(9).max() + low.rolling(9).min()) / 2
+        kijun = (high.rolling(26).max() + low.rolling(26).min()) / 2
+        senkou_a = ((tenkan + kijun) / 2).shift(26)
+        senkou_b = ((high.rolling(52).max() + low.rolling(52).min()) / 2).shift(26)
+        cloud_top = pd.concat([senkou_a, senkou_b], axis=1).max(axis=1)
+        cloud_bot = pd.concat([senkou_a, senkou_b], axis=1).min(axis=1)
+        raw = np.where((close > cloud_top) & (tenkan > kijun), 1,
+                       np.where((close < cloud_bot) & (tenkan < kijun), -1, 0))
+        return raw
+
+    # Fallback: EMA crossover
+    else:
+        fast = close.rolling(int(length)).mean()
+        slow = close.rolling(int(length * 2.1)).mean()
+        return np.where(fast > slow, 1, -1)
+
+
+def run_tournament_backtest(df, strategy_name, mult=2.5, length=14,
+                            sl=0.01, tp=0.03, max_daily_loss=-0.03,
+                            cooldown_trigger=3, cooldown_bars=4,
+                            use_adx=True, use_atr=True, oos_split=0.0):
+    """Run backtest matching tournament's run_test() exactly.
+
+    Returns: (daily_roi, gross_dd, net_dd, win_rate, sharpe, total_trades, metrics_dict)
+    If oos_split > 0, returns (is_metrics, oos_metrics).
+    """
+    d = df.copy()
+    d["pct"] = d["close"].pct_change()
+
+    # Apply strategy signal
+    d["sig"] = tournament_apply_strategy(d, strategy_name, mult, length)
+
+    # Filter 1: ADX > 20
+    if use_adx:
+        adx = calculate_adx(d, n=int(length))
+        d["sig"] = np.where(adx > 20, d["sig"], 0)
+
+    # Filter 2: ATR volatility
+    if use_atr:
+        atr_14 = (d["high"] - d["low"]).rolling(14).mean()
+        atr_ma = atr_14.rolling(100).mean()
+        d["sig"] = np.where(atr_14 > 2 * atr_ma, 0, d["sig"])
+
+    # Calculate returns: signal × bar_return, clipped to SL/TP
+    d["daily_ret"] = d["sig"].shift(1) * d["pct"]
+    d["daily_ret"] = d["daily_ret"].clip(lower=-sl, upper=tp)
+
+    # Filter 3: Consecutive loss cooldown
+    rets = d["daily_ret"].values.copy()
+    consec_losses = 0
+    skip_remaining = 0
+    for i in range(len(rets)):
+        if skip_remaining > 0:
+            rets[i] = 0.0
+            skip_remaining -= 1
+            continue
+        if rets[i] < 0:
+            consec_losses += 1
+            if consec_losses >= cooldown_trigger:
+                skip_remaining = cooldown_bars
+                consec_losses = 0
+        else:
+            consec_losses = 0
+    d["daily_ret"] = rets
+
+    # Filter 4: Daily circuit breaker
+    if "timestamp" in d.columns:
+        d["_date"] = pd.to_datetime(d["timestamp"]).dt.date
+        d["_daily_cum"] = d.groupby("_date")["daily_ret"].cumsum()
+        d.loc[d["_daily_cum"] < max_daily_loss, "daily_ret"] = 0.0
+        d.drop(columns=["_date", "_daily_cum"], inplace=True)
+
+    def calc_metrics(series):
+        total_return = series.sum() * 100
+        total_days = max(len(series) / 96, 1)  # 96 bars per day on 15m
+        daily_roi = total_return / total_days
+
+        # Gross DD (compounding)
+        cum = (1 + series.fillna(0)).cumprod()
+        gdd_series = ((cum - cum.cummax()) / cum.cummax()) * 100
+        gross_dd = gdd_series.min()
+
+        # Net DD (fixed sizing)
+        cum_sum = series.fillna(0).cumsum() * 100
+        net_dd = (cum_sum - cum_sum.cummax()).min()
+
+        # Win rate
+        trades = series[series != 0]
+        total_trades = len(trades)
+        winning = len(trades[trades > 0])
+        win_rate = round(winning / total_trades * 100, 1) if total_trades > 0 else 0
+
+        # Sharpe
+        mean_r = series.mean()
+        std_r = series.std()
+        sharpe = round((mean_r / std_r) * np.sqrt(35040), 2) if std_r > 0 else 0
+
+        # PF
+        gross_win = trades[trades > 0].sum()
+        gross_loss = abs(trades[trades < 0].sum())
+        pf = round(gross_win / gross_loss, 2) if gross_loss > 0 else 0
+
+        return {
+            "daily_roi": round(daily_roi, 4),
+            "gross_dd": round(gross_dd, 2),
+            "net_dd": round(net_dd, 2),
+            "win_rate": win_rate,
+            "sharpe": sharpe,
+            "pf": pf,
+            "total_trades": total_trades,
+            "total_bars": len(series),
+        }
+
+    if oos_split > 0:
+        split = int(len(d) * (1 - oos_split))
+        is_metrics = calc_metrics(d["daily_ret"].iloc[:split])
+        oos_metrics = calc_metrics(d["daily_ret"].iloc[split:])
+        return is_metrics, oos_metrics
+    else:
+        return calc_metrics(d["daily_ret"])
+
+
 def process_with_pagination(df, page_size=5000):
     """Process data with pagination"""
     total_rows = len(df)

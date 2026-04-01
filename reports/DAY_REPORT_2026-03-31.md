@@ -1,7 +1,7 @@
 # Day Report — March 31, 2026
 
 ## Executive Summary
-Today's focus was finding strategies that deliver 1%+ per day ROI. Tested 8 different approaches across our backtester — all failed to match TradingView results. Discovered 3 fundamental flaws in our backtester (level signals vs crossovers, fixed SL/TP vs signal exits, long-only vs long+short) and rewrote the entire engine. Testing Harsh's top 14 ALPHA/ALPHA++ strategies from the tournament system for validation and deployment.
+Today's focus was finding strategies that deliver 1%+ per day ROI. Tested 8 different approaches across our backtester — all failed to match TradingView results. Discovered 3 fundamental flaws in our backtester (level signals vs crossovers, fixed SL/TP vs signal exits, long-only vs long+short) and rewrote the entire engine. Validated Harsh's top 14 ALPHA/ALPHA++ strategies on TradingView — **13 of 14 were UNPROFITABLE on TV**, only MACD_Breakout on FIL showed marginal profit. Tournament backtester's risk management filters (cooldown, circuit breaker, ADX/ATR) are the key difference — Pine Scripts without them lose money.
 
 **LLM Time**: ~6 hours | **Human Time**: ~5 hours
 
@@ -89,6 +89,29 @@ Tested 3 proven strategies (Ichimoku, Keltner, Aggressive) on all assets — all
 
 ---
 
+## Live Dashboard (Streamlit)
+
+Built and deployed a **live web dashboard** on the server at `http://15.207.152.119/dashboard/` with 9 tabs:
+
+| Tab | Feature |
+|-----|---------|
+| Analytics | Combined leaderboard, ROI distribution, method comparison, scatter plots, tier breakdown |
+| ML Scanner | Random Forest + GBM results with model comparison charts |
+| Genetic Evolution | Generation progress chart, all strategies table, signal frequency |
+| Generator | 5-method results with method breakdown |
+| Strategy Builder | Interactive: select signals + params → run backtest → equity curve |
+| Pine Script Gen | 10 pre-built scripts (7 rule-based + 3 genetic) + custom generator |
+| Monte Carlo | 1000x trade shuffle simulation for robustness testing |
+| Parameter Heatmap | SL/TP grid showing ROI for every combination |
+| Architecture | System diagram, tech stack, development timeline |
+
+- Auto-refreshes every 30 seconds
+- All timestamps in IST
+- Sidebar with Pine Script dropdown (expandable, shows all strategy names)
+- Served via nginx reverse proxy on port 80 (no AWS Security Group change needed)
+
+---
+
 ## Infrastructure Built Today
 
 | Component | Status |
@@ -137,10 +160,27 @@ Tested 3 proven strategies (Ichimoku, Keltner, Aggressive) on all assets — all
 
 ---
 
+## TV Validation Results (Evening)
+
+Validated all 14 strategies on TradingView. Full results in [TV_VALIDATION_RESULTS_2026-03-31.md](TV_VALIDATION_RESULTS_2026-03-31.md).
+
+- **1 of 14 profitable**: MACD_Breakout on FIL (+28.7%, WR=83.3%, but PF=1.11 — barely profitable)
+- **13 of 14 UNPROFITABLE**: Losses from -$160k to -$999k on TV
+- **Root cause**: Tournament backtester applies risk filters (cooldown, circuit breaker, ADX, ATR) that Pine Scripts don't have
+
+### Tomorrow's Plan
+1. Add tournament risk management filters to Pine Scripts (cooldown after 3 losses, daily -3% circuit breaker, ADX>20, ATR volatility filter)
+2. Retest the improved Pine Scripts on TV
+3. Focus on MACD_Breakout on FIL — the only one that showed profit, improve it
+4. Push to main branch after validation
+5. Test on testnet (not real money)
+
+---
+
 ## Open Items
 
-1. Validate top 14 tournament strategies on TradingView
-2. Generate Pine Scripts for all 14 for TV alerts
-3. Align our backtester with tournament system or use tournament system only
-4. Test on testnet (not real money)
-5. Git commit all changes
+1. **Add risk filters to Pine Scripts** — cooldown, circuit breaker, ADX, ATR (top priority)
+2. Improve MACD_Breakout on FIL — the only TV-profitable strategy
+3. Align our backtester with tournament system
+4. Push to main after validation
+5. Git committed and pushed to Trading_bot branch

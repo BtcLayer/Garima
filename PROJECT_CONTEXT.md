@@ -1,279 +1,168 @@
 # Garima — Project Context for LLM Sessions
 
 ## What This Is
-Crypto trading bot with Telegram interface. Backtests 260+ strategies across 10 assets (BTC, ETH, BNB, SOL, XRP, ADA, AVAX, DOT, LINK, LTC) on 3 timeframes (15m, 1h, 4h) using 6 years of Binance Spot data. Generates Pine Scripts for TradingView verification. Uses Gemini AI for analysis. Integrated with alert bot tournament tier system (TIER_1/TIER_2/PAPER).
+Crypto trading bot with Telegram interface, ML strategy scanner, Streamlit dashboard, and Pine Script generator. Backtests strategies across 10+ assets on 4h timeframe using 6 years of Binance data. **Critical discovery: our backtester and TradingView produce fundamentally different results. Only TV-validated strategies should be trusted.**
+
+## Current State (as of April 1, 2026)
+
+### What Works
+- Telegram bot with 15+ commands (running on AWS EC2)
+- Streamlit dashboard (live at server/dashboard/, 9 tabs, auto-refresh)
+- ML pipeline (RF + GBM, 40+ features, walk-forward OOS)
+- Pine Script generator (dashboard + bot)
+- Backtester rewritten with crossover signals + signal-based exits + long/short
+- 70+ Pine Scripts generated
+
+### What Doesn't Work
+- **Our backtester results DON'T match TradingView** — strategies showing 1%+/day on backtester show -95% on TV
+- **Harsh's backtester (strategy_tournament.py) uses signal×return model** — theoretical math, not real trades. Results don't transfer to TV either
+- **15m timeframe** — all strategies fail on TV (too noisy)
+- **Genetic algorithm** — produced fake 3%/day results that failed TV validation completely
+
+### Critical Finding
+The backtester (both ours and Harsh's) uses a different execution model than TradingView:
+- **Backtester**: signal × bar_return (no actual trades)
+- **TradingView**: actual position open/close with fees and slippage
+- **Result gap**: backtester shows +0.3%/day, TV shows -95%
+- **Root cause**: Harsh's risk filters (cooldown, circuit breaker, ADX, ATR) are applied to the return stream, not to actual trade execution
 
 ## Repo Structure
 ```
 src/
-  telegram_backtest_bot.py  — Main bot (4600+ lines, all commands incl. autohunt)
+  telegram_backtest_bot.py  — Main bot (5000+ lines, /autohunt /ml /evolve /generate)
+  ml_strategy.py            — ML pipeline (RF + GBM, 40+ features, walk-forward OOS)
+  genetic_strategy.py       — Genetic algorithm (failed TV validation — don't trust results)
   brain.py                  — Gemini AI integration
   data_fetcher.py           — Binance data downloader
   binance_client.py         — Binance API wrapper
-  manager.py                — Live trade execution (~400 lines, kill switch, 2% risk, circuit breaker)
-  signal_server.py          — FastAPI webhook server (Pydantic validation)
-  signal_queue.py           — SQLite signal queue (WAL mode, idempotency)
+  manager.py                — Live trade execution (~400 lines, kill switch, circuit breaker)
+  signal_server.py          — FastAPI webhook server
+  signal_queue.py           — SQLite signal queue (WAL mode)
   pine_generator.py         — Pine Script generator
-  comprehensive_backtest.py — Full backtest engine with Sharpe/Sortino/Calmar
-  auto_optimizer.py         — SL/TP/TS parameter optimizer
-  backtest_optimizer.py     — Trade analyzer
-  walk_forward.py           — Walk-forward validation (rolling train/test)
-  metrics.py                — Signal processing metrics
-  event_log.py              — JSONL event logger
-  logger.py                 — Structured JSON logging with rotation
+  walk_forward.py           — Walk-forward validation
 
-run_strategies_batch.py     — Core backtesting engine (19 indicators, 19 signals, TV-matched execution)
-strategies/                 — 22 batch files (batch_01.py - batch_22.py), 260+ strategies
-storage/historical_data/    — 30 parquet files, 6yr data (gitignored, ~80MB)
-storage/checkpoints/        — Auto-save progress for long-running commands
-storage/elite_ranking.json  — Saved optimized strategy params (gitignored)
-storage/autohunt_results.json — Auto-hunt found strategies
-scripts/                    — find_high_trade_strategies.py, optimize_pf.py, param_sweep_engine.py, etc.
-reports/                    — Day reports, weekly report, audit report, CSVs
-archive/                    — Unused but preserved: webhook, core executor, migrations, old runners
-deploy/                     — systemd service file, SSH key (gitignored)
-pine/                       — 65+ TradingView Pine Script files (TV-validated)
+run_strategies_batch.py     — Core backtesting engine (REWRITTEN Mar 31)
+                              Now has: crossover signals, signal-based exits, long+short flipping,
+                              tournament-matched backtester (run_tournament_backtest()),
+                              LONG_EXIT_FUNCTIONS, SHORT_ENTRY_FUNCTIONS
+dashboard.py                — Streamlit dashboard (9 tabs, auto-refresh, Pine Script gen)
+strategies/                 — 22 batch files (batch_01-22), 260+ strategies
+storage/                    — Historical data, ML results, genetic results, autohunt results
+scripts/                    — ml_15m_scan.py, continuous_search.py, run_proven_strategies.py, etc.
+reports/                    — Day reports, weekly report, TV validation results
+pine/                       — 70+ Pine Scripts (rule-based + genetic + TV-first)
+deploy/                     — systemd service, SSH key (gitignored)
 ```
 
 ## Bot Commands (Telegram)
 ```
-Step 1: Backtest
-  /auto all 4h        — Full pipeline: backtest all strats → filter top 20 → optimize → validate
-  /auto all 1h        — Same for 1h timeframe
-  /backtest ETHUSDT_4h 1-5  — Run specific batches on specific asset
-  /comprehensive      — All assets x all timeframes
-  /autohunt           — Auto-find ALPHA/ALPHA++ strategies (Phase 0 proven + Phase 1 brute force)
-  /autohunt stop      — Pause hunt (saves checkpoint)
-  /autohunt resume    — Resume from checkpoint
-  /autohunt status    — Show progress
+Backtesting:
+  /auto all 4h        — Full pipeline: backtest → filter → optimize → validate
+  /backtest ETHUSDT_4h 1-5 — Run specific batches
+  /autohunt           — Auto-find strategies (crossover signals + long/short)
+  /autohunt stop/resume/status
 
-Step 2: Results & Analysis
-  /results             — Last run results (all timeframes)
-  /results 4h          — Filter by timeframe
-  /elite               — Show/run elite strategies (with NDD, Cap@NDD)
-  /analyze             — Gemini AI analysis (uses API quota)
-  /ask <question>      — Ask AI about results
+Strategy Generation:
+  /generate           — 5-method generator (ATR-adaptive, mean reversion, random mutation, high-TP, hybrid)
+  /generate stop
 
-Step 3: Pine Script & Verification
-  /pinescript top 5    — Generate Pine Scripts for top 5 strategies
-  /pinescript <name>   — Generate for specific strategy
+ML Scanner:
+  /ml                 — Start ML scan (RF + GBM, 40+ features, walk-forward OOS)
+  /ml status          — Current progress
+  /ml results         — Top 10 ML strategies
+  /ml stop
 
-Step 4: Management
-  /status              — Bot status, running jobs, config
-  /stop                — Stop current job (checkpoint saved)
-  /restart             — Reset bot internal state
-  /setdefault BTCUSDT_4h — Change default symbol
-  /help                — Command guide
+Genetic Evolution:
+  /evolve start       — Start genetic evolution
+  /evolve status      — Check progress
+  /evolve results     — See results
+
+Results & Info:
+  /results, /results 4h, /elite, /status, /help
 ```
 
-## Server Deployment
+## Server
 ```
 Server: ubuntu@15.207.152.119 (AWS EC2, ap-south-1)
 SSH key: deploy/harsh_server/harsh-key-ap-south-1.pem
-Service: telegram_bot.service (systemd, auto-restart)
-Python: 3.10, venv at /home/ubuntu/Garima/.venv
-Bot runs: python -m src.telegram_backtest_bot
+Bot service: telegram_bot.service (systemd)
+Dashboard: Streamlit on port 8502, accessible via nginx at /dashboard/
+Harsh's system: /home/ubuntu/tradingview_webhook_bot/ (separate project, port 8501)
 
-# Deploy updated code:
-scp -i "deploy/harsh_server/harsh-key-ap-south-1.pem" src/telegram_backtest_bot.py ubuntu@15.207.152.119:/home/ubuntu/Garima/src/telegram_backtest_bot.py
-
-# Deploy multiple files:
-scp -i "deploy/harsh_server/harsh-key-ap-south-1.pem" run_strategies_batch.py ubuntu@15.207.152.119:/home/ubuntu/Garima/
-
-# Restart bot:
+# Deploy + restart:
+scp -i "deploy/harsh_server/harsh-key-ap-south-1.pem" src/telegram_backtest_bot.py ubuntu@15.207.152.119:/home/ubuntu/Garima/src/
 ssh -i "deploy/harsh_server/harsh-key-ap-south-1.pem" ubuntu@15.207.152.119 "sudo systemctl restart telegram_bot"
-
-# Check logs:
-ssh -i "deploy/harsh_server/harsh-key-ap-south-1.pem" ubuntu@15.207.152.119 "sudo journalctl -u telegram_bot -n 30 --no-pager"
 ```
 
-## Key Technical Details
+## Backtester Details (run_strategies_batch.py)
 
-### Backtester (run_strategies_batch.py) — TV-Matched (Mar 29-30)
-- **19 indicators**: EMA8/21/50, SMA20, BB, RSI14, MACD, Stochastic, VWAP, ADX, ATR, Supertrend, Volume, OBV, CCI, Ichimoku, PSAR, MFI, Keltner, Williams %R
-- **19 signal functions**: EMA_Cross, RSI_Oversold, MACD_Cross, BB_Lower, BB_Upper, Volume_Spike, Breakout_20, Stochastic, Supertrend, VWAP, ADX_Trend, Trend_MA50, OBV_Rising, CCI_Oversold, Ichimoku_Bull, PSAR_Bull, MFI_Oversold, Keltner_Lower, Williams_Oversold
-- **Entry**: Next bar open (pending_entry flag) — matches TradingView
-- **Position sizing**: Compounds at 95% of current equity (not fixed) — matches TradingView
-- **Exit**: At actual SL/TP price level, not bar close — matches TradingView
-- **Peak tracking**: From bar high, not close — matches TradingView
-- **Fees**: 0.03% per side (0.06% round-trip) — matches TradingView (FEE=0.0003)
-- **Sharpe**: TV-style daily Sharpe = (mean_daily_return / std_daily_return) x sqrt(252)
-- **Initial capital**: $10,000
-- **min_agreement**: N-of-M signals must fire simultaneously for entry
+### Two Modes:
+1. **Trade-based backtester** (run_backtest) — crossover entry, signal exits, long+short flipping, 0.1% fee
+2. **Tournament-matched backtester** (run_tournament_backtest) — signal×return model matching Harsh's system
 
-### Autohunt System (Mar 29-30)
-- **Phase 0**: Tests proven signal combos (PSAR+EMA+Supertrend core) on all assets/TFs
-- **Phase 1**: Brute force all N-choose-K combinations (sizes 2-6) with min_ag sweep
-- **TF-specific params**: 4h uses SL 0.8-2% TP 3-12%; 1h uses SL 0.4-1% TP 1.2-6%
-- **TF-specific criteria**: 4h strict (PF>=1.6 for TIER_2), 1h relaxed (PF>=1.35 for TIER_2)
-- **Checkpoints**: Every 50 combos, resumes from where it left off
-- **Searches 1h + 4h** (15m disabled for now)
+### 19 Indicators + 19 Signals (all CROSSOVER-based now)
+Signals fire ONCE on crossover, not every bar. Each has matching LONG_EXIT and SHORT_ENTRY functions.
 
-### Alert Bot Grading (User's Live System)
-```
-TIER_1_DEPLOY:   PF >= 2.0, WR >= 50%, MDD < 30%, ROI >= 20%, Sharpe > 0
-TIER_1_MONITOR:  PF >= 1.8, WR >= 50%, Sharpe >= 0.5, ROI >= 15%, MDD < 50%
-TIER_2_DEPLOY:   PF >= 1.6, WR >= 50%, MDD < 40%, ROI >= 10%
-TIER_2_TEST:     PF >= 1.4, WR >= 50%, MDD < 50%, ROI >= 5%
-PAPER_TRADE:     PF >= 1.2, WR >= 45%, ROI >= 2%, MDD < 60%
-```
-Key insight: **PF + WR determine tier, not Sharpe**.
+### Key Lesson
+Tournament-style backtester produces positive results (0.3-1.5%/day) but these DON'T translate to TradingView. The signal×return model is theoretical — TV uses actual trade execution with fees.
 
-### Winning Signal Combo
-- **PSAR_Bull + EMA_Cross + Supertrend + Trend_MA50 + Volume_Spike** (5/5 agree)
-- TP sweet spot: 4-8% for 4h (balances PF vs ROI)
-- Only ETH, ADA, BTC produce reliable TV-matched results
-- BNB, SOL, LINK, XRP, DOT, AVAX, LTC fail PF/WR thresholds on 4h
+## Harsh's System (strategy_tournament.py)
+Located at `/home/ubuntu/tradingview_webhook_bot/`
+- Uses `signal × bar_return` model (NOT individual trades)
+- Risk filters: ADX>20, ATR<2x, cooldown after 3 losses, -3% daily circuit breaker
+- Grading: ALPHA++ (ROI≥0.5%, Sharpe≥3.5, WR≥45%, GDD<35%), ALPHA (ROI≥0.25%, Sharpe≥2.5)
+- 902 strategies tested, 119 ALPHA++, 106 ALPHA
+- **OOS retention: only 18.9%** (headline 1.5%/day → real 0.2-0.3%/day)
+- **TV validation: 0 of 14 strategies profitable on TV**
 
-### Checkpoint System
-- /auto saves progress after each asset (Phase 1) and each strategy (Phase 3)
-- /autohunt saves every 50 combos
-- Saved to storage/checkpoints/ and storage/autohunt_checkpoint.json
-- If stopped, re-running resumes from checkpoint
+## ML Pipeline (src/ml_strategy.py)
+- **Models**: Random Forest (200 trees) + Gradient Boosting (200 estimators)
+- **Features**: 40+ from 19 indicators (returns, distances, slopes, ratios, candle patterns)
+- **Validation**: Walk-forward 70/30 train/test split — OOS results only
+- **Labels**: 1 if price hits TP before SL within N bars, 0 otherwise
+- **Best result**: 0.178%/day on ADA 4h (GBM, PF=2.17, WR=55.9%, Acc=73.2%)
+- Currently running 4h scan on server
 
-### Results Storage
-- /auto saves to auto_results_{timeframe}.csv and auto_optimization_results.csv
-- /autohunt saves to storage/autohunt_results.json
-- /results loads from all CSV files + reports/ directory + in-memory results
-- /results {timeframe} filters by 15m/1h/4h
+## Dashboard (dashboard.py)
+Live at `http://15.207.152.119/dashboard/` (via nginx reverse proxy)
+- 9 tabs: Analytics, ML Scanner, Genetic Evolution, Generator, Strategy Builder, Pine Script Gen, Monte Carlo, Parameter Heatmap, Architecture
+- Auto-refreshes every 30 seconds
+- Sidebar: metrics + Pine Script dropdown with 10 pre-built scripts
+- Interactive strategy builder: select signals → run backtest → equity curve
 
-### Pine Script Generator
-- Generates TradingView-compatible Pine Script v5
-- Includes JSON webhook alert_message for live trading
-- Uses strategy.cash qty type
-- min_agreement mapped correctly (>= N, not AND)
-- Position sizing 95% of equity (matching backtester)
-- 65+ pine scripts in pine/ directory, TV-validated
+## TV Validation Results (CRITICAL)
+All strategies tested on TradingView showed UNPROFITABLE results:
+- 14 Harsh strategies on 15m: 0 profitable (all -90% to -100%)
+- 14 Harsh strategies on 1h: 1 barely profitable (MACD_Breakout FIL +28.7%)
+- 5 TV-first scripts on 15m: 0 profitable (all -70% to -100%)
+- 3 genetic algo scripts on 4h: 0 profitable (all -12% to -65%)
 
-## Bugs Fixed
+**Only proven approach: build directly on TV, validate there, never trust backtester numbers alone.**
 
-### Mar 24 (Day 1)
-1. Trailing stop never tracked peak — CRITICAL
-2. SL/TP checked at close only — now uses high/low for intrabar stops
-3. Fees only on exit — now both entry + exit
-4. Bollinger Bands wrong stdev — ddof=1 to ddof=0
-5. Breakout_20 included current bar — now uses [1:] for lookback
-6. Exit threshold hardcoded to 0 — now matches min_agreement
-7. VWAP fallback assumed 15m — now timeframe-aware
-
-### Mar 26 (Day 2)
-8. `/results 4h` showing no results — bot only searched root dir, added reports/ scanning
-9. Column name normalization for different CSV formats
-
-### Mar 29 (Day 3)
-10. Bot Sharpe inflated 5-10x vs TV — was per-trade, fixed to daily Sharpe
-11. Walk-forward showed SOL overfit (282%/yr on TV, -10.7% OOS) — dropped SOL
-12. Kill switch test sending real Telegram messages — fixed with mocking
-13. Gross DD dividing by initial_capital instead of peak_equity — fixed
-14. Net DD returning 0 for negative results — fixed
-
-### Mar 30 (Day 4) — MAJOR REWRITE
-15. Bot entry at current close, TV at next bar open — rewrote with pending_entry flag
-16. Bot fixed capital sizing, TV compounds — changed to 95% equity / entry_price
-17. Bot exit at close price, TV at SL/TP level — exit at actual sl_price/tp_price
-18. Peak tracking from close instead of high — changed to track from high
-19. Fee 0.1% per side (3x TV) — changed to 0.03% per side (FEE=0.0003)
-20. Cap@NDD showing $10,000 for all — key mismatch `Net_DD_Capital` vs `Capital_At_Net_DD` fixed
-21. Pine Script position sizing was 10% — changed to 95%
-22. Autohunt Phase 1 using undefined `PARAMS` variable — fixed to `PARAMS_BY_TF`
-23. Autohunt only searching 4h — added 1h with TF-specific params and relaxed criteria
-24. `pine_backtest` import crash — changed to optional import with graceful fallback
-
-## 14 Deployed Strategies (TV-Validated, as of Mar 30)
-| # | Strategy | Asset | TF | PF | WR% | ROI%/yr | Tier |
-|---|----------|-------|----|----|-----|---------|------|
-| 1 | tv_04_TP8 | ETH | 4h | 1.87 | 62.4 | 112.3 | TIER_1_MONITOR |
-| 2 | 44_PSAR_Vol_Surge | BTC | 4h | 1.87 | 46.1 | 107.7 | TIER_1_MONITOR |
-| 3 | tv_03_TP6 | ETH | 4h | 1.73 | 52.4 | 109.6 | TIER_2_DEPLOY |
-| 4 | tv_12_PSAR_EMA_Vol | ADA | 4h | 1.72 | 52.5 | 102.4 | TIER_2_DEPLOY |
-| 5 | tv_02_TP5 | ETH | 4h | 1.73 | — | — | TIER_2_DEPLOY |
-| 6 | tv_01_TP4 | ETH | 4h | 1.73 | — | — | TIER_2_DEPLOY |
-| 7 | tv_04_TP8 | ADA | 4h | 1.73 | — | — | TIER_2_DEPLOY |
-| 8 | 56_PSAR_Vol_Tight | ETH | 4h | 1.68 | 61.1 | 93.0 | TIER_2_DEPLOY |
-| 9 | 57_PSAR_Vol_Ultra | ETH | 4h | 1.63 | 63.4 | 69.1 | TIER_2_DEPLOY |
-| 10 | tv_11_ADA_TP9 | ADA | 4h | 1.50 | 52.3 | 112.1 | TIER_2_TEST |
-| 11 | alpha_04_Ichi_PSAR | ETH | 4h | 1.56 | ~55 | 55.8 | TIER_2_TEST |
-| 12 | 56_PSAR_Vol_Tight | BTC | 4h | 1.51 | 50.8 | — | TIER_2_TEST |
-| 13 | tv_04_TP8 | LINK | 4h | 1.25 | 48.9 | — | TIER_2_TEST |
-| 14 | tv_03_TP6 | BTC | 4h | — | — | — | TIER_2_TEST |
+## Bugs Fixed (28 total across 6 days)
+Days 1-4: 24 bugs (trailing stop, SL/TP, fees, entry timing, sizing, DD calc, etc.)
+Day 5 (Mar 31): Backtester rewrite — crossover signals, signal exits, L/S flipping
+Day 6 (Apr 1): Tournament backtester matching, TV validation proving gap
 
 ## Work Completed by Day
+- **Mar 24-25**: Foundation, 7 bug fixes, first backtests
+- **Mar 26**: TV cross-validation, 7 new indicators, 14 signal functions
+- **Mar 29**: Walk-forward, SOL overfit caught, autohunt built
+- **Mar 30**: TV-match rewrite, 14 strategies deployed, 65+ Pine Scripts
+- **Mar 31**: ML pipeline, genetic algo (failed), dashboard (9 tabs), backtester rewrite #2
+- **Apr 1**: Read Harsh's tournament code, found signal×return model mismatch, TV validated all strategies (all failed), ML 4h scan running
 
-### Day 1 — Mar 24-25: Foundation & Bug Fixes
-- Fixed 7 critical backtester bugs (trailing stop, SL/TP, fees, etc.)
-- `/results 4h` bug fixed (was not scanning reports/ directory)
-- Ran full `/auto all 1h` — 200 results across 10 assets
-- Ran backtests on 15m (locally) and 1h (on bot)
-- Created mid-day report with executive summary
-- Completed P0 audit items (data integrity, fee accuracy)
-
-### Day 2 — Mar 26: TradingView Cross-Validation & New Indicators
-- Generated Pine Scripts for top strategies
-- TV cross-validation revealed bot vs TV mismatches
-- Added 7 new indicators: OBV, CCI, Ichimoku, PSAR, MFI, Keltner, Williams %R
-- Added 14 new signal functions (7 long + 7 short)
-- Created strategies batch_21 (12 strategies) and batch_22 (16 TV-validated alpha)
-- Categorized strategies into high-return and moderate-return sets
-
-### Day 3 — Mar 29: Walk-Forward Validation & Alpha Hunting
-- Walk-forward validation (rolling train/test windows) on all assets
-- Discovered SOL overfit: 282%/yr on TV but -10.7% OOS — dropped from deploy list
-- Fixed bot Sharpe calculation (was 5-10x inflated vs TV)
-- Added NDD date, Cap@NDD columns to /elite and /results
-- Fixed gross DD and net DD calculation bugs
-- Built autohunt system with Phase 0 (proven combos) + Phase 1 (brute force)
-- Identified PF + WR as tier-determining metrics, not Sharpe
-- Found TP sweet spot: 4-8% balances PF and ROI
-- Identified winning signal combo: PSAR + EMA_Cross + Supertrend + Trend_MA50 + Volume_Spike
-
-### Day 4 — Mar 30: TV-Matched Backtester Rewrite & Live Deployment
-- **Major backtester rewrite** to match TradingView execution exactly:
-  - Entry at next bar open (pending_entry flag)
-  - Compound position sizing (95% equity)
-  - Exit at actual SL/TP price level
-  - Peak tracking from high
-  - Fee changed to 0.03% per side (0.06% round-trip)
-- PF accuracy improved from ~50% off to within 2% of TV
-- Generated 65+ Pine Scripts for TradingView
-- Created 14 deployable strategies (2 TIER_1, 7 TIER_2_DEPLOY, 5 TIER_2_TEST)
-- TP sweep on all 9 remaining assets — only ADA showed candidates
-- Updated autohunt: added 1h timeframe, TF-specific params, relaxed criteria
-- Fixed Phase 1 using undefined PARAMS variable
-- Fixed pine_backtest import crash
-- Created weekly report (Mar 23-30) with day-by-day breakdown
-- Updated PROJECT_CONTEXT.md
-- 4 git commits covering all changes
-- Running high-trade-count strategy sweep for 4h + 1h
-
-## Data
-- 10 assets x 3 timeframes = 30 parquet files
-- Period: 2020-01-01 to 2026-03-21 (~6 years)
-- Downloaded via scripts/fetch_6yr_data.py (paginated Binance API, 1000 candles/batch)
-- SOL/AVAX/DOT start later (Aug-Sep 2020)
-- Data lives locally + on server, NOT in git (gitignored)
-
-## Known Issues / Limitations
-1. Only ETH, ADA, BTC produce reliable TV-matched results on 4h
-2. 1h and 15m strategies have not yet produced TIER_1/TIER_2 results (work in progress)
-3. Bot processes commands sequentially — don't use two Telegram chats simultaneously
-4. /restart only resets internal state, does NOT reload Python code (need systemctl restart)
-5. Gemini AI free tier has quota limits — only called on /analyze and /ask
-6. 15m backtests are slow (~217k candles x 260 strats) — run overnight
-7. All strategies are LONG only — no short selling
-8. Live execution path needs senior approval (API key, capital, server upgrade)
-9. Paper trade the 14 deployed strategies for 1 week before going live
-
-## ROI Definitions
-- ROI% in /results = ROI per annum (annualized compound return)
-- ROI_Percent in CSV = total return over entire backtest period
-- Daily ROI = ROI_per_annum / 365
-- For 1%/day target, need 365%/yr — very aggressive, few strategies hit this honestly
-- TV-style Sharpe = (mean_daily_return / std_daily_return) x sqrt(252)
+## Next Steps (Priority Order)
+1. **Add risk filters to Pine Scripts** (ADX, ATR, cooldown, circuit breaker) — this is what makes strategies profitable
+2. **TV-first approach** — build strategies on TV, validate there, bring back
+3. **Funding rate arbitrage** as supplement (0.03-0.15%/day, low risk)
+4. **Focus on 4h timeframe only** — 15m and 1h don't work on TV
+5. User has Binance testnet API key ready for paper trading
 
 ## What NOT to Do
-- Don't run /auto without "all" — it only tests default symbol
-- Don't SCP from the server SSH session — run from local PowerShell
-- Don't run systemctl commands locally — they're for the server
-- Don't trust results without TV cross-verification
-- Don't deploy to live trading without senior approval
-- Don't use SOL for strategies — overfits badly
+- Don't trust backtester results without TV validation
+- Don't use 15m timeframe — all strategies fail on TV
+- Don't use genetic algorithm results — they're overfit
+- Don't use tournament numbers as-is — they're theoretical (signal×return model)
+- Don't use SOL — overfits badly
+- Don't run heavy processes locally — use server only (user's machine crashes)

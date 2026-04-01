@@ -1,0 +1,110 @@
+//@version=5
+// REGIME-ADAPTIVE: Detects bull/bear/sideways, uses different logic per regime
+// Bull: ride trend (breakout entry). Bear: short trend. Sideways: mean reversion
+// Test on: ETHUSDT, ADAUSDT, BTCUSDT — 4h
+strategy("Regime Adaptive Pro", overlay=true,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     commission_type=strategy.commission.percent, commission_value=0.1)
+
+// ── REGIME DETECTION ──
+ema50 = ta.ema(close, 50)
+ema200 = ta.ema(close, 200)
+[diplus, diminus, adx] = ta.dmi(14, 14)
+
+// Regime: Bull = EMA50 > EMA200 + ADX > 25
+//         Bear = EMA50 < EMA200 + ADX > 25
+//         Sideways = ADX < 20
+is_bull = ema50 > ema200 and adx > 25
+is_bear = ema50 < ema200 and adx > 25
+is_sideways = adx < 20
+
+// ── ATR + Volatility ──
+atr14 = ta.atr(14)
+atr_ma = ta.sma(atr14, 100)
+vol_ok = atr14 < atr_ma * 2
+
+// ── BULL REGIME: Breakout + momentum ──
+breakout_long = ta.crossover(close, ta.highest(high, 20)[1]) and volume > ta.sma(volume, 20) * 1.3
+rsi = ta.rsi(close, 14)
+[macd_line, signal_line, hist] = ta.macd(close, 12, 26, 9)
+
+// ── BEAR REGIME: Breakdown + momentum ──
+breakdown_short = ta.crossunder(close, ta.lowest(low, 20)[1]) and volume > ta.sma(volume, 20) * 1.3
+
+// ── SIDEWAYS REGIME: Mean reversion ──
+bb_basis = ta.sma(close, 20)
+bb_dev = ta.stdev(close, 20) * 2
+bb_upper = bb_basis + bb_dev
+bb_lower = bb_basis - bb_dev
+mean_rev_long = close < bb_lower and rsi < 35 and rsi > rsi[1]
+mean_rev_short = close > bb_upper and rsi > 65 and rsi < rsi[1]
+
+// ── ANTI-OVERTRADING ──
+var int trades_today = 0
+var int consec_losses = 0
+var int cooldown = 0
+var float day_equity = strategy.equity
+
+is_new_day = ta.change(time("D")) != 0
+if is_new_day
+    trades_today := 0
+    day_equity := strategy.equity
+
+if cooldown > 0
+    cooldown -= 1
+
+was_closed = (strategy.position_size[1] != 0 and strategy.position_size == 0)
+if was_closed
+    trades_today += 1
+    if strategy.netprofit < strategy.netprofit[1]
+        consec_losses += 1
+        if consec_losses >= 3
+            cooldown := 6  // 1 day on 4h
+            consec_losses := 0
+    else
+        consec_losses := 0
+
+daily_pnl = (strategy.equity - day_equity) / day_equity
+can_trade = trades_today < 3 and cooldown == 0 and daily_pnl > -0.03 and vol_ok
+
+// ── EXECUTION ──
+if can_trade
+    // BULL regime
+    if is_bull and breakout_long and strategy.position_size <= 0
+        strategy.entry("Long", strategy.long)
+        strategy.exit("L_Exit", "Long", stop=close * 0.97, limit=close * 1.06)
+
+    if is_bull and ta.crossunder(macd_line, signal_line) and strategy.position_size > 0
+        strategy.close("Long")
+
+    // BEAR regime
+    if is_bear and breakdown_short and strategy.position_size >= 0
+        strategy.entry("Short", strategy.short)
+        strategy.exit("S_Exit", "Short", stop=close * 1.03, limit=close * 0.94)
+
+    if is_bear and ta.crossover(macd_line, signal_line) and strategy.position_size < 0
+        strategy.close("Short")
+
+    // SIDEWAYS regime
+    if is_sideways and mean_rev_long and strategy.position_size <= 0
+        strategy.entry("MR_Long", strategy.long)
+        strategy.exit("MR_L_Exit", "MR_Long", stop=close * 0.985, limit=close * 1.02)
+
+    if is_sideways and mean_rev_short and strategy.position_size >= 0
+        strategy.entry("MR_Short", strategy.short)
+        strategy.exit("MR_S_Exit", "MR_Short", stop=close * 1.015, limit=close * 0.98)
+
+// ── VISUALS ──
+bgcolor(is_bull ? color.new(color.green, 92) : is_bear ? color.new(color.red, 92) : color.new(color.gray, 95))
+plot(ema50, "EMA50", color.blue, 2)
+plot(ema200, "EMA200", color.orange, 2)
+
+var table info = table.new(position.top_right, 2, 3, bgcolor=color.new(color.black, 80))
+if barstate.islast
+    table.cell(info, 0, 0, "Regime", text_color=color.white, text_size=size.small)
+    table.cell(info, 1, 0, is_bull ? "BULL" : is_bear ? "BEAR" : "SIDEWAYS", text_color=is_bull ? color.green : is_bear ? color.red : color.gray, text_size=size.small)
+    table.cell(info, 0, 1, "ADX", text_color=color.white, text_size=size.small)
+    table.cell(info, 1, 1, str.tostring(math.round(adx, 1)), text_color=adx > 25 ? color.green : color.gray, text_size=size.small)
+    table.cell(info, 0, 2, "Trades/Day", text_color=color.white, text_size=size.small)
+    table.cell(info, 1, 2, str.tostring(trades_today) + "/3", text_color=color.white, text_size=size.small)

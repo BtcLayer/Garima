@@ -1,0 +1,54 @@
+//@version=5
+// TV-FIRST Strategy 04: Ichimoku Cloud + Tenkan/Kijun Cross + ADX
+// Test on: NEARUSDT, FILUSDT, LDOUSDT, OPUSDT — 15m timeframe
+strategy("Ichimoku Cloud ADX", overlay=true,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     commission_type=strategy.commission.percent, commission_value=0.1)
+
+// Ichimoku
+tenkan_len = input.int(9, "Tenkan")
+kijun_len = input.int(26, "Kijun")
+displacement = input.int(26, "Displacement")
+
+tenkan = (ta.highest(high, tenkan_len) + ta.lowest(low, tenkan_len)) / 2
+kijun = (ta.highest(high, kijun_len) + ta.lowest(low, kijun_len)) / 2
+senkou_a = (tenkan + kijun) / 2
+senkou_b = (ta.highest(high, 52) + ta.lowest(low, 52)) / 2
+cloud_top = math.max(senkou_a[displacement], senkou_b[displacement])
+cloud_bot = math.min(senkou_a[displacement], senkou_b[displacement])
+chikou_ref = close[displacement]
+
+// ADX + ATR
+[diplus, diminus, adx] = ta.dmi(14, 14)
+atr14 = ta.atr(14)
+atr_ma = ta.sma(atr14, 100)
+adx_ok = adx > 20
+vol_ok = atr14 < atr_ma * 2
+
+// Entry
+long_entry = close > cloud_top and ta.crossover(tenkan, kijun) and close > chikou_ref and adx_ok and vol_ok
+short_entry = close < cloud_bot and ta.crossunder(tenkan, kijun) and adx_ok and vol_ok
+
+// Exit
+long_exit = ta.crossunder(tenkan, kijun) or close < cloud_bot
+short_exit = ta.crossover(tenkan, kijun) or close > cloud_top
+
+// Execution
+if long_entry and strategy.position_size <= 0
+    strategy.entry("Long", strategy.long)
+if short_entry and strategy.position_size >= 0
+    strategy.entry("Short", strategy.short)
+if long_exit and strategy.position_size > 0
+    strategy.close("Long")
+if short_exit and strategy.position_size < 0
+    strategy.close("Short")
+
+// Visuals
+plot(tenkan, "Tenkan", color.blue)
+plot(kijun, "Kijun", color.red)
+p1 = plot(senkou_a, "Senkou A", color.new(color.green, 70), offset=displacement)
+p2 = plot(senkou_b, "Senkou B", color.new(color.red, 70), offset=displacement)
+fill(p1, p2, color=senkou_a >= senkou_b ? color.new(color.green, 90) : color.new(color.red, 90))
+plotshape(long_entry, "Buy", shape.triangleup, location.belowbar, color.lime, size=size.tiny)
+plotshape(short_entry, "Sell", shape.triangledown, location.abovebar, color.red, size=size.tiny)
