@@ -121,6 +121,15 @@ ML Scored approach (quality score 0-100) found:
 
 ---
 
+## Git Status
+- All code pushed to `Trading_bot` branch on GitHub
+- Historical data (86MB) gitignored — README added with download instructions
+- Complete optimization process doc created (English + Hinglish)
+- TV validation comparison (1h vs 15m) created for senior
+- 2 ML scans running overnight on server (persistent + hybrid)
+
+---
+
 ## Tomorrow's Plan
 1. Check overnight ML results (persistent + hybrid)
 2. TV validate LTC 0.366%/day strategy
