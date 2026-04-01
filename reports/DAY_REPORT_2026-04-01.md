@@ -99,10 +99,32 @@ ML Scored approach (quality score 0-100) found:
 
 ---
 
+## End of Day Activities
+
+### 1. Visiting Top Strategy in TradingView
+- Testing ML Scored LTC 0.366%/day strategy directly on TV
+- Validating InsideBar Breakout ETH 0.168%/day
+- Checking Regime Adaptive and Triple Flip strategies
+
+### 2. Sharing Optimization Process with Harsh
+- Explained tournament backtester vs TV gap (signal×return vs real trades)
+- Shared 1h vs 15m TV validation comparison
+- Key finding: tournament's risk filters work on return stream, not on actual trades
+- Recommendation: TV-first approach for all future strategies
+
+### 3. AlgoEdge Platform (edgeconnect-new.algoedge.io)
+- Explored trading dashboard with Harsh
+- Found 6 live signals: IV, OI, Price Action, Put-Call Ratio, Volume, VWAP Deviation
+- 5 strategy types: Pairs L/S, Sector Rotation, ORB Breakout, Crossover, RSI Reversion
+- Data API available for stock/options (equity-focused, not crypto)
+- Useful strategy concepts (ORB Breakout, Pairs) to implement for crypto tomorrow
+
+---
+
 ## Tomorrow's Plan
 1. Check overnight ML results (persistent + hybrid)
 2. TV validate LTC 0.366%/day strategy
-3. Implement ORB Breakout for crypto (from AlgoEdge)
+3. Implement ORB Breakout for crypto (from AlgoEdge concept)
 4. Implement Pairs trading (long ETH / short BTC)
 5. Compile best 10 strategies for senior presentation
 6. Push to main branch
