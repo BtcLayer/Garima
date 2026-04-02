@@ -1,0 +1,148 @@
+//@version=5
+// ML SCORED STRATEGY — LTCUSDT 4h
+// Backtester: 0.366%/day, PF=1.80, WR=53.3%, 90 trades
+// Based on ML feature importance: ATR%, EMA trend, Volume, MACD, ADX, OBV
+// ML Score > 60 = enter trade (high quality setup)
+strategy("LTC ML Scored", overlay=true,
+     initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=95,
+     commission_type=strategy.commission.percent, commission_value=0.1)
+
+// ── INPUTS ──
+tp_pct = input.float(6.0, "Take Profit %") / 100
+sl_pct = input.float(3.0, "Stop Loss %") / 100
+score_threshold = input.int(4, "Min Score (out of 7)", minval=1, maxval=7)
+
+// ── INDICATORS (matching ML's top features) ──
+// 1. ATR % (most important — 11.9%)
+atr14 = ta.atr(14)
+atr_pct = atr14 / close * 100
+atr_expanding = atr_pct > ta.sma(atr_pct, 20)  // volatility expanding = opportunity
+
+// 2. EMA Trend (10% importance)
+ema21 = ta.ema(close, 21)
+ema50 = ta.ema(close, 50)
+ema8 = ta.ema(close, 8)
+trend_up = ema21 > ema50 and ema8 > ema21
+trend_down = ema21 < ema50 and ema8 < ema21
+
+// 3. Volume (9.2% importance)
+vol_ratio = volume / ta.sma(volume, 20)
+vol_confirm = vol_ratio > 1.2
+
+// 4. MACD (7% importance)
+[macd_line, signal_line, hist] = ta.macd(close, 12, 26, 9)
+macd_bull = hist > 0 and hist > hist[1]
+macd_bear = hist < 0 and hist < hist[1]
+
+// 5. ADX (6.4% importance)
+[diplus, diminus, adx] = ta.dmi(14, 14)
+adx_trending = adx > 20
+
+// 6. OBV (6.1% importance)
+obv = ta.cum(math.sign(ta.change(close)) * volume)
+obv_sma = ta.sma(obv, 20)
+obv_bull = obv > obv_sma
+
+// 7. BB Width (5.1% importance — squeeze detection)
+bb_basis = ta.sma(close, 20)
+bb_dev = ta.stdev(close, 20) * 2
+bb_width = (bb_basis + bb_dev - (bb_basis - bb_dev)) / close
+bb_expanding = bb_width > bb_width[1]  // bands expanding = breakout
+
+// ── QUALITY SCORE (0-7) ──
+// Each condition = 1 point. ML enters when score >= threshold
+score_long = 0
+score_long += atr_expanding ? 1 : 0
+score_long += trend_up ? 1 : 0
+score_long += vol_confirm ? 1 : 0
+score_long += macd_bull ? 1 : 0
+score_long += adx_trending ? 1 : 0
+score_long += obv_bull ? 1 : 0
+score_long += bb_expanding ? 1 : 0
+
+score_short = 0
+score_short += atr_expanding ? 1 : 0
+score_short += trend_down ? 1 : 0
+score_short += vol_confirm ? 1 : 0
+score_short += macd_bear ? 1 : 0
+score_short += adx_trending ? 1 : 0
+score_short += not obv_bull ? 1 : 0
+score_short += bb_expanding ? 1 : 0
+
+// ── ANTI-OVERTRADING ──
+var int trades_today = 0
+var int consec_losses = 0
+var int cooldown = 0
+var float day_equity = strategy.equity
+
+is_new_day = ta.change(time("D")) != 0
+if is_new_day
+    trades_today := 0
+    day_equity := strategy.equity
+
+if cooldown > 0
+    cooldown -= 1
+
+was_closed = (strategy.position_size[1] != 0 and strategy.position_size == 0)
+if was_closed
+    trades_today += 1
+    if strategy.netprofit < strategy.netprofit[1]
+        consec_losses += 1
+        if consec_losses >= 3
+            cooldown := 6
+            consec_losses := 0
+    else
+        consec_losses := 0
+
+daily_pnl = (strategy.equity - day_equity) / day_equity
+can_trade = trades_today < 3 and cooldown == 0 and daily_pnl > -0.03
+
+// ── ENTRY ──
+long_entry = score_long >= score_threshold and can_trade
+short_entry = score_short >= score_threshold and can_trade
+
+// Only enter on score INCREASE (not every bar while high)
+long_fresh = long_entry and not (score_long[1] >= score_threshold)
+short_fresh = short_entry and not (score_short[1] >= score_threshold)
+
+// ── EXECUTION ──
+if long_fresh and strategy.position_size <= 0
+    strategy.entry("Long", strategy.long)
+    strategy.exit("L_Exit", "Long",
+         stop=close * (1 - sl_pct),
+         limit=close * (1 + tp_pct))
+
+if short_fresh and strategy.position_size >= 0
+    strategy.entry("Short", strategy.short)
+    strategy.exit("S_Exit", "Short",
+         stop=close * (1 + sl_pct),
+         limit=close * (1 - tp_pct))
+
+// Exit on score drop
+if score_long < 2 and strategy.position_size > 0
+    strategy.close("Long")
+if score_short < 2 and strategy.position_size < 0
+    strategy.close("Short")
+
+// ── VISUALS ──
+plot(ema8, "EMA8", color.blue)
+plot(ema21, "EMA21", color.orange)
+plot(ema50, "EMA50", color.gray, 2)
+bgcolor(long_fresh ? color.new(color.green, 85) : short_fresh ? color.new(color.red, 85) : na)
+plotshape(long_fresh, "Buy", shape.triangleup, location.belowbar, color.lime, size=size.small)
+plotshape(short_fresh, "Sell", shape.triangledown, location.abovebar, color.red, size=size.small)
+
+// Score display
+var table info = table.new(position.top_right, 2, 5, bgcolor=color.new(color.black, 80))
+if barstate.islast
+    table.cell(info, 0, 0, "Long Score", text_color=color.white, text_size=size.small)
+    table.cell(info, 1, 0, str.tostring(score_long) + "/7", text_color=score_long >= score_threshold ? color.green : color.gray, text_size=size.small)
+    table.cell(info, 0, 1, "Short Score", text_color=color.white, text_size=size.small)
+    table.cell(info, 1, 1, str.tostring(score_short) + "/7", text_color=score_short >= score_threshold ? color.red : color.gray, text_size=size.small)
+    table.cell(info, 0, 2, "ADX", text_color=color.white, text_size=size.small)
+    table.cell(info, 1, 2, str.tostring(math.round(adx, 1)), text_color=adx_trending ? color.green : color.gray, text_size=size.small)
+    table.cell(info, 0, 3, "Vol Ratio", text_color=color.white, text_size=size.small)
+    table.cell(info, 1, 3, str.tostring(math.round(vol_ratio, 1)) + "x", text_color=vol_confirm ? color.green : color.gray, text_size=size.small)
+    table.cell(info, 0, 4, "Trades/Day", text_color=color.white, text_size=size.small)
+    table.cell(info, 1, 4, str.tostring(trades_today) + "/3", text_color=color.white, text_size=size.small)

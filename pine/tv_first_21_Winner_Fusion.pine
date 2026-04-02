@@ -1,0 +1,106 @@
+//@version=5
+// WINNER FUSION — takes ALL 4 TV-winning signals, enters when 2+ agree
+// Regime (8.1%) + MACD (4.76%) + Squeeze (3.94%) + Triple EMA (2.87%)
+// Hypothesis: combining winners = stronger signal = higher returns
+// Test on: BTCUSDT, ETHUSDT — 4h
+strategy("Winner Fusion", overlay=true, initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=95,
+     commission_type=strategy.commission.percent, commission_value=0.1)
+
+min_signals = input.int(2, "Min Signals to Enter", minval=1, maxval=4)
+
+// ── Signal 1: Regime (from Regime Adaptive — winner #1) ──
+ema50 = ta.ema(close, 50)
+ema200 = ta.ema(close, 200)
+[diplus, diminus, adx] = ta.dmi(14, 14)
+rsi = ta.rsi(close, 14)
+regime_bull = ema50 > ema200 and adx > 25
+regime_bear = ema50 < ema200 and adx > 25
+// Breakout in bull, breakdown in bear
+s1_long = regime_bull and ta.crossover(close, ta.highest(high, 20)[1]) and volume > ta.sma(volume, 20) * 1.3
+s1_short = regime_bear and ta.crossunder(close, ta.lowest(low, 20)[1]) and volume > ta.sma(volume, 20) * 1.3
+
+// ── Signal 2: MACD (from MACD V2 — winner #2) ──
+[macd_line, signal_line, hist] = ta.macd(close, 12, 26, 9)
+s2_long = (macd_line > 0 and macd_line[1] <= 0 and close > ema200 and adx > 20) or (ta.crossover(macd_line, signal_line) and hist > 0 and adx > 25)
+s2_short = (macd_line < 0 and macd_line[1] >= 0 and close < ema200 and adx > 20) or (ta.crossunder(macd_line, signal_line) and hist < 0 and adx > 25)
+
+// ── Signal 3: Squeeze (from Squeeze Momentum — winner #3) ──
+bb_upper = ta.sma(close, 20) + ta.stdev(close, 20) * 2
+bb_lower = ta.sma(close, 20) - ta.stdev(close, 20) * 2
+kc_upper = ta.ema(close, 20) + 1.5 * ta.atr(20)
+kc_lower = ta.ema(close, 20) - 1.5 * ta.atr(20)
+squeeze_release = not (bb_upper < kc_upper and bb_lower > kc_lower) and (bb_upper[1] < kc_upper[1] and bb_lower[1] > kc_lower[1])
+mom = ta.linreg(close - ta.sma(close, 20), 20, 0)
+s3_long = squeeze_release and mom > 0 and adx > 15
+s3_short = squeeze_release and mom < 0 and adx > 15
+
+// ── Signal 4: Triple EMA (from Triple EMA ADX — winner #4) ──
+ema8 = ta.ema(close, 8)
+ema21 = ta.ema(close, 21)
+bull_aligned = ema8 > ema21 and ema21 > ema50 and adx > 25
+bear_aligned = ema8 < ema21 and ema21 < ema50 and adx > 25
+s4_long = bull_aligned and not bull_aligned[1] and rsi > 45
+s4_short = bear_aligned and not bear_aligned[1] and rsi < 55
+
+// ── Score: count how many winners agree ──
+long_score = (s1_long ? 1 : 0) + (s2_long ? 1 : 0) + (s3_long ? 1 : 0) + (s4_long ? 1 : 0)
+short_score = (s1_short ? 1 : 0) + (s2_short ? 1 : 0) + (s3_short ? 1 : 0) + (s4_short ? 1 : 0)
+
+// ── ATR filter ──
+atr14 = ta.atr(14)
+atr_ma = ta.sma(atr14, 100)
+vol_ok = atr14 < atr_ma * 2
+
+long_entry = long_score >= min_signals and vol_ok
+short_entry = short_score >= min_signals and vol_ok
+
+// ── Anti-overtrading ──
+var int trades_today = 0
+var int consec_losses = 0
+var int cooldown = 0
+var float day_equity = strategy.equity
+is_new_day = ta.change(time("D")) != 0
+if is_new_day
+    trades_today := 0
+    day_equity := strategy.equity
+if cooldown > 0
+    cooldown -= 1
+was_closed = strategy.position_size[1] != 0 and strategy.position_size == 0
+if was_closed
+    trades_today += 1
+    if strategy.netprofit < strategy.netprofit[1]
+        consec_losses += 1
+        if consec_losses >= 3
+            cooldown := 6
+            consec_losses := 0
+    else
+        consec_losses := 0
+daily_pnl = (strategy.equity - day_equity) / day_equity
+can_trade = trades_today < 3 and cooldown == 0 and daily_pnl > -0.03
+
+// ── Execution ──
+if long_entry and can_trade and strategy.position_size <= 0
+    strategy.entry("Long", strategy.long)
+    strategy.exit("L_X", "Long", stop=close * 0.97, limit=close * 1.06)
+if short_entry and can_trade and strategy.position_size >= 0
+    strategy.entry("Short", strategy.short)
+    strategy.exit("S_X", "Short", stop=close * 1.03, limit=close * 0.94)
+if long_score < 1 and strategy.position_size > 0
+    strategy.close("Long")
+if short_score < 1 and strategy.position_size < 0
+    strategy.close("Short")
+
+// ── Visuals ──
+plot(ema50, "EMA50", color.blue, 2)
+plot(ema200, "EMA200", color.orange, 2)
+bgcolor(long_entry and can_trade ? color.new(color.green, 85) : short_entry and can_trade ? color.new(color.red, 85) : na)
+plotshape(long_entry and can_trade, "Buy", shape.triangleup, location.belowbar, color.lime, size=size.small)
+plotshape(short_entry and can_trade, "Sell", shape.triangledown, location.abovebar, color.red, size=size.small)
+
+var table info = table.new(position.top_right, 2, 2, bgcolor=color.new(color.black, 80))
+if barstate.islast
+    table.cell(info, 0, 0, "Long Score", text_color=color.white, text_size=size.small)
+    table.cell(info, 1, 0, str.tostring(long_score) + "/4", text_color=long_score >= min_signals ? color.green : color.gray, text_size=size.small)
+    table.cell(info, 0, 1, "Short Score", text_color=color.white, text_size=size.small)
+    table.cell(info, 1, 1, str.tostring(short_score) + "/4", text_color=short_score >= min_signals ? color.red : color.gray, text_size=size.small)

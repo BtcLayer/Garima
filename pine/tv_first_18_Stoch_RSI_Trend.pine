@@ -1,0 +1,57 @@
+//@version=5
+// Stochastic + RSI Double Bounce in Trend
+// Both oversold indicators bounce together + price in uptrend = strong entry
+// Test on: ETHUSDT, ADAUSDT, SOLUSDT, XRPUSDT — 4h
+strategy("Stoch RSI Trend Bounce", overlay=true, initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     commission_type=strategy.commission.percent, commission_value=0.1)
+
+rsi = ta.rsi(close, 14)
+stoch_k = ta.stoch(close, high, low, 14)
+ema50 = ta.ema(close, 50)
+ema200 = ta.ema(close, 200)
+[diplus, diminus, adx] = ta.dmi(14, 14)
+atr14 = ta.atr(14)
+atr_ma = ta.sma(atr14, 100)
+
+// Double bounce: both RSI and Stoch cross up from oversold
+rsi_bounce = rsi > 30 and rsi[1] <= 30
+stoch_bounce = stoch_k > 20 and stoch_k[1] <= 20
+rsi_drop = rsi < 70 and rsi[1] >= 70
+stoch_drop = stoch_k < 80 and stoch_k[1] >= 80
+
+trend_up = close > ema50 and ema50 > ema200
+trend_down = close < ema50 and ema50 < ema200
+
+long_entry = (rsi_bounce or stoch_bounce) and (rsi < 40 or stoch_k < 30) and trend_up and adx > 15 and atr14 < atr_ma * 2
+short_entry = (rsi_drop or stoch_drop) and (rsi > 60 or stoch_k > 70) and trend_down and adx > 15 and atr14 < atr_ma * 2
+
+var int trades_today = 0
+var int cooldown = 0
+is_new_day = ta.change(time("D")) != 0
+if is_new_day
+    trades_today := 0
+if cooldown > 0
+    cooldown -= 1
+was_closed = strategy.position_size[1] != 0 and strategy.position_size == 0
+if was_closed
+    trades_today += 1
+    if strategy.netprofit < strategy.netprofit[1]
+        cooldown := 4
+can_trade = trades_today < 3 and cooldown == 0
+
+if long_entry and can_trade and strategy.position_size <= 0
+    strategy.entry("Long", strategy.long)
+    strategy.exit("L_X", "Long", stop=close * 0.975, limit=close * 1.04)
+if short_entry and can_trade and strategy.position_size >= 0
+    strategy.entry("Short", strategy.short)
+    strategy.exit("S_X", "Short", stop=close * 1.025, limit=close * 0.96)
+if rsi > 70 and strategy.position_size > 0
+    strategy.close("Long")
+if rsi < 30 and strategy.position_size < 0
+    strategy.close("Short")
+
+plot(ema50, "EMA50", color.blue, 2)
+plot(ema200, "EMA200", color.gray, 2)
+plotshape(long_entry and can_trade, "Buy", shape.triangleup, location.belowbar, color.lime, size=size.small)
+plotshape(short_entry and can_trade, "Sell", shape.triangledown, location.abovebar, color.red, size=size.small)

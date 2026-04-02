@@ -4962,7 +4962,8 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
             return "ML scanner already running.\n`/ml status` — check progress\n`/ml results` — see results\n`/ml stop` — stop scanner"
 
         # Parse args: /ml [assets] [tf]
-        assets = ["ETHUSDT", "BTCUSDT", "ADAUSDT", "SOLUSDT", "LINKUSDT", "BNBUSDT"]
+        assets = ["ETHUSDT", "BTCUSDT", "ADAUSDT", "SOLUSDT", "LINKUSDT",
+                  "BNBUSDT", "XRPUSDT", "AVAXUSDT", "DOTUSDT", "LTCUSDT"]
         tf_list = ["4h"]
         if args:
             if args[0] in ("1h", "4h", "15m"):
@@ -5066,14 +5067,28 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
 
     def _ml_worker(self, assets, tf_list):
         try:
+            from src.ml_persistent import PersistentML, features_at_entry, collect_trades
             from src.ml_strategy import train_and_evaluate
+            USE_PERSISTENT = True
         except ImportError:
             try:
+                from ml_persistent import PersistentML, features_at_entry, collect_trades
                 from ml_strategy import train_and_evaluate
+                USE_PERSISTENT = True
             except ImportError:
-                self.send_message("ML module not found. Ensure src/ml_strategy.py exists.")
-                self._ml_running = False
-                return
+                USE_PERSISTENT = False
+                try:
+                    from src.ml_strategy import train_and_evaluate
+                except:
+                    try:
+                        from ml_strategy import train_and_evaluate
+                    except:
+                        self.send_message("ML module not found.")
+                        self._ml_running = False
+                        return
+
+        if USE_PERSISTENT:
+            self.send_message("ML using *persistent mode* — skips already-tested combos, saves models.")
 
         param_grid = [
             (0.015, 0.008, 12), (0.02, 0.01, 12), (0.03, 0.015, 12),
@@ -5084,7 +5099,19 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
         models = ["rf", "gbm"]
         results = []
         total = 0
+        skipped = 0
         best_daily = 0
+
+        # Load persistent memory if available
+        ml_memory = None
+        if USE_PERSISTENT:
+            try:
+                ml_memory = PersistentML()
+                # Load existing results so we don't lose them
+                results = ml_memory.results.copy()
+                best_daily = results[0]["roi_day"] if results else 0
+            except:
+                ml_memory = None
 
         for asset in assets:
             if not self._ml_running:
@@ -5094,17 +5121,30 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
                     for tp, sl, horizon in param_grid:
                         if not self._ml_running:
                             break
+
+                        # Skip if already tested (persistent mode)
+                        if ml_memory and ml_memory.is_tested(asset, f"ml_{model_type}", tp, sl, model_type):
+                            skipped += 1
+                            continue
+
                         total += 1
                         self._ml_progress = {
-                            "total": total, "hits": len(results),
+                            "total": total, "hits": len(results), "skipped": skipped,
                             "current_asset": asset, "current_model": f"{model_type} TP={tp*100:.0f}%",
                             "started": getattr(self, '_ml_progress', {}).get('started', ''),
                         }
                         try:
                             r = train_and_evaluate(asset, tf, tp_pct=tp, sl_pct=sl,
                                                    horizon=horizon, model_type=model_type)
+
+                            # Mark as tested in persistent memory
+                            if ml_memory:
+                                ml_memory.mark_tested(asset, f"ml_{model_type}", tp, sl, model_type, r)
+
                             if r and r["roi_day"] > 0.1:
                                 results.append(r)
+                                if ml_memory:
+                                    ml_memory.add_result(r)
                                 # Report good ones immediately
                                 if r["roi_day"] >= 0.5 or r["roi_day"] > best_daily:
                                     best_daily = max(best_daily, r["roi_day"])
@@ -5123,7 +5163,12 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
                         except Exception as e:
                             pass
 
-                self.send_message(f"ML: `{asset} {tf}` done — {total} tested, {len(results)} hits")
+                # Save persistent memory after each asset
+                if ml_memory:
+                    ml_memory._save_memory()
+                    ml_memory._save_results()
+
+                self.send_message(f"ML: `{asset} {tf}` done — {total} new, {skipped} skipped, {len(results)} total hits")
 
         self._ml_running = False
 
