@@ -1,0 +1,130 @@
+//@version=5
+// ICHIMOKU V2 — Pure Ichimoku + BB Squeeze V2's winning risk management
+// V1 was WEAK (DOT +165%, ETH +91%) — high DD killed it
+// V2 adds: trailing stop, momentum exit, consecutive loss tracking, daily circuit breaker
+// Test on: DOTUSDT, ETHUSDT, BTCUSDT, LDOUSDT — 4h
+strategy("Ichimoku V2", overlay=true, initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=95,
+     commission_type=strategy.commission.percent, commission_value=0.1)
+
+// ── ICHIMOKU ──
+tenkan_len = input.int(9, "Tenkan")
+kijun_len = input.int(26, "Kijun")
+senkou_b_len = input.int(52, "Senkou B")
+displacement = input.int(26, "Displacement")
+sl_pct = input.float(1.5, "SL %") / 100
+tp_pct = input.float(10.0, "TP %") / 100
+trail_pct = input.float(3.5, "Trail %") / 100
+
+tenkan = (ta.highest(high, tenkan_len) + ta.lowest(low, tenkan_len)) / 2
+kijun = (ta.highest(high, kijun_len) + ta.lowest(low, kijun_len)) / 2
+senkou_a = (tenkan + kijun) / 2
+senkou_b = (ta.highest(high, senkou_b_len) + ta.lowest(low, senkou_b_len)) / 2
+
+cloud_top = math.max(senkou_a[displacement], senkou_b[displacement])
+cloud_bot = math.min(senkou_a[displacement], senkou_b[displacement])
+chikou_past = close[displacement]
+
+// ── 5 ICHIMOKU CONDITIONS ──
+above_cloud = close > cloud_top
+below_cloud = close < cloud_bot
+tenkan_bull = tenkan > kijun
+tenkan_bear = tenkan < kijun
+tk_cross_up = ta.crossover(tenkan, kijun)
+tk_cross_down = ta.crossunder(tenkan, kijun)
+chikou_bull = close > chikou_past
+chikou_bear = close < chikou_past
+future_bull = senkou_a > senkou_b
+future_bear = senkou_a < senkou_b
+
+// ── STRONG SIGNALS (all 5 align) ──
+strong_long = above_cloud and tk_cross_up and chikou_bull and future_bull
+strong_short = below_cloud and tk_cross_down and chikou_bear and future_bear
+
+// ── MEDIUM SIGNALS (4 of 5 + volume) ──
+bull_count = (above_cloud ? 1 : 0) + (tenkan_bull ? 1 : 0) + (chikou_bull ? 1 : 0) + (future_bull ? 1 : 0)
+bear_count = (below_cloud ? 1 : 0) + (tenkan_bear ? 1 : 0) + (chikou_bear ? 1 : 0) + (future_bear ? 1 : 0)
+vol_confirm = volume > ta.sma(volume, 20) * 1.2
+
+medium_long = tk_cross_up and bull_count >= 3 and vol_confirm
+medium_short = tk_cross_down and bear_count >= 3 and vol_confirm
+
+// ── TIERED ENTRY (like BB Squeeze V2) ──
+long_entry = strong_long or medium_long
+short_entry = strong_short or medium_short
+
+// ── MOMENTUM for exit (like BB Squeeze V2) ──
+cloud_thickness = cloud_top - cloud_bot
+cloud_expanding = cloud_thickness > cloud_thickness[1]
+// Momentum = distance from cloud (fading = exit signal)
+long_momentum_fade = close < tenkan and tenkan < kijun
+short_momentum_fade = close > tenkan and tenkan > kijun
+
+// ── ATR + ADX filters ──
+[diplus, diminus, adx] = ta.dmi(14, 14)
+atr14 = ta.atr(14)
+atr_ma = ta.sma(atr14, 100)
+vol_ok = atr14 < atr_ma * 2
+adx_ok = adx > 20
+
+// ── ANTI-OVERTRADING (BB Squeeze V2 style — consecutive losses + circuit breaker) ──
+var int trades_today = 0
+var int consec_losses = 0
+var int cooldown = 0
+var float day_equity = strategy.equity
+is_new_day = ta.change(time("D")) != 0
+if is_new_day
+    trades_today := 0
+    day_equity := strategy.equity
+if cooldown > 0
+    cooldown -= 1
+was_closed = strategy.position_size[1] != 0 and strategy.position_size == 0
+if was_closed
+    trades_today += 1
+    if strategy.netprofit < strategy.netprofit[1]
+        consec_losses += 1
+        if consec_losses >= 3
+            cooldown := 6
+            consec_losses := 0
+    else
+        consec_losses := 0
+daily_pnl = (strategy.equity - day_equity) / day_equity
+can_trade = trades_today < 3 and cooldown == 0 and daily_pnl > -0.03
+
+// ── EXECUTION with TRAILING STOP (key BB Squeeze V2 feature) ──
+if long_entry and can_trade and vol_ok and adx_ok and strategy.position_size <= 0
+    strategy.entry("Long", strategy.long)
+    strategy.exit("L_X", "Long",
+         stop=close * (1 - sl_pct),
+         limit=close * (1 + tp_pct),
+         trail_points=close * trail_pct / 100 / syminfo.mintick,
+         trail_offset=close * trail_pct / 100 / syminfo.mintick)
+
+if short_entry and can_trade and vol_ok and adx_ok and strategy.position_size >= 0
+    strategy.entry("Short", strategy.short)
+    strategy.exit("S_X", "Short",
+         stop=close * (1 + sl_pct),
+         limit=close * (1 - tp_pct),
+         trail_points=close * trail_pct / 100 / syminfo.mintick,
+         trail_offset=close * trail_pct / 100 / syminfo.mintick)
+
+// ── MOMENTUM REVERSAL EXIT (like BB Squeeze V2) ──
+if long_momentum_fade and strategy.position_size > 0
+    strategy.close("Long")
+if short_momentum_fade and strategy.position_size < 0
+    strategy.close("Short")
+
+// ── CLOUD BREAK EXIT (Ichimoku-specific) ──
+if close < cloud_bot and strategy.position_size > 0
+    strategy.close("Long")
+if close > cloud_top and strategy.position_size < 0
+    strategy.close("Short")
+
+// ── VISUALS ──
+plot(tenkan, "Tenkan", color.blue)
+plot(kijun, "Kijun", color.red)
+p1 = plot(senkou_a, "Senkou A", color.new(color.green, 70), offset=displacement)
+p2 = plot(senkou_b, "Senkou B", color.new(color.red, 70), offset=displacement)
+fill(p1, p2, color=senkou_a >= senkou_b ? color.new(color.green, 90) : color.new(color.red, 90))
+plotshape(long_entry and can_trade, "Buy", shape.triangleup, location.belowbar, color.lime, size=size.small)
+plotshape(short_entry and can_trade, "Sell", shape.triangledown, location.abovebar, color.red, size=size.small)

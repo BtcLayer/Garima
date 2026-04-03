@@ -1,0 +1,109 @@
+//@version=5
+// VWAP MEAN REVERSION — Completely different approach from trend-following
+// Buy when price dips below VWAP bands, sell when it returns to mean
+// Works in RANGING markets (where trend strategies fail)
+// BB Squeeze V2 risk management applied
+// Test on: ETHUSDT, BTCUSDT, DOTUSDT, LDOUSDT — 4h
+strategy("VWAP Reversion", overlay=true, initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=95,
+     commission_type=strategy.commission.percent, commission_value=0.1)
+
+// ── INPUTS ──
+vwap_len = input.int(20, "VWAP Length")
+band_mult = input.float(2.0, "Band Multiplier")
+sl_pct = input.float(1.5, "SL %") / 100
+tp_pct = input.float(8.0, "TP %") / 100
+trail_pct = input.float(3.0, "Trail %") / 100
+
+// ── VWAP CALCULATION (session-based approximation for crypto) ──
+// Using volume-weighted moving average as VWAP proxy for 24/7 markets
+vwap_val = ta.vwma(close, vwap_len)
+vwap_dev = ta.stdev(close, vwap_len) * band_mult
+vwap_upper = vwap_val + vwap_dev
+vwap_lower = vwap_val - vwap_dev
+
+// ── MEAN REVERSION SIGNALS ──
+// Price touches lower band = oversold, buy for reversion to mean
+// Price touches upper band = overbought, sell for reversion
+rsi = ta.rsi(close, 14)
+below_lower = close < vwap_lower
+above_upper = close > vwap_upper
+returning_up = close > close[1] and close[1] <= vwap_lower  // bouncing off lower
+returning_down = close < close[1] and close[1] >= vwap_upper  // bouncing off upper
+
+// ── CONFIRMATION ──
+[diplus, diminus, adx] = ta.dmi(14, 14)
+atr14 = ta.atr(14)
+atr_ma = ta.sma(atr14, 100)
+vol_ok = atr14 < atr_ma * 2
+vol_confirm = volume > ta.sma(volume, 20) * 1.1
+ema200 = ta.ema(close, 200)
+
+// ── TIERED ENTRY ──
+// Strong: at band + RSI confirms + volume
+long_strong = returning_up and rsi < 35 and vol_confirm and close > ema200
+short_strong = returning_down and rsi > 65 and vol_confirm and close < ema200
+
+// Medium: at band + basic confirmation
+long_medium = returning_up and rsi < 45 and close > ema200
+short_medium = returning_down and rsi > 55 and close < ema200
+
+long_entry = long_strong or long_medium
+short_entry = short_strong or short_medium
+
+// ── EXIT: back at VWAP mean ──
+long_exit = close > vwap_val and close[1] <= vwap_val  // reached mean
+short_exit = close < vwap_val and close[1] >= vwap_val
+
+// ── ANTI-OVERTRADING (BB Squeeze V2 style) ──
+var int trades_today = 0
+var int consec_losses = 0
+var int cooldown = 0
+var float day_equity = strategy.equity
+is_new_day = ta.change(time("D")) != 0
+if is_new_day
+    trades_today := 0
+    day_equity := strategy.equity
+if cooldown > 0
+    cooldown -= 1
+was_closed = strategy.position_size[1] != 0 and strategy.position_size == 0
+if was_closed
+    trades_today += 1
+    if strategy.netprofit < strategy.netprofit[1]
+        consec_losses += 1
+        if consec_losses >= 3
+            cooldown := 6
+            consec_losses := 0
+    else
+        consec_losses := 0
+daily_pnl = (strategy.equity - day_equity) / day_equity
+can_trade = trades_today < 3 and cooldown == 0 and daily_pnl > -0.03
+
+// ── EXECUTION with TRAILING STOP ──
+if long_entry and can_trade and vol_ok and strategy.position_size <= 0
+    strategy.entry("Long", strategy.long)
+    strategy.exit("L_X", "Long",
+         stop=close * (1 - sl_pct),
+         limit=close * (1 + tp_pct),
+         trail_points=close * trail_pct / 100 / syminfo.mintick,
+         trail_offset=close * trail_pct / 100 / syminfo.mintick)
+
+if short_entry and can_trade and vol_ok and strategy.position_size >= 0
+    strategy.entry("Short", strategy.short)
+    strategy.exit("S_X", "Short",
+         stop=close * (1 + sl_pct),
+         limit=close * (1 - tp_pct),
+         trail_points=close * trail_pct / 100 / syminfo.mintick,
+         trail_offset=close * trail_pct / 100 / syminfo.mintick)
+
+if long_exit and strategy.position_size > 0
+    strategy.close("Long")
+if short_exit and strategy.position_size < 0
+    strategy.close("Short")
+
+// ── VISUALS ──
+plot(vwap_val, "VWAP", color.yellow, 2)
+plot(vwap_upper, "Upper", color.new(color.red, 50))
+plot(vwap_lower, "Lower", color.new(color.green, 50))
+plotshape(long_entry and can_trade, "Buy", shape.triangleup, location.belowbar, color.lime, size=size.small)
+plotshape(short_entry and can_trade, "Sell", shape.triangledown, location.abovebar, color.red, size=size.small)

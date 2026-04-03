@@ -1,0 +1,122 @@
+//@version=5
+// HEIKIN ASHI TREND — Smoothed candles for clean trend signals
+// HA candles remove noise — series of green = strong uptrend
+// Enter on first green HA after red series (trend reversal)
+// Very popular among profitable crypto traders
+// BB Squeeze V2 risk management applied
+// Test on: ETHUSDT, BTCUSDT, DOTUSDT, LDOUSDT — 4h
+strategy("HA Trend", overlay=true, initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=95,
+     commission_type=strategy.commission.percent, commission_value=0.1)
+
+// ── INPUTS ──
+sl_pct = input.float(1.5, "SL %") / 100
+tp_pct = input.float(10.0, "TP %") / 100
+trail_pct = input.float(3.5, "Trail %") / 100
+min_red_bars = input.int(3, "Min Red Bars Before Entry")
+
+// ── HEIKIN ASHI CALCULATION ──
+ha_close = (open + high + low + close) / 4
+var float ha_open = na
+ha_open := na(ha_open[1]) ? (open + close) / 2 : (ha_open[1] + ha_close[1]) / 2
+ha_high = math.max(high, math.max(ha_open, ha_close))
+ha_low = math.min(low, math.min(ha_open, ha_close))
+
+ha_green = ha_close > ha_open
+ha_red = ha_close < ha_open
+
+// ── COUNT consecutive HA candles ──
+var int consec_red = 0
+var int consec_green = 0
+
+if ha_red
+    consec_red += 1
+    consec_green := 0
+else if ha_green
+    consec_green += 1
+    consec_red := 0
+
+// ── TREND REVERSAL SIGNALS ──
+// First green after 3+ red = bullish reversal
+// First red after 3+ green = bearish reversal
+first_green = ha_green and ha_red[1] and consec_red[1] >= min_red_bars
+first_red = ha_red and ha_green[1] and consec_green[1] >= min_red_bars
+
+// ── STRONG HA (no lower wick on green = strong bullish) ──
+strong_green = ha_green and ha_low == ha_open  // no lower wick
+strong_red = ha_red and ha_high == ha_open  // no upper wick
+
+// ── CONFIRMATION ──
+ema50 = ta.ema(close, 50)
+ema200 = ta.ema(close, 200)
+[diplus, diminus, adx] = ta.dmi(14, 14)
+rsi = ta.rsi(close, 14)
+atr14 = ta.atr(14)
+atr_ma = ta.sma(atr14, 100)
+vol_ok = atr14 < atr_ma * 2
+vol_confirm = volume > ta.sma(volume, 20) * 1.2
+
+// Tiered
+long_strong = first_green and close > ema50 and adx > 25 and vol_confirm
+long_medium = first_green and close > ema50 and adx > 18
+short_strong = first_red and close < ema50 and adx > 25 and vol_confirm
+short_medium = first_red and close < ema50 and adx > 18
+
+long_entry = long_strong or long_medium
+short_entry = short_strong or short_medium
+
+// ── EXIT: HA color reversal ──
+long_exit = ha_red and ha_red[1]  // 2 consecutive red HA
+short_exit = ha_green and ha_green[1]  // 2 consecutive green HA
+
+// ── ANTI-OVERTRADING (BB Squeeze V2 style) ──
+var int trades_today = 0
+var int consec_losses = 0
+var int cooldown_val = 0
+var float day_equity = strategy.equity
+is_new_day = ta.change(time("D")) != 0
+if is_new_day
+    trades_today := 0
+    day_equity := strategy.equity
+if cooldown_val > 0
+    cooldown_val -= 1
+was_closed = strategy.position_size[1] != 0 and strategy.position_size == 0
+if was_closed
+    trades_today += 1
+    if strategy.netprofit < strategy.netprofit[1]
+        consec_losses += 1
+        if consec_losses >= 3
+            cooldown_val := 6
+            consec_losses := 0
+    else
+        consec_losses := 0
+daily_pnl = (strategy.equity - day_equity) / day_equity
+can_trade = trades_today < 3 and cooldown_val == 0 and daily_pnl > -0.03
+
+// ── EXECUTION with TRAILING STOP ──
+if long_entry and can_trade and vol_ok and strategy.position_size <= 0
+    strategy.entry("Long", strategy.long)
+    strategy.exit("L_X", "Long",
+         stop=close * (1 - sl_pct),
+         limit=close * (1 + tp_pct),
+         trail_points=close * trail_pct / 100 / syminfo.mintick,
+         trail_offset=close * trail_pct / 100 / syminfo.mintick)
+
+if short_entry and can_trade and vol_ok and strategy.position_size >= 0
+    strategy.entry("Short", strategy.short)
+    strategy.exit("S_X", "Short",
+         stop=close * (1 + sl_pct),
+         limit=close * (1 - tp_pct),
+         trail_points=close * trail_pct / 100 / syminfo.mintick,
+         trail_offset=close * trail_pct / 100 / syminfo.mintick)
+
+if long_exit and strategy.position_size > 0
+    strategy.close("Long")
+if short_exit and strategy.position_size < 0
+    strategy.close("Short")
+
+// ── VISUALS ──
+plot(ema50, "EMA50", color.blue, 2)
+barcolor(ha_green ? color.green : color.red)
+plotshape(long_entry and can_trade, "Buy", shape.triangleup, location.belowbar, color.lime, size=size.small, text="HA")
+plotshape(short_entry and can_trade, "Sell", shape.triangledown, location.abovebar, color.red, size=size.small, text="HA")

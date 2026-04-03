@@ -1,0 +1,111 @@
+//@version=5
+// ENGULFING V2 — Candlestick + Volume + BB Squeeze V2 risk management
+// V1 was WEAK (BTC +89%, DOT +6%) — no trailing stop, rigid exits
+// V2 adds: trailing stop, momentum-based exit, consecutive loss tracking, tiered signals
+// Test on: BTCUSDT, ETHUSDT, DOTUSDT, LDOUSDT — 4h
+strategy("Engulfing V2", overlay=true, initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=95,
+     commission_type=strategy.commission.percent, commission_value=0.1)
+
+// ── INPUTS ──
+sl_pct = input.float(1.5, "SL %") / 100
+tp_pct = input.float(10.0, "TP %") / 100
+trail_pct = input.float(3.5, "Trail %") / 100
+vol_mult = input.float(1.5, "Volume Multiplier")
+
+// ── CANDLE PATTERNS ──
+body = math.abs(close - open)
+body_prev = math.abs(close[1] - open[1])
+
+bull_engulf = close > open and close[1] < open[1] and open <= close[1] and close >= open[1] and body > body_prev
+bear_engulf = close < open and close[1] > open[1] and open >= close[1] and close <= open[1] and body > body_prev
+
+// ── VOLUME CONFIRMATION ──
+vol_sma = ta.sma(volume, 20)
+high_vol = volume > vol_sma * vol_mult
+med_vol = volume > vol_sma * 1.2
+
+// ── TREND + MOMENTUM ──
+ema20 = ta.ema(close, 20)
+ema50 = ta.ema(close, 50)
+ema200 = ta.ema(close, 200)
+[diplus, diminus, adx] = ta.dmi(14, 14)
+rsi = ta.rsi(close, 14)
+atr14 = ta.atr(14)
+atr_ma = ta.sma(atr14, 100)
+vol_ok = atr14 < atr_ma * 2
+
+// ── TIERED ENTRY (strong vs medium — like BB Squeeze V2) ──
+// Strong: engulfing + high volume + trend aligned + ADX strong
+long_strong = bull_engulf and high_vol and close > ema50 and ema50 > ema200 and adx > 25 and rsi < 65
+short_strong = bear_engulf and high_vol and close < ema50 and ema50 < ema200 and adx > 25 and rsi > 35
+
+// Medium: engulfing + medium volume + basic trend
+long_medium = bull_engulf and med_vol and close > ema50 and adx > 20 and rsi < 70
+short_medium = bear_engulf and med_vol and close < ema50 and adx > 20 and rsi > 30
+
+long_entry = long_strong or (long_medium and close > close[1])
+short_entry = short_strong or (short_medium and close < close[1])
+
+// ── MOMENTUM EXIT (like BB Squeeze V2 — exit when momentum fades) ──
+// Price back below EMA20 = momentum lost
+long_momentum_fade = close < ema20 and close[1] >= ema20[1]
+short_momentum_fade = close > ema20 and close[1] <= ema20[1]
+
+// ── ANTI-OVERTRADING (BB Squeeze V2 style) ──
+var int trades_today = 0
+var int consec_losses = 0
+var int cooldown = 0
+var float day_equity = strategy.equity
+is_new_day = ta.change(time("D")) != 0
+if is_new_day
+    trades_today := 0
+    day_equity := strategy.equity
+if cooldown > 0
+    cooldown -= 1
+was_closed = strategy.position_size[1] != 0 and strategy.position_size == 0
+if was_closed
+    trades_today += 1
+    if strategy.netprofit < strategy.netprofit[1]
+        consec_losses += 1
+        if consec_losses >= 3
+            cooldown := 6
+            consec_losses := 0
+    else
+        consec_losses := 0
+daily_pnl = (strategy.equity - day_equity) / day_equity
+can_trade = trades_today < 3 and cooldown == 0 and daily_pnl > -0.03
+
+// ── EXECUTION with TRAILING STOP ──
+if long_entry and can_trade and vol_ok and strategy.position_size <= 0
+    strategy.entry("Long", strategy.long)
+    strategy.exit("L_X", "Long",
+         stop=close * (1 - sl_pct),
+         limit=close * (1 + tp_pct),
+         trail_points=close * trail_pct / 100 / syminfo.mintick,
+         trail_offset=close * trail_pct / 100 / syminfo.mintick)
+
+if short_entry and can_trade and vol_ok and strategy.position_size >= 0
+    strategy.entry("Short", strategy.short)
+    strategy.exit("S_X", "Short",
+         stop=close * (1 + sl_pct),
+         limit=close * (1 - tp_pct),
+         trail_points=close * trail_pct / 100 / syminfo.mintick,
+         trail_offset=close * trail_pct / 100 / syminfo.mintick)
+
+// ── MOMENTUM REVERSAL EXIT ──
+if long_momentum_fade and strategy.position_size > 0
+    strategy.close("Long")
+if short_momentum_fade and strategy.position_size < 0
+    strategy.close("Short")
+
+// ── RSI EXTREME EXIT ──
+if rsi > 80 and strategy.position_size > 0
+    strategy.close("Long")
+if rsi < 20 and strategy.position_size < 0
+    strategy.close("Short")
+
+// ── VISUALS ──
+plot(ema50, "EMA50", color.blue, 2)
+plotshape(long_entry and can_trade, "Buy", shape.triangleup, location.belowbar, color.lime, size=size.small, text="ENG")
+plotshape(short_entry and can_trade, "Sell", shape.triangledown, location.abovebar, color.red, size=size.small, text="ENG")
