@@ -1,0 +1,107 @@
+//@version=5
+// PURE ICHIMOKU — Full cloud strategy (no other indicators mixed in)
+// This is how Ichimoku was DESIGNED to be used — all 5 components together
+// Previous attempts mixed Ichimoku with other signals (diluted it)
+// Test on: ETHUSDT, BTCUSDT, DOTUSDT — 4h
+strategy("Ichimoku Pure", overlay=true, initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=95,
+     commission_type=strategy.commission.percent, commission_value=0.1)
+
+// ── ICHIMOKU ──
+tenkan_len = input.int(9, "Tenkan")
+kijun_len = input.int(26, "Kijun")
+senkou_b_len = input.int(52, "Senkou B")
+displacement = input.int(26, "Displacement")
+sl_pct = input.float(2.5, "SL %") / 100
+tp_pct = input.float(6.0, "TP %") / 100
+
+tenkan = (ta.highest(high, tenkan_len) + ta.lowest(low, tenkan_len)) / 2
+kijun = (ta.highest(high, kijun_len) + ta.lowest(low, kijun_len)) / 2
+senkou_a = (tenkan + kijun) / 2
+senkou_b = (ta.highest(high, senkou_b_len) + ta.lowest(low, senkou_b_len)) / 2
+
+// Current cloud (displaced back)
+cloud_top = math.max(senkou_a[displacement], senkou_b[displacement])
+cloud_bot = math.min(senkou_a[displacement], senkou_b[displacement])
+chikou_past = close[displacement]
+
+// ── 5 ICHIMOKU CONDITIONS ──
+// 1. Price above cloud
+above_cloud = close > cloud_top
+below_cloud = close < cloud_bot
+
+// 2. Tenkan above Kijun (momentum)
+tenkan_bull = tenkan > kijun
+tenkan_bear = tenkan < kijun
+
+// 3. Tenkan-Kijun cross (entry trigger)
+tk_cross_up = ta.crossover(tenkan, kijun)
+tk_cross_down = ta.crossunder(tenkan, kijun)
+
+// 4. Chikou above price (confirmation)
+chikou_bull = close > chikou_past
+chikou_bear = close < chikou_past
+
+// 5. Future cloud bullish (senkou_a > senkou_b)
+future_bull = senkou_a > senkou_b
+future_bear = senkou_a < senkou_b
+
+// ── STRONG SIGNALS (all 5 align) ──
+strong_long = above_cloud and tk_cross_up and chikou_bull and future_bull
+strong_short = below_cloud and tk_cross_down and chikou_bear and future_bear
+
+// ── MEDIUM SIGNALS (4 of 5) ──
+bull_count = (above_cloud ? 1 : 0) + (tenkan_bull ? 1 : 0) + (chikou_bull ? 1 : 0) + (future_bull ? 1 : 0)
+bear_count = (below_cloud ? 1 : 0) + (tenkan_bear ? 1 : 0) + (chikou_bear ? 1 : 0) + (future_bear ? 1 : 0)
+
+medium_long = tk_cross_up and bull_count >= 3
+medium_short = tk_cross_down and bear_count >= 3
+
+long_entry = strong_long or medium_long
+short_entry = strong_short or medium_short
+
+// ── EXIT ──
+long_exit = tk_cross_down or close < cloud_bot
+short_exit = tk_cross_up or close > cloud_top
+
+// ── ATR filter ──
+atr14 = ta.atr(14)
+atr_ma = ta.sma(atr14, 100)
+vol_ok = atr14 < atr_ma * 2
+
+// ── ANTI-OVERTRADING ──
+var int trades_today = 0
+var int cooldown = 0
+is_new_day = ta.change(time("D")) != 0
+if is_new_day
+    trades_today := 0
+if cooldown > 0
+    cooldown -= 1
+was_closed = strategy.position_size[1] != 0 and strategy.position_size == 0
+if was_closed
+    trades_today += 1
+    if strategy.netprofit < strategy.netprofit[1]
+        cooldown := 4
+can_trade = trades_today < 3 and cooldown == 0
+
+// ── EXECUTION ──
+if long_entry and can_trade and vol_ok and strategy.position_size <= 0
+    strategy.entry("Long", strategy.long)
+    strategy.exit("L_X", "Long", stop=close * (1 - sl_pct), limit=close * (1 + tp_pct))
+if short_entry and can_trade and vol_ok and strategy.position_size >= 0
+    strategy.entry("Short", strategy.short)
+    strategy.exit("S_X", "Short", stop=close * (1 + sl_pct), limit=close * (1 - tp_pct))
+if long_exit and strategy.position_size > 0
+    strategy.close("Long")
+if short_exit and strategy.position_size < 0
+    strategy.close("Short")
+
+// ── VISUALS ──
+plot(tenkan, "Tenkan", color.blue)
+plot(kijun, "Kijun", color.red)
+p1 = plot(senkou_a, "Senkou A", color.new(color.green, 70), offset=displacement)
+p2 = plot(senkou_b, "Senkou B", color.new(color.red, 70), offset=displacement)
+fill(p1, p2, color=senkou_a >= senkou_b ? color.new(color.green, 90) : color.new(color.red, 90))
+plotshape(strong_long and can_trade, "Strong Buy", shape.triangleup, location.belowbar, color.lime, size=size.small, text="STRONG")
+plotshape(medium_long and not strong_long and can_trade, "Med Buy", shape.triangleup, location.belowbar, color.green, size=size.tiny)
+plotshape(strong_short and can_trade, "Strong Sell", shape.triangledown, location.abovebar, color.red, size=size.small, text="STRONG")

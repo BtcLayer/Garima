@@ -1,0 +1,72 @@
+//@version=5
+// SUPERTREND + MACD FUSION — Two strongest individual signals combined
+// From our TV data: Regime Adaptive (8.1%/yr) used both. MACD V2 (4.76%/yr) had best PF.
+// This fuses them: Supertrend for direction, MACD for timing
+// Test on: ETHUSDT, BTCUSDT, DOTUSDT — 4h
+strategy("Supertrend MACD Fusion", overlay=true, initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=95,
+     commission_type=strategy.commission.percent, commission_value=0.1)
+
+// ── INPUTS ──
+st_mult = input.float(3.0, "Supertrend Mult")
+st_len = input.int(14, "Supertrend Length")
+sl_pct = input.float(2.0, "SL %") / 100
+tp_pct = input.float(6.0, "TP %") / 100
+
+// ── SUPERTREND (direction) ──
+[st_val, st_dir] = ta.supertrend(st_mult, st_len)
+st_bull = close > st_val
+st_bear = close < st_val
+
+// ── MACD (timing) ──
+[macd_line, signal_line, hist] = ta.macd(close, 12, 26, 9)
+macd_cross_up = ta.crossover(macd_line, signal_line)
+macd_cross_down = ta.crossunder(macd_line, signal_line)
+
+// ── FILTERS ──
+[diplus, diminus, adx] = ta.dmi(14, 14)
+atr14 = ta.atr(14)
+atr_ma = ta.sma(atr14, 100)
+vol_ok = atr14 < atr_ma * 2
+vol_confirm = volume > ta.sma(volume, 20) * 1.2
+rsi = ta.rsi(close, 14)
+
+// ── ENTRY: Supertrend confirms direction + MACD confirms timing ──
+long_entry = st_bull and macd_cross_up and adx > 20 and vol_ok and rsi < 70
+short_entry = st_bear and macd_cross_down and adx > 20 and vol_ok and rsi > 30
+
+// ── EXIT ──
+long_exit = st_bear or macd_cross_down
+short_exit = st_bull or macd_cross_up
+
+// ── ANTI-OVERTRADING ──
+var int trades_today = 0
+var int cooldown = 0
+is_new_day = ta.change(time("D")) != 0
+if is_new_day
+    trades_today := 0
+if cooldown > 0
+    cooldown -= 1
+was_closed = strategy.position_size[1] != 0 and strategy.position_size == 0
+if was_closed
+    trades_today += 1
+    if strategy.netprofit < strategy.netprofit[1]
+        cooldown := 4
+can_trade = trades_today < 3 and cooldown == 0
+
+// ── EXECUTION ──
+if long_entry and can_trade and strategy.position_size <= 0
+    strategy.entry("Long", strategy.long)
+    strategy.exit("L_X", "Long", stop=close * (1 - sl_pct), limit=close * (1 + tp_pct))
+if short_entry and can_trade and strategy.position_size >= 0
+    strategy.entry("Short", strategy.short)
+    strategy.exit("S_X", "Short", stop=close * (1 + sl_pct), limit=close * (1 - tp_pct))
+if long_exit and strategy.position_size > 0
+    strategy.close("Long")
+if short_exit and strategy.position_size < 0
+    strategy.close("Short")
+
+// ── VISUALS ──
+plot(st_val, "Supertrend", st_bull ? color.green : color.red, 2)
+plotshape(long_entry and can_trade, "Buy", shape.triangleup, location.belowbar, color.lime, size=size.small)
+plotshape(short_entry and can_trade, "Sell", shape.triangledown, location.abovebar, color.red, size=size.small)

@@ -1,0 +1,69 @@
+//@version=5
+// MOMENTUM ROTATION — Always hold the STRONGEST momentum asset
+// Uses Rate of Change (ROC) to rank momentum
+// Enters when momentum turns positive AND accelerating
+// Different from BB Squeeze — this rides trends, doesn't wait for squeeze
+// Test on: ETHUSDT, BTCUSDT, SOLUSDT — 4h
+strategy("Momentum Rotation", overlay=true, initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=95,
+     commission_type=strategy.commission.percent, commission_value=0.1)
+
+// ── INPUTS ──
+roc_len = input.int(12, "ROC Length (bars)")
+roc_smooth = input.int(3, "ROC Smoothing")
+sl_pct = input.float(3.0, "SL %") / 100
+tp_pct = input.float(8.0, "TP %") / 100
+
+// ── RATE OF CHANGE (momentum measure) ──
+roc = ta.roc(close, roc_len)
+roc_smooth_val = ta.sma(roc, roc_smooth)
+roc_accel = roc_smooth_val > roc_smooth_val[1]  // momentum accelerating
+
+// ── TREND ──
+ema20 = ta.ema(close, 20)
+ema50 = ta.ema(close, 50)
+ema200 = ta.ema(close, 200)
+[diplus, diminus, adx] = ta.dmi(14, 14)
+rsi = ta.rsi(close, 14)
+
+// ── ENTRY: momentum turns positive + accelerating + trend confirms ──
+long_entry = roc_smooth_val > 0 and roc_smooth_val[1] <= 0 and roc_accel and close > ema50 and adx > 20
+short_entry = roc_smooth_val < 0 and roc_smooth_val[1] >= 0 and not roc_accel and close < ema50 and adx > 20
+
+// ── EXIT: momentum fades ──
+long_exit = roc_smooth_val < 0 or (rsi > 75 and not roc_accel)
+short_exit = roc_smooth_val > 0 or (rsi < 25 and roc_accel)
+
+// ── ANTI-OVERTRADING ──
+var int trades_today = 0
+var int cooldown = 0
+is_new_day = ta.change(time("D")) != 0
+if is_new_day
+    trades_today := 0
+if cooldown > 0
+    cooldown -= 1
+was_closed = strategy.position_size[1] != 0 and strategy.position_size == 0
+if was_closed
+    trades_today += 1
+    if strategy.netprofit < strategy.netprofit[1]
+        cooldown := 4
+can_trade = trades_today < 3 and cooldown == 0
+
+// ── EXECUTION ──
+if long_entry and can_trade and strategy.position_size <= 0
+    strategy.entry("Long", strategy.long)
+    strategy.exit("L_X", "Long", stop=close * (1 - sl_pct), limit=close * (1 + tp_pct))
+if short_entry and can_trade and strategy.position_size >= 0
+    strategy.entry("Short", strategy.short)
+    strategy.exit("S_X", "Short", stop=close * (1 + sl_pct), limit=close * (1 - tp_pct))
+if long_exit and strategy.position_size > 0
+    strategy.close("Long")
+if short_exit and strategy.position_size < 0
+    strategy.close("Short")
+
+// ── VISUALS ──
+plot(ema50, "EMA50", color.blue, 2)
+plot(ema200, "EMA200", color.gray, 2)
+plotshape(long_entry and can_trade, "Buy", shape.triangleup, location.belowbar, color.lime, size=size.small)
+plotshape(short_entry and can_trade, "Sell", shape.triangledown, location.abovebar, color.red, size=size.small)
+bgcolor(roc_smooth_val > 0 ? color.new(color.green, 95) : color.new(color.red, 95))

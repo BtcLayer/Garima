@@ -1,0 +1,64 @@
+//@version=5
+// DCA GRID — Dollar Cost Average on dips, sell on recovery
+// NOT a signal strategy — buys at fixed % intervals below entry
+// Works in ANY market because it accumulates on drops
+// Test on: ETHUSDT, BTCUSDT — 4h
+strategy("DCA Grid", overlay=true, initial_capital=10000,
+     default_qty_type=strategy.cash, default_qty_value=1000,
+     commission_type=strategy.commission.percent, commission_value=0.1,
+     pyramiding=5)
+
+// ── INPUTS ──
+grid_pct = input.float(3.0, "Grid Step %", step=0.5) / 100
+tp_pct = input.float(5.0, "Take Profit %", step=0.5) / 100
+max_orders = input.int(5, "Max Grid Orders")
+
+// ── TREND FILTER (only DCA in uptrend) ──
+ema50 = ta.ema(close, 50)
+ema200 = ta.ema(close, 200)
+uptrend = ema50 > ema200
+
+// ── GRID LOGIC ──
+var float base_price = na
+var int grid_level = 0
+
+// Reset grid when no position
+if strategy.position_size == 0
+    base_price := na
+    grid_level := 0
+
+// First entry — on EMA cross up or RSI bounce
+rsi = ta.rsi(close, 14)
+first_entry = uptrend and rsi < 40 and rsi > rsi[1] and strategy.position_size == 0
+
+if first_entry
+    strategy.entry("Grid_0", strategy.long)
+    base_price := close
+    grid_level := 1
+
+// Grid entries — buy more at each grid step down
+if not na(base_price) and grid_level < max_orders
+    for i = 1 to max_orders
+        grid_price = base_price * (1 - grid_pct * i)
+        if close <= grid_price and grid_level < i + 1
+            strategy.entry("Grid_" + str.tostring(i), strategy.long)
+            grid_level := i + 1
+
+// Take profit — close ALL when average price + TP% reached
+if strategy.position_size > 0
+    avg_price = strategy.position_avg_price
+    if close >= avg_price * (1 + tp_pct)
+        strategy.close_all()
+
+// ── SAFETY: close if drops too far (max 5 grids × 3% = 15% max) ──
+if strategy.position_size > 0 and not na(base_price)
+    if close < base_price * (1 - grid_pct * (max_orders + 1))
+        strategy.close_all()
+
+// ── VISUALS ──
+plot(ema50, "EMA50", color.blue)
+plot(ema200, "EMA200", color.gray, 2)
+if not na(base_price)
+    for i = 1 to max_orders
+        line.new(bar_index - 1, base_price * (1 - grid_pct * i), bar_index, base_price * (1 - grid_pct * i), color=color.new(color.green, 70))
+plotshape(first_entry, "First Entry", shape.diamond, location.belowbar, color.lime, size=size.small)
