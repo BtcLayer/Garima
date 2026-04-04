@@ -153,6 +153,86 @@ def build_labels(df, tp_pct=0.02, sl_pct=0.01, horizon=12):
     return labels
 
 
+def build_strategy_signals(df):
+    """Generate signals from our TV-proven strategies (Donchian, CCI, HA, PSAR, etc.)
+    Returns a DataFrame of binary signals — ML learns WHEN these signals are profitable."""
+    signals = pd.DataFrame(index=df.index)
+
+    # ── DONCHIAN BREAKOUT (our #1 winner) ──
+    if "donchian_upper" in df.columns:
+        signals["donchian_long"] = (df["close"] > df["donchian_upper"].shift(1)).astype(int)
+        signals["donchian_short"] = (df["close"] < df["donchian_lower"].shift(1)).astype(int)
+
+    # ── CCI TREND (our #2 winner) ──
+    if "cci" in df.columns:
+        signals["cci_bull"] = (df["cci"] > 100).astype(int) & (~(df["cci"].shift(1) > 100)).astype(int)
+        signals["cci_bear"] = (df["cci"] < -100).astype(int) & (~(df["cci"].shift(1) < -100)).astype(int)
+        signals["cci_above_zero"] = (df["cci"] > 0).astype(int)
+
+    # ── HEIKIN ASHI TREND ──
+    if "ha_green" in df.columns:
+        ha_red = 1 - df["ha_green"]
+        # Count consecutive reds
+        consec_red = ha_red.groupby((ha_red != ha_red.shift()).cumsum()).cumcount() + 1
+        consec_red = consec_red * ha_red
+        # First green after 3+ red
+        signals["ha_reversal_long"] = ((df["ha_green"] == 1) & (ha_red.shift(1) == 1) & (consec_red.shift(1) >= 3)).astype(int)
+
+    # ── PSAR FLIP ──
+    if "psar" in df.columns:
+        psar_bull = (df["close"] > df["psar"]).astype(int)
+        signals["psar_flip_up"] = (psar_bull & ~psar_bull.shift(1).fillna(0).astype(bool)).astype(int)
+        signals["psar_flip_down"] = (~psar_bull.astype(bool) & psar_bull.shift(1).fillna(0).astype(bool)).astype(int)
+
+    # ── AROON CROSS ──
+    if "aroon_up" in df.columns:
+        signals["aroon_cross_up"] = ((df["aroon_up"] > df["aroon_down"]) & (df["aroon_up"].shift(1) <= df["aroon_down"].shift(1))).astype(int)
+
+    # ── SUPERTREND FLIP ──
+    if "supertrend" in df.columns:
+        st_bull = (df["close"] > df["supertrend"]).astype(int)
+        signals["st_flip_up"] = (st_bull & ~st_bull.shift(1).fillna(0).astype(bool)).astype(int)
+
+    # ── KELTNER BREAKOUT ──
+    if "keltner_upper" in df.columns:
+        signals["kc_break_up"] = ((df["close"] > df["keltner_upper"]) & (df["close"].shift(1) <= df["keltner_upper"].shift(1))).astype(int)
+
+    # ── ADX + DI CROSS ──
+    if "di_plus" in df.columns:
+        signals["di_cross_up"] = ((df["di_plus"] > df["di_minus"]) & (df["di_plus"].shift(1) <= df["di_minus"].shift(1))).astype(int)
+
+    # ── TRIX SIGNAL CROSS ──
+    if "trix" in df.columns:
+        signals["trix_cross_up"] = ((df["trix"] > df["trix_signal"]) & (df["trix"].shift(1) <= df["trix_signal"].shift(1))).astype(int)
+
+    # ── MACD ZERO CROSS ──
+    if "macd" in df.columns:
+        signals["macd_zero_up"] = ((df["macd"] > 0) & (df["macd"].shift(1) <= 0)).astype(int)
+
+    # ── BB SQUEEZE RELEASE ──
+    if "bb_upper" in df.columns and "keltner_upper" in df.columns:
+        squeeze = (df["bb_upper"] < df["keltner_upper"]) & (df["bb_lower"] > df["keltner_lower"])
+        signals["squeeze_release"] = (squeeze.shift(1) & ~squeeze).astype(int)
+
+    # ── COMMON FILTERS (applied to all) ──
+    if "adx" in df.columns:
+        signals["adx_strong"] = (df["adx"] > 20).astype(int)
+    if "vol_ratio" in df.columns:
+        signals["vol_spike"] = (df["vol_ratio"] > 1.2).astype(int)
+    if "ema50" in df.columns:
+        signals["above_ema50"] = (df["close"] > df["ema50"]).astype(int)
+
+    # ── COMBO SIGNALS (what our winning strategies actually do) ──
+    if "donchian_long" in signals.columns and "adx_strong" in signals.columns:
+        signals["donchian_confirmed"] = signals["donchian_long"] & signals["adx_strong"] & signals["above_ema50"]
+    if "cci_bull" in signals.columns and "adx_strong" in signals.columns:
+        signals["cci_confirmed"] = signals["cci_bull"] & signals["adx_strong"] & signals["above_ema50"]
+    if "donchian_long" in signals.columns and "cci_above_zero" in signals.columns:
+        signals["donchian_cci_fusion"] = signals["donchian_long"] & signals["cci_above_zero"] & signals["adx_strong"]
+
+    return signals.fillna(0).astype(int)
+
+
 def run_ml_backtest(df, predictions, tp_pct=0.02, sl_pct=0.01, horizon=12):
     """Backtest ML predictions — enter when model says 1, exit at TP/SL/horizon."""
     capital = INITIAL_CAPITAL
@@ -215,6 +295,14 @@ def train_and_evaluate(asset, tf, tp_pct=0.02, sl_pct=0.01, horizon=12,
 
     df = calculate_indicators(df)
     features = build_features(df)
+
+    # Add strategy signals as features — ML learns when signals are profitable
+    try:
+        strat_signals = build_strategy_signals(df)
+        features = pd.concat([features, strat_signals.reindex(features.index)], axis=1)
+    except:
+        pass
+
     labels = build_labels(df, tp_pct=tp_pct, sl_pct=sl_pct, horizon=horizon)
 
     # Align and drop NaN
@@ -270,7 +358,7 @@ def train_and_evaluate(asset, tf, tp_pct=0.02, sl_pct=0.01, horizon=12,
         yrs = len(test_df) / (365 * 6)  # rough estimate
 
     roi_a = ((capital / INITIAL_CAPITAL) ** (1 / yrs) - 1) * 100 if capital > 0 else -100
-    daily = roi_a / 365
+    daily = (((1 + roi_a / 100) ** (1 / 365.25)) - 1) * 100 if roi_a > -100 else -1
     wins = [t for t in trades if t["pnl"] > 0]
     wr = len(wins) / len(trades) * 100 if trades else 0
     tw = sum(t["pnl"] for t in trades if t["pnl"] > 0)
