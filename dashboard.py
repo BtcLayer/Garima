@@ -527,18 +527,27 @@ with tab5:
     st.header("Pine Script Generator")
     st.markdown("*Select strategy → get copy-paste Pine Script for TradingView*")
 
-    # Pre-built Pine Scripts for deployed strategies
-    st.subheader("Pre-Built Scripts (Click to expand)")
+    # Pre-built Pine Scripts — loaded from actual pine/ folder
+    st.subheader("TV-Validated Pine Scripts (Click to expand)")
 
-    prebuilt = {
-        "PSAR_EMA_ST_TP8 (ETH 4h)": {"signals": ["PSAR_Bull", "EMA_Cross", "Supertrend", "Trend_MA50", "Volume_Spike"], "min_ag": 5, "sl": 1.5, "tp": 8.0, "ts": 0.7, "asset": "ETHUSDT"},
-        "PSAR_Volume_Surge (BTC 4h)": {"signals": ["PSAR_Bull", "Volume_Spike", "EMA_Cross", "Supertrend", "Trend_MA50"], "min_ag": 5, "sl": 1.5, "tp": 8.0, "ts": 0.7, "asset": "BTCUSDT"},
-        "PSAR_EMA_Vol_OBV (ADA 4h)": {"signals": ["PSAR_Bull", "EMA_Cross", "Volume_Spike", "OBV_Rising"], "min_ag": 4, "sl": 1.5, "tp": 9.0, "ts": 0.7, "asset": "ADAUSDT"},
-        "PSAR_Vol_Tight (ETH 4h)": {"signals": ["PSAR_Bull", "Volume_Spike", "EMA_Cross", "Supertrend"], "min_ag": 4, "sl": 1.2, "tp": 6.0, "ts": 0.6, "asset": "ETHUSDT"},
-        "Ichimoku_PSAR_Pro (ETH 4h)": {"signals": ["Ichimoku_Bull", "PSAR_Bull", "ADX_Trend", "OBV_Rising", "EMA_Cross", "Supertrend"], "min_ag": 5, "sl": 1.5, "tp": 6.0, "ts": 0.7, "asset": "ETHUSDT"},
-        "PSAR_EMA_ST_TP6 (ETH 4h)": {"signals": ["PSAR_Bull", "EMA_Cross", "Supertrend", "Trend_MA50", "Volume_Spike"], "min_ag": 5, "sl": 1.2, "tp": 6.0, "ts": 0.6, "asset": "ETHUSDT"},
-        "PSAR_EMA_ST_TP9 (ADA 4h)": {"signals": ["PSAR_Bull", "EMA_Cross", "Supertrend", "Trend_MA50", "Volume_Spike"], "min_ag": 5, "sl": 1.5, "tp": 9.0, "ts": 0.7, "asset": "ADAUSDT"},
-    }
+    # Load Pine files dynamically
+    pine_dir = os.path.join(ROOT, "pine")
+    pine_files = sorted([f for f in os.listdir(pine_dir) if f.startswith("tv_first_") and f.endswith(".pine")]) if os.path.exists(pine_dir) else []
+
+    if pine_files:
+        for pf in pine_files:
+            label = pf.replace("tv_first_", "").replace(".pine", "").replace("_", " ")
+            with st.expander(f"{label}"):
+                try:
+                    with open(os.path.join(pine_dir, pf), encoding="utf-8", errors="ignore") as fp:
+                        st.code(fp.read(), language="javascript")
+                except:
+                    st.write(f"Could not load {pf}")
+    else:
+        st.info("No Pine scripts found in pine/ folder")
+
+    # Legacy prebuilt kept for backward compatibility
+    prebuilt = {}
 
     for name, config in prebuilt.items():
         with st.expander(name):
