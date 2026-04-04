@@ -585,6 +585,8 @@ class TelegramBacktestBot:
             return self._start_ml(args)
         elif command == "evolve":
             return self._evolve_cmd(args)
+        elif command == "promote":
+            return self._promote_cmd(args)
 
         # ── 6. Info ──
         elif command == "status":
@@ -5561,6 +5563,120 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
             self.send_message(f"Synced {len(df_combined)} strategies to dashboard CSV + top 10 JSON.")
         except Exception as e:
             self.send_message(f"Sync warning: {e}")
+
+    # ------------------------------------------------------------------ #
+    # /promote — Strategy promotion pipeline (T07)
+    # ------------------------------------------------------------------ #
+
+    def _promote_cmd(self, args: list) -> str:
+        """Strategy promotion pipeline — review and approve strategies for live."""
+        try:
+            from src.strategy_promotion import (
+                generate_candidates, approve_strategy, reject_strategy,
+                revoke_strategy, get_promotion_report, get_approved_strategies,
+                get_pending_candidates
+            )
+        except ImportError:
+            from strategy_promotion import (
+                generate_candidates, approve_strategy, reject_strategy,
+                revoke_strategy, get_promotion_report, get_approved_strategies,
+                get_pending_candidates
+            )
+
+        if not args:
+            return (
+                "*Strategy Promotion Pipeline*\n\n"
+                "`/promote generate` — create candidates from TV results\n"
+                "`/promote report` — show promotion report\n"
+                "`/promote approve <id>` — approve for live\n"
+                "`/promote reject <id>` — reject strategy\n"
+                "`/promote revoke <id>` — remove from live\n"
+                "`/promote live` — show approved live set\n"
+                "`/promote pending` — show awaiting review\n"
+            )
+
+        cmd = args[0].lower()
+
+        if cmd == "generate":
+            candidates = generate_candidates()
+            pending = [c for c in candidates if c["status"] == "PENDING"]
+            tier1 = [c for c in candidates if "TIER_1" in c.get("tier", "")]
+            msg = (
+                f"*Promotion Candidates Generated*\n\n"
+                f"Total: `{len(candidates)}`\n"
+                f"TIER_1+: `{len(tier1)}`\n"
+                f"Pending review: `{len(pending)}`\n\n"
+                f"*Top 5 by score:*\n"
+            )
+            for c in sorted(candidates, key=lambda x: -x["score"])[:5]:
+                flags = f" ⚠ {','.join(c['flags'])}" if c["flags"] else ""
+                msg += (
+                    f"\n`{c['id']}`\n"
+                    f"  CAGR: {c['cagr_pct']}% | GDD: {c['gdd_pct']}% | Score: {c['score']}/100{flags}\n"
+                )
+            msg += f"\nUse `/promote report` for full list."
+            return msg
+
+        elif cmd == "report":
+            report = get_promotion_report()
+            # Truncate for Telegram (max 4096 chars)
+            if len(report) > 3500:
+                report = report[:3500] + "\n\n... (truncated)"
+            return f"```\n{report}\n```"
+
+        elif cmd == "approve":
+            if len(args) < 2:
+                pending = get_pending_candidates()
+                if not pending:
+                    return "No pending candidates. Run `/promote generate` first."
+                msg = "*Pending strategies:*\n"
+                for p in sorted(pending, key=lambda x: -x["score"])[:10]:
+                    msg += f"\n`{p['id']}`\n  Score: {p['score']} | CAGR: {p['cagr_pct']}% | {p['tier']}\n"
+                msg += "\nUsage: `/promote approve <id>`"
+                return msg
+            strategy_id = args[1]
+            notes = " ".join(args[2:]) if len(args) > 2 else ""
+            if approve_strategy(strategy_id, reviewer="Garima", notes=notes):
+                return f"✅ *APPROVED:* `{strategy_id}`\nNow in live deployment set."
+            return f"Strategy `{strategy_id}` not found in candidates."
+
+        elif cmd == "reject":
+            if len(args) < 2:
+                return "Usage: `/promote reject <id> [reason]`"
+            strategy_id = args[1]
+            notes = " ".join(args[2:]) if len(args) > 2 else ""
+            reject_strategy(strategy_id, reviewer="Garima", notes=notes)
+            return f"❌ *REJECTED:* `{strategy_id}`"
+
+        elif cmd == "revoke":
+            if len(args) < 2:
+                return "Usage: `/promote revoke <id>`"
+            revoke_strategy(args[1], reviewer="Garima")
+            return f"🔄 *REVOKED:* `{args[1]}` removed from live set."
+
+        elif cmd == "live":
+            approved = get_approved_strategies()
+            if not approved:
+                return "No approved strategies yet. Use `/promote generate` then `/promote approve <id>`."
+            msg = f"*Live Deployment Set ({len(approved)} strategies)*\n"
+            for a in sorted(approved, key=lambda x: -x["score"]):
+                msg += (
+                    f"\n✅ `{a['strategy']}` on {a['asset']} {a['timeframe']}\n"
+                    f"   CAGR: {a['cagr_pct']}% | GDD: {a['gdd_pct']}% | Score: {a['score']}\n"
+                )
+            return msg
+
+        elif cmd == "pending":
+            pending = get_pending_candidates()
+            if not pending:
+                return "No pending candidates."
+            msg = f"*Pending Review ({len(pending)})*\n"
+            for p in sorted(pending, key=lambda x: -x["score"])[:15]:
+                flags = f" ⚠{','.join(p['flags'])}" if p["flags"] else ""
+                msg += f"\n`{p['id']}`\n  {p['tier']} | Score: {p['score']} | CAGR: {p['cagr_pct']}%{flags}\n"
+            return msg
+
+        return "Unknown command. Use `/promote` for help."
 
     # ------------------------------------------------------------------ #
     # /evolve — Genetic Algorithm status & control
