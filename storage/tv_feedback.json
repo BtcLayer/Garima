@@ -3383,5 +3383,749 @@
     },
     "backtester_features": {},
     "timestamp": "2026-04-04T13:38:03.465241"
+  },
+  {
+    "strategy": "EMA_Ribbon",
+    "asset": "ETHUSDT",
+    "tf": "1h",
+    "params": {
+      "signals": "ema+ribbon",
+      "tp": 12.0,
+      "sl": 1.5,
+      "trail": 4.0
+    },
+    "tv_result": {
+      "net_profit_pct": 3066,
+      "win_rate": 83.45,
+      "profit_factor": 3.88,
+      "trades": 2159,
+      "max_drawdown": -9.05,
+      "profitable": true,
+      "sharpe": 0
+    },
+    "backtester_features": {
+      "tp_pct": 12.0,
+      "sl_pct": 1.5,
+      "tp_sl_ratio": 8.0,
+      "avg_atr_pct": 0.01121228561077192,
+      "avg_adx": 36.84846561242778,
+      "avg_vol_ratio": 1.0270877417212696,
+      "avg_rsi": 50.64150679995316,
+      "trend_strength": 0.496,
+      "volatility_trend": -2.395961466778695e-06,
+      "avg_bb_width": 0.04972849923452208,
+      "asset_idx": 0,
+      "bt_roi_day": 0,
+      "bt_pf": 0,
+      "bt_wr": 0,
+      "bt_trades": 0,
+      "bt_gdd": 0,
+      "has_ema": 1.0,
+      "has_rsi": 0.0,
+      "has_macd": 0.0,
+      "has_supertrend": 0.0,
+      "has_bb": 1.0,
+      "has_volume": 0.0,
+      "has_adx": 0.0,
+      "has_ichimoku": 0.0,
+      "n_signals": 2
+    },
+    "timestamp": "2026-04-04T13:41:10.361578"
+  },
+  {
+    "strategy": "EMA_Ribbon",
+    "asset": "BTCUSDT",
+    "tf": "1h",
+    "params": {
+      "signals": "ema+ribbon",
+      "tp": 12.0,
+      "sl": 1.5,
+      "trail": 4.0
+    },
+    "tv_result": {
+      "net_profit_pct": 991,
+      "win_rate": 76.28,
+      "profit_factor": 7.09,
+      "trades": 1659,
+      "max_drawdown": -12.0,
+      "profitable": true,
+      "sharpe": 0
+    },
+    "backtester_features": {
+      "tp_pct": 12.0,
+      "sl_pct": 1.5,
+      "tp_sl_ratio": 8.0,
+      "avg_atr_pct": 0.008709160121511543,
+      "avg_adx": 37.13400363985555,
+      "avg_vol_ratio": 1.020434887918118,
+      "avg_rsi": 49.87081128348155,
+      "trend_strength": 0.528,
+      "volatility_trend": -1.3148117177194452e-06,
+      "avg_bb_width": 0.03846177889585255,
+      "asset_idx": 1,
+      "bt_roi_day": 0,
+      "bt_pf": 0,
+      "bt_wr": 0,
+      "bt_trades": 0,
+      "bt_gdd": 0,
+      "has_ema": 1.0,
+      "has_rsi": 0.0,
+      "has_macd": 0.0,
+      "has_supertrend": 0.0,
+      "has_bb": 1.0,
+      "has_volume": 0.0,
+      "has_adx": 0.0,
+      "has_ichimoku": 0.0,
+      "n_signals": 2
+    },
+    "timestamp": "2026-04-04T13:41:15.831165"
+  },
+  {
+    "strategy": "CCI_Donchian_Fusion",
+    "asset": "ETHUSDT",
+    "tf": "1h",
+    "params": {
+      "signals": "cci+donchian+fusion",
+      "tp": 12.0,
+      "sl": 1.5,
+      "trail": 4.0
+    },
+    "tv_result": {
+      "net_profit_pct": 2480,
+      "win_rate": 84.25,
+      "profit_factor": 5.55,
+      "trades": 1022,
+      "max_drawdown": -7.0,
+      "profitable": true,
+      "sharpe": 0
+    },
+    "backtester_features": {
+      "tp_pct": 12.0,
+      "sl_pct": 1.5,
+      "tp_sl_ratio": 8.0,
+      "avg_atr_pct": 0.01121228561077192,
+      "avg_adx": 36.84846561242778,
+      "avg_vol_ratio": 1.0270877417212696,
+      "avg_rsi": 50.64150679995316,
+      "trend_strength": 0.496,
+      "volatility_trend": -2.395961466778695e-06,
+      "avg_bb_width": 0.04972849923452208,
+      "asset_idx": 0,
+      "bt_roi_day": 0,
+      "bt_pf": 0,
+      "bt_wr": 0,
+      "bt_trades": 0,
+      "bt_gdd": 0,
+      "has_ema": 0.0,
+      "has_rsi": 0.0,
+      "has_macd": 0.0,
+      "has_supertrend": 0.0,
+      "has_bb": 0.0,
+      "has_volume": 0.0,
+      "has_adx": 0.0,
+      "has_ichimoku": 0.0,
+      "n_signals": 3
+    },
+    "timestamp": "2026-04-04T13:41:21.923954"
+  },
+  {
+    "strategy": "EMA_Ribbon",
+    "asset": "LDOUSDT",
+    "tf": "1h",
+    "params": {
+      "signals": "ema+ribbon",
+      "tp": 12.0,
+      "sl": 1.5,
+      "trail": 4.0
+    },
+    "tv_result": {
+      "net_profit_pct": 3410,
+      "win_rate": 97.83,
+      "profit_factor": 9.79,
+      "trades": 741,
+      "max_drawdown": -7.72,
+      "profitable": true,
+      "sharpe": 0
+    },
+    "backtester_features": {},
+    "timestamp": "2026-04-04T13:41:21.954414"
+  },
+  {
+    "strategy": "EMA_Ribbon",
+    "asset": "SUIUSDT",
+    "tf": "4h",
+    "params": {
+      "signals": "ema+ribbon",
+      "tp": 12.0,
+      "sl": 1.5,
+      "trail": 4.0
+    },
+    "tv_result": {
+      "net_profit_pct": 1350,
+      "win_rate": 84.94,
+      "profit_factor": 8.94,
+      "trades": 1658,
+      "max_drawdown": -10.22,
+      "profitable": true,
+      "sharpe": 0
+    },
+    "backtester_features": {},
+    "timestamp": "2026-04-04T13:41:21.979615"
+  },
+  {
+    "strategy": "Triple_Confirm",
+    "asset": "BTCUSDT",
+    "tf": "4h",
+    "params": {
+      "signals": "triple+confirm",
+      "tp": 12.0,
+      "sl": 1.5,
+      "trail": 4.0
+    },
+    "tv_result": {
+      "net_profit_pct": 3826,
+      "win_rate": 84.01,
+      "profit_factor": 8.84,
+      "trades": 744,
+      "max_drawdown": -2.46,
+      "profitable": true,
+      "sharpe": 0
+    },
+    "backtester_features": {
+      "tp_pct": 12.0,
+      "sl_pct": 1.5,
+      "tp_sl_ratio": 8.0,
+      "avg_atr_pct": 0.01573350801185543,
+      "avg_adx": 39.304097901381844,
+      "avg_vol_ratio": 1.032946797527882,
+      "avg_rsi": 48.13631100810012,
+      "trend_strength": 0.458,
+      "volatility_trend": 1.2091476102866897e-05,
+      "avg_bb_width": 0.07168240292029643,
+      "asset_idx": 1,
+      "bt_roi_day": 0,
+      "bt_pf": 0,
+      "bt_wr": 0,
+      "bt_trades": 0,
+      "bt_gdd": 0,
+      "has_ema": 0.0,
+      "has_rsi": 0.0,
+      "has_macd": 0.0,
+      "has_supertrend": 0.0,
+      "has_bb": 0.0,
+      "has_volume": 0.0,
+      "has_adx": 0.0,
+      "has_ichimoku": 0.0,
+      "n_signals": 2
+    },
+    "timestamp": "2026-04-04T13:41:23.359200"
+  },
+  {
+    "strategy": "CCI_Donchian_Fusion",
+    "asset": "BTCUSDT",
+    "tf": "4h",
+    "params": {
+      "signals": "cci+donchian+fusion",
+      "tp": 12.0,
+      "sl": 1.5,
+      "trail": 4.0
+    },
+    "tv_result": {
+      "net_profit_pct": 3277,
+      "win_rate": 80.84,
+      "profit_factor": 8.84,
+      "trades": 604,
+      "max_drawdown": -2.46,
+      "profitable": true,
+      "sharpe": 0
+    },
+    "backtester_features": {
+      "tp_pct": 12.0,
+      "sl_pct": 1.5,
+      "tp_sl_ratio": 8.0,
+      "avg_atr_pct": 0.01573350801185543,
+      "avg_adx": 39.304097901381844,
+      "avg_vol_ratio": 1.032946797527882,
+      "avg_rsi": 48.13631100810012,
+      "trend_strength": 0.458,
+      "volatility_trend": 1.2091476102866897e-05,
+      "avg_bb_width": 0.07168240292029643,
+      "asset_idx": 1,
+      "bt_roi_day": 0,
+      "bt_pf": 0,
+      "bt_wr": 0,
+      "bt_trades": 0,
+      "bt_gdd": 0,
+      "has_ema": 0.0,
+      "has_rsi": 0.0,
+      "has_macd": 0.0,
+      "has_supertrend": 0.0,
+      "has_bb": 0.0,
+      "has_volume": 0.0,
+      "has_adx": 0.0,
+      "has_ichimoku": 0.0,
+      "n_signals": 3
+    },
+    "timestamp": "2026-04-04T13:41:24.828604"
+  },
+  {
+    "strategy": "CCI_Donchian_Fusion",
+    "asset": "LDOUSDT",
+    "tf": "4h",
+    "params": {
+      "signals": "cci+donchian+fusion",
+      "tp": 12.0,
+      "sl": 1.5,
+      "trail": 4.0
+    },
+    "tv_result": {
+      "net_profit_pct": 2104,
+      "win_rate": 83.91,
+      "profit_factor": 9.17,
+      "trades": 604,
+      "max_drawdown": -6.27,
+      "profitable": true,
+      "sharpe": 0
+    },
+    "backtester_features": {},
+    "timestamp": "2026-04-04T13:41:24.857021"
+  },
+  {
+    "strategy": "Triple_Confirm",
+    "asset": "LDOUSDT",
+    "tf": "4h",
+    "params": {
+      "signals": "triple+confirm",
+      "tp": 12.0,
+      "sl": 1.5,
+      "trail": 4.0
+    },
+    "tv_result": {
+      "net_profit_pct": 3122,
+      "win_rate": 83.52,
+      "profit_factor": 9.05,
+      "trades": 744,
+      "max_drawdown": -3.53,
+      "profitable": true,
+      "sharpe": 0
+    },
+    "backtester_features": {},
+    "timestamp": "2026-04-04T13:41:24.886267"
+  },
+  {
+    "strategy": "Supertrend_CCI",
+    "asset": "BTCUSDT",
+    "tf": "4h",
+    "params": {
+      "signals": "supertrend+cci",
+      "tp": 12.0,
+      "sl": 1.5,
+      "trail": 4.0
+    },
+    "tv_result": {
+      "net_profit_pct": 1005,
+      "win_rate": 83.91,
+      "profit_factor": 9.17,
+      "trades": 604,
+      "max_drawdown": -2.47,
+      "profitable": true,
+      "sharpe": 0
+    },
+    "backtester_features": {
+      "tp_pct": 12.0,
+      "sl_pct": 1.5,
+      "tp_sl_ratio": 8.0,
+      "avg_atr_pct": 0.01573350801185543,
+      "avg_adx": 39.304097901381844,
+      "avg_vol_ratio": 1.032946797527882,
+      "avg_rsi": 48.13631100810012,
+      "trend_strength": 0.458,
+      "volatility_trend": 1.2091476102866897e-05,
+      "avg_bb_width": 0.07168240292029643,
+      "asset_idx": 1,
+      "bt_roi_day": 0,
+      "bt_pf": 0,
+      "bt_wr": 0,
+      "bt_trades": 0,
+      "bt_gdd": 0,
+      "has_ema": 0.0,
+      "has_rsi": 0.0,
+      "has_macd": 0.0,
+      "has_supertrend": 1.0,
+      "has_bb": 0.0,
+      "has_volume": 0.0,
+      "has_adx": 0.0,
+      "has_ichimoku": 0.0,
+      "n_signals": 2
+    },
+    "timestamp": "2026-04-04T13:41:26.295617"
+  },
+  {
+    "strategy": "Supertrend_CCI",
+    "asset": "SUIUSDT",
+    "tf": "4h",
+    "params": {
+      "signals": "supertrend+cci",
+      "tp": 12.0,
+      "sl": 1.5,
+      "trail": 4.0
+    },
+    "tv_result": {
+      "net_profit_pct": 1793,
+      "win_rate": 82.78,
+      "profit_factor": 7.69,
+      "trades": 270,
+      "max_drawdown": -4.24,
+      "profitable": true,
+      "sharpe": 0
+    },
+    "backtester_features": {},
+    "timestamp": "2026-04-04T13:41:26.322607"
+  },
+  {
+    "strategy": "Triple_Confirm",
+    "asset": "SUIUSDT",
+    "tf": "4h",
+    "params": {
+      "signals": "triple+confirm",
+      "tp": 12.0,
+      "sl": 1.5,
+      "trail": 4.0
+    },
+    "tv_result": {
+      "net_profit_pct": 1703,
+      "win_rate": 83.72,
+      "profit_factor": 9.05,
+      "trades": 744,
+      "max_drawdown": -2.73,
+      "profitable": true,
+      "sharpe": 0
+    },
+    "backtester_features": {},
+    "timestamp": "2026-04-04T13:41:26.352599"
+  },
+  {
+    "strategy": "CCI_Donchian_Fusion",
+    "asset": "SUIUSDT",
+    "tf": "4h",
+    "params": {
+      "signals": "cci+donchian+fusion",
+      "tp": 12.0,
+      "sl": 1.5,
+      "trail": 4.0
+    },
+    "tv_result": {
+      "net_profit_pct": 1703,
+      "win_rate": 83.72,
+      "profit_factor": 12.05,
+      "trades": 226,
+      "max_drawdown": -1.11,
+      "profitable": true,
+      "sharpe": 0
+    },
+    "backtester_features": {},
+    "timestamp": "2026-04-04T13:41:26.376466"
+  },
+  {
+    "strategy": "Stoch_RSI_Trend",
+    "asset": "BTCUSDT",
+    "tf": "4h",
+    "params": {
+      "signals": "stoch+rsi+trend",
+      "tp": 12.0,
+      "sl": 1.5,
+      "trail": 4.0
+    },
+    "tv_result": {
+      "net_profit_pct": 806,
+      "win_rate": 81.19,
+      "profit_factor": 6.69,
+      "trades": 270,
+      "max_drawdown": -12.48,
+      "profitable": true,
+      "sharpe": 0
+    },
+    "backtester_features": {
+      "tp_pct": 12.0,
+      "sl_pct": 1.5,
+      "tp_sl_ratio": 8.0,
+      "avg_atr_pct": 0.01573350801185543,
+      "avg_adx": 39.304097901381844,
+      "avg_vol_ratio": 1.032946797527882,
+      "avg_rsi": 48.13631100810012,
+      "trend_strength": 0.458,
+      "volatility_trend": 1.2091476102866897e-05,
+      "avg_bb_width": 0.07168240292029643,
+      "asset_idx": 1,
+      "bt_roi_day": 0,
+      "bt_pf": 0,
+      "bt_wr": 0,
+      "bt_trades": 0,
+      "bt_gdd": 0,
+      "has_ema": 0.0,
+      "has_rsi": 1.0,
+      "has_macd": 0.0,
+      "has_supertrend": 0.0,
+      "has_bb": 0.0,
+      "has_volume": 0.0,
+      "has_adx": 0.0,
+      "has_ichimoku": 0.0,
+      "n_signals": 3
+    },
+    "timestamp": "2026-04-04T13:41:27.878678"
+  },
+  {
+    "strategy": "Stoch_RSI_Trend",
+    "asset": "SUIUSDT",
+    "tf": "4h",
+    "params": {
+      "signals": "stoch+rsi+trend",
+      "tp": 12.0,
+      "sl": 1.5,
+      "trail": 4.0
+    },
+    "tv_result": {
+      "net_profit_pct": 1338,
+      "win_rate": 81.8,
+      "profit_factor": 8.44,
+      "trades": 270,
+      "max_drawdown": -9.5,
+      "profitable": true,
+      "sharpe": 0
+    },
+    "backtester_features": {},
+    "timestamp": "2026-04-04T13:41:27.905441"
+  },
+  {
+    "strategy": "Stoch_RSI_Trend",
+    "asset": "LDOUSDT",
+    "tf": "4h",
+    "params": {
+      "signals": "stoch+rsi+trend",
+      "tp": 12.0,
+      "sl": 1.5,
+      "trail": 4.0
+    },
+    "tv_result": {
+      "net_profit_pct": 1338,
+      "win_rate": 82.22,
+      "profit_factor": 8.72,
+      "trades": 270,
+      "max_drawdown": -3.21,
+      "profitable": true,
+      "sharpe": 0
+    },
+    "backtester_features": {},
+    "timestamp": "2026-04-04T13:41:27.928868"
+  },
+  {
+    "strategy": "MACD_Zero_Cross",
+    "asset": "ETHUSDT",
+    "tf": "4h",
+    "params": {
+      "signals": "macd+zero+cross",
+      "tp": 12.0,
+      "sl": 1.5,
+      "trail": 4.0
+    },
+    "tv_result": {
+      "net_profit_pct": 805,
+      "win_rate": 83.83,
+      "profit_factor": 11.61,
+      "trades": 266,
+      "max_drawdown": -2.97,
+      "profitable": true,
+      "sharpe": 0
+    },
+    "backtester_features": {
+      "tp_pct": 12.0,
+      "sl_pct": 1.5,
+      "tp_sl_ratio": 8.0,
+      "avg_atr_pct": 0.02166894678705313,
+      "avg_adx": 39.50670519384608,
+      "avg_vol_ratio": 1.0342749826094575,
+      "avg_rsi": 48.954833500899504,
+      "trend_strength": 0.476,
+      "volatility_trend": 1.9642422524732317e-05,
+      "avg_bb_width": 0.10034741927766941,
+      "asset_idx": 0,
+      "bt_roi_day": 0,
+      "bt_pf": 0,
+      "bt_wr": 0,
+      "bt_trades": 0,
+      "bt_gdd": 0,
+      "has_ema": 0.0,
+      "has_rsi": 0.0,
+      "has_macd": 1.0,
+      "has_supertrend": 0.0,
+      "has_bb": 0.0,
+      "has_volume": 0.0,
+      "has_adx": 0.0,
+      "has_ichimoku": 0.0,
+      "n_signals": 3
+    },
+    "timestamp": "2026-04-04T13:41:29.282279"
+  },
+  {
+    "strategy": "MACD_Zero_Cross",
+    "asset": "BTCUSDT",
+    "tf": "4h",
+    "params": {
+      "signals": "macd+zero+cross",
+      "tp": 12.0,
+      "sl": 1.5,
+      "trail": 4.0
+    },
+    "tv_result": {
+      "net_profit_pct": 506,
+      "win_rate": 77.07,
+      "profit_factor": 8.49,
+      "trades": 266,
+      "max_drawdown": -4.67,
+      "profitable": true,
+      "sharpe": 0
+    },
+    "backtester_features": {
+      "tp_pct": 12.0,
+      "sl_pct": 1.5,
+      "tp_sl_ratio": 8.0,
+      "avg_atr_pct": 0.01573350801185543,
+      "avg_adx": 39.304097901381844,
+      "avg_vol_ratio": 1.032946797527882,
+      "avg_rsi": 48.13631100810012,
+      "trend_strength": 0.458,
+      "volatility_trend": 1.2091476102866897e-05,
+      "avg_bb_width": 0.07168240292029643,
+      "asset_idx": 1,
+      "bt_roi_day": 0,
+      "bt_pf": 0,
+      "bt_wr": 0,
+      "bt_trades": 0,
+      "bt_gdd": 0,
+      "has_ema": 0.0,
+      "has_rsi": 0.0,
+      "has_macd": 1.0,
+      "has_supertrend": 0.0,
+      "has_bb": 0.0,
+      "has_volume": 0.0,
+      "has_adx": 0.0,
+      "has_ichimoku": 0.0,
+      "n_signals": 3
+    },
+    "timestamp": "2026-04-04T13:41:31.023259"
+  },
+  {
+    "strategy": "MACD_Zero_Cross",
+    "asset": "LDOUSDT",
+    "tf": "4h",
+    "params": {
+      "signals": "macd+zero+cross",
+      "tp": 12.0,
+      "sl": 1.5,
+      "trail": 4.0
+    },
+    "tv_result": {
+      "net_profit_pct": 404,
+      "win_rate": 83.78,
+      "profit_factor": 8.19,
+      "trades": 111,
+      "max_drawdown": -3.19,
+      "profitable": true,
+      "sharpe": 0
+    },
+    "backtester_features": {},
+    "timestamp": "2026-04-04T13:41:31.059252"
+  },
+  {
+    "strategy": "MACD_Zero_Cross",
+    "asset": "SUIUSDT",
+    "tf": "4h",
+    "params": {
+      "signals": "macd+zero+cross",
+      "tp": 12.0,
+      "sl": 1.5,
+      "trail": 4.0
+    },
+    "tv_result": {
+      "net_profit_pct": 1268,
+      "win_rate": 85.41,
+      "profit_factor": 10.76,
+      "trades": 270,
+      "max_drawdown": -3.59,
+      "profitable": true,
+      "sharpe": 0
+    },
+    "backtester_features": {},
+    "timestamp": "2026-04-04T13:41:31.097361"
+  },
+  {
+    "strategy": "Supertrend_CCI",
+    "asset": "ETHUSDT",
+    "tf": "4h",
+    "params": {
+      "signals": "supertrend+cci",
+      "tp": 12.0,
+      "sl": 1.5,
+      "trail": 4.0
+    },
+    "tv_result": {
+      "net_profit_pct": 6431,
+      "win_rate": 82.95,
+      "profit_factor": 8.66,
+      "trades": 900,
+      "max_drawdown": -2.66,
+      "profitable": true,
+      "sharpe": 0
+    },
+    "backtester_features": {
+      "tp_pct": 12.0,
+      "sl_pct": 1.5,
+      "tp_sl_ratio": 8.0,
+      "avg_atr_pct": 0.02166894678705313,
+      "avg_adx": 39.50670519384608,
+      "avg_vol_ratio": 1.0342749826094575,
+      "avg_rsi": 48.954833500899504,
+      "trend_strength": 0.476,
+      "volatility_trend": 1.9642422524732317e-05,
+      "avg_bb_width": 0.10034741927766941,
+      "asset_idx": 0,
+      "bt_roi_day": 0,
+      "bt_pf": 0,
+      "bt_wr": 0,
+      "bt_trades": 0,
+      "bt_gdd": 0,
+      "has_ema": 0.0,
+      "has_rsi": 0.0,
+      "has_macd": 0.0,
+      "has_supertrend": 1.0,
+      "has_bb": 0.0,
+      "has_volume": 0.0,
+      "has_adx": 0.0,
+      "has_ichimoku": 0.0,
+      "n_signals": 2
+    },
+    "timestamp": "2026-04-04T13:41:32.866792"
+  },
+  {
+    "strategy": "Supertrend_CCI",
+    "asset": "LDOUSDT",
+    "tf": "4h",
+    "params": {
+      "signals": "supertrend+cci",
+      "tp": 12.0,
+      "sl": 1.5,
+      "trail": 4.0
+    },
+    "tv_result": {
+      "net_profit_pct": 3301,
+      "win_rate": 83.49,
+      "profit_factor": 8.66,
+      "trades": 604,
+      "max_drawdown": -3.06,
+      "profitable": true,
+      "sharpe": 0
+    },
+    "backtester_features": {},
+    "timestamp": "2026-04-04T13:41:32.900490"
   }
 ]
