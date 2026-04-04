@@ -5197,11 +5197,14 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
         # Final summary
         results.sort(key=lambda x: -x["roi_day"])
 
-        # Save
+        # Save to ml_results.json (bot reads this)
         import json
         gen_path = os.path.join(_ROOT, "storage", "ml_results.json")
         with open(gen_path, "w") as f:
             json.dump([{k: v for k, v in r.items() if k != "top_features"} for r in results], f, indent=2)
+
+        # ── SYNC: Write to shared CSV so dashboard auto-updates ──
+        self._sync_results_to_dashboard(results)
 
         above1 = [r for r in results if r["roi_day"] >= 1.0]
         above05 = [r for r in results if r["roi_day"] >= 0.5]
@@ -5234,8 +5237,100 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
                     f"   Acc={r['accuracy']}% Prec={r['precision']}%\n"
                 )
 
-        msg += f"\nResults saved to storage/ml_results.json"
+        msg += f"\nResults synced to dashboard + bot."
         self.send_message(msg)
+
+    # ------------------------------------------------------------------ #
+    # SYNC: Write ML results to shared files (dashboard + bot + top10)
+    # ------------------------------------------------------------------ #
+    def _sync_results_to_dashboard(self, results):
+        """Write ML results to shared CSV + top10 JSON so dashboard auto-updates."""
+        import json
+        try:
+            import pandas as pd
+            csv_path = os.path.join(_ROOT, "storage", "tv_cagr_results.csv")
+            top10_path = os.path.join(_ROOT, "storage", "top10_strategies.json")
+
+            # Load existing CSV results (TV-validated)
+            existing = []
+            if os.path.exists(csv_path):
+                try:
+                    df_existing = pd.read_csv(csv_path)
+                    # Keep only TV-validated rows (not ML-generated)
+                    df_existing = df_existing[~df_existing["Strategy"].str.startswith("ML_", na=False)]
+                    existing = df_existing.to_dict("records")
+                except:
+                    pass
+
+            # Add ML results as new rows
+            for r in results:
+                if r.get("roi_day", 0) > 0.05:  # only save decent results
+                    existing.append({
+                        "Strategy": f"ML_{r.get('model','').upper()}_{r.get('asset','')[:3]}",
+                        "Asset": r.get("asset", ""),
+                        "Timeframe": r.get("tf", "4h"),
+                        "Net_Profit_USD": 0,
+                        "ROI_Percent": r.get("roi_yr", 0),
+                        "ROI": r.get("roi_yr", 0) / 100,
+                        "CAGR_Percent": r.get("roi_yr", 0),
+                        "ROI_Per_Day_Pct": r.get("roi_day", 0),
+                        "Win_Rate_Percent": r.get("wr", 0),
+                        "Win_Rate_Adjusted": r.get("wr", 0),
+                        "Profit_Factor": r.get("pf", 0),
+                        "Sharpe_Ratio": 0,
+                        "Avg_Win_USD": 0, "Avg_Loss_USD": 0, "Win_Loss_Ratio": 0,
+                        "Trades_Per_Year": r.get("trades", 0) / max(r.get("test_years", 1), 0.5),
+                        "Max_Drawdown_USD": 0, "Max_Drawdown_Percent": 0,
+                        "Gross_Drawdown_USD": 0,
+                        "Gross_Drawdown_Percent": -r.get("gdd", 0),
+                        "Net_Drawdown_USD": 0, "Net_Drawdown_Percent": 0,
+                        "Current_Drawdown_USD": 0, "Current_Drawdown_Percent": 0,
+                        "WR_Flag": "HIGH_WR" if r.get("wr", 0) > 80 else "",
+                        "Performance_Grade": "ML",
+                        "Deployment_Status": "TIER_1" if r.get("roi_yr", 0) >= 200 else "TIER_2" if r.get("roi_yr", 0) >= 50 else "PAPER_TRADE" if r.get("roi_yr", 0) >= 15 else "IGNORE",
+                        "Rank": 0,
+                        "Initial_Capital_USD": 10000,
+                        "Final_Capital_USD": r.get("final_cap", 10000),
+                        "Time_period_checked": "",
+                        "Time_start": "", "time_end": "",
+                        "fees_exchnage": "0.06%",
+                        "Total_Trades": r.get("trades", 0),
+                        "Data_Source": "ml_scanner",
+                    })
+
+            # Save combined CSV
+            df_combined = pd.DataFrame(existing)
+            df_combined = df_combined.sort_values("CAGR_Percent", ascending=False)
+            df_combined["Rank"] = range(1, len(df_combined) + 1)
+            df_combined.to_csv(csv_path, index=False)
+
+            # Update top10 JSON
+            top10 = []
+            top_df = df_combined[df_combined["CAGR_Percent"] > 0].head(10)
+            for i, (_, row) in enumerate(top_df.iterrows(), 1):
+                top10.append({
+                    "rank": i,
+                    "strategy": str(row.get("Strategy", "")),
+                    "asset": str(row.get("Asset", "")),
+                    "timeframe": "4h",
+                    "cagr_pct": round(float(row.get("CAGR_Percent", 0)), 2),
+                    "roi_per_day_pct": round(float(row.get("ROI_Per_Day_Pct", 0)), 4),
+                    "win_rate": round(float(row.get("Win_Rate_Percent", 0)), 2),
+                    "profit_factor": round(float(row.get("Profit_Factor", 0)), 2),
+                    "sharpe": round(float(row.get("Sharpe_Ratio", 0)), 2),
+                    "max_dd_pct": round(abs(float(row.get("Max_Drawdown_Percent", 0))), 2),
+                    "gdd_pct": round(abs(float(row.get("Gross_Drawdown_Percent", 0))), 2),
+                    "trades": int(row.get("Total_Trades", 0)),
+                    "tier": str(row.get("Deployment_Status", "")),
+                    "params": {"sl_pct": 1.5, "tp_pct": 12.0, "trail_pct": 4.0,
+                               "adx_filter": 20, "volume_filter": True,
+                               "max_trades_day": 3, "circuit_breaker_pct": -3.0},
+                })
+            json.dump(top10, open(top10_path, "w"), indent=2)
+
+            self.send_message(f"Synced {len(df_combined)} strategies to dashboard CSV + top 10 JSON.")
+        except Exception as e:
+            self.send_message(f"Sync warning: {e}")
 
     # ------------------------------------------------------------------ #
     # /evolve — Genetic Algorithm status & control
