@@ -4335,7 +4335,9 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
         MOMENTARY = ["Volume_Spike", "MACD_Cross", "Breakout_20"]
         all_sigs = PERSISTENT + MOMENTARY
 
-        ASSETS = ["ETHUSDT", "BTCUSDT", "ADAUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT"]
+        ASSETS = ["ETHUSDT", "BTCUSDT", "ADAUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT",
+                  "XRPUSDT", "AVAXUSDT", "DOTUSDT", "LTCUSDT", "SUIUSDT", "LDOUSDT",
+                  "NEARUSDT", "OPUSDT", "INJUSDT", "DOGEUSDT", "APTUSDT", "ARBUSDT"]
         TIMEFRAMES = ["1h", "4h"]
         # TF-specific SL/TP/TS params (tighter for shorter TFs)
         PARAMS_BY_TF = {
@@ -4632,7 +4634,9 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
         import math
         from datetime import datetime as _dt
 
-        ASSETS = ["ETHUSDT", "BTCUSDT", "ADAUSDT", "SOLUSDT", "LINKUSDT", "BNBUSDT"]
+        ASSETS = ["ETHUSDT", "BTCUSDT", "ADAUSDT", "SOLUSDT", "LINKUSDT", "BNBUSDT",
+                  "XRPUSDT", "AVAXUSDT", "DOTUSDT", "LTCUSDT", "SUIUSDT", "LDOUSDT",
+                  "NEARUSDT", "OPUSDT", "INJUSDT", "DOGEUSDT", "APTUSDT", "ARBUSDT"]
         ALL_SIGNALS = list(SIGNAL_FUNCTIONS.keys())
         # Trend signals (persistent — stay on for multiple bars)
         TREND_SIGS = ["EMA_Cross", "Supertrend", "PSAR_Bull", "Trend_MA50",
@@ -4963,7 +4967,9 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
 
         # Parse args: /ml [assets] [tf]
         assets = ["ETHUSDT", "BTCUSDT", "ADAUSDT", "SOLUSDT", "LINKUSDT",
-                  "BNBUSDT", "XRPUSDT", "AVAXUSDT", "DOTUSDT", "LTCUSDT"]
+                  "BNBUSDT", "XRPUSDT", "AVAXUSDT", "DOTUSDT", "LTCUSDT",
+                  "SUIUSDT", "LDOUSDT", "NEARUSDT", "OPUSDT", "INJUSDT",
+                  "DOGEUSDT", "APTUSDT", "ARBUSDT", "UNIUSDT", "FILUSDT"]
         tf_list = ["4h"]
         if args:
             if args[0] in ("1h", "4h", "15m"):
