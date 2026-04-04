@@ -4962,8 +4962,23 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
         if args and args[0] == "results":
             return self._ml_results()
 
+        if args and args[0] == "learn":
+            return self._ml_learn(args[1:])
+
+        if args and args[0] == "generate":
+            return self._ml_generate()
+
+        if args and args[0] == "insights":
+            return self._ml_insights()
+
         if getattr(self, '_ml_running', False):
-            return "ML scanner already running.\n`/ml status` — check progress\n`/ml results` — see results\n`/ml stop` — stop scanner"
+            return ("ML scanner already running.\n"
+                    "`/ml status` — check progress\n"
+                    "`/ml results` — see top 10\n"
+                    "`/ml stop` — stop scanner\n"
+                    "`/ml learn <strategy> <asset> <roi> <wr> <pf> <gdd>` — feed TV result\n"
+                    "`/ml insights` — what ML learned\n"
+                    "`/ml generate` — create new strategies from learned patterns")
 
         # Parse args: /ml [assets] [tf]
         assets = ["ETHUSDT", "BTCUSDT", "ADAUSDT", "SOLUSDT", "LINKUSDT",
@@ -4994,6 +5009,232 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
             f"`/ml status` — check progress\n"
             f"`/ml results` — see completed results"
         )
+
+    def _ml_learn(self, args) -> str:
+        """Feed TV validation result so ML learns what works on TradingView.
+        Usage: /ml learn Donchian_Trend ETH 436 83 12.05 9.05
+        Args: strategy asset cagr% wr% pf gdd%
+        """
+        if len(args) < 6:
+            return ("*Feed TV result to ML:*\n"
+                    "`/ml learn <strategy> <asset> <cagr%> <wr%> <pf> <gdd%>`\n\n"
+                    "Example:\n"
+                    "`/ml learn Donchian_Trend ETH 436 83 12.05 9.05`\n"
+                    "`/ml learn CCI_Trend LDO 613 85 12.86 8.42`\n\n"
+                    "This teaches ML what features make strategies profitable on TV.")
+
+        try:
+            strategy = args[0]
+            asset = args[1].upper()
+            if not asset.endswith("USDT"):
+                asset += "USDT"
+            cagr = float(args[2])
+            wr = float(args[3])
+            pf = float(args[4])
+            gdd = float(args[5])
+
+            profitable = cagr > 0
+
+            # Feed to online ML
+            try:
+                from src.ml_online import add_tv_result, train_online_model
+            except ImportError:
+                from ml_online import add_tv_result, train_online_model
+
+            params = {
+                "signals": strategy.lower(),
+                "tp": 12.0, "sl": 1.5, "trail": 4.0,
+            }
+            tv_result = {
+                "net_profit_pct": cagr,
+                "win_rate": wr,
+                "profit_factor": pf,
+                "trades": 0,
+                "max_drawdown": -gdd,
+                "profitable": profitable,
+                "sharpe": 0,
+            }
+
+            count = add_tv_result(strategy, asset, "4h", params, tv_result)
+
+            # Retrain model
+            try:
+                model = train_online_model()
+                trained = "Model retrained" if model else "Training skipped"
+            except Exception as e:
+                trained = f"Training error: {e}"
+
+            # Also append to shared CSV
+            try:
+                import pandas as pd
+                csv_path = os.path.join(_ROOT, "storage", "tv_cagr_results.csv")
+                new_row = pd.DataFrame([{
+                    "Strategy": strategy, "Asset": asset.replace("USDT", ""),
+                    "Timeframe": "4h", "CAGR_Percent": cagr,
+                    "ROI_Per_Day_Pct": round(((1 + cagr/100)**(1/365.25) - 1) * 100, 4),
+                    "Win_Rate_Percent": wr, "Profit_Factor": pf,
+                    "Gross_Drawdown_Percent": -gdd,
+                    "Deployment_Status": "TIER_1" if cagr >= 200 else "TIER_2" if cagr >= 50 else "PAPER_TRADE",
+                    "Total_Trades": 0, "Data_Source": "tv_manual",
+                }])
+                if os.path.exists(csv_path):
+                    df = pd.read_csv(csv_path)
+                    df = pd.concat([df, new_row], ignore_index=True)
+                else:
+                    df = new_row
+                df.to_csv(csv_path, index=False)
+            except:
+                pass
+
+            emoji = "✅" if profitable else "❌"
+            tier = "TIER_1" if cagr >= 200 else "TIER_2" if cagr >= 50 else "PAPER" if cagr >= 15 else "WEAK"
+            return (
+                f"{emoji} *TV Result Learned*\n\n"
+                f"Strategy: `{strategy}`\n"
+                f"Asset: `{asset}` | TF: 4h\n"
+                f"CAGR: `{cagr}%` | WR: `{wr}%` | PF: `{pf}`\n"
+                f"GDD: `{gdd}%` | Tier: `{tier}`\n\n"
+                f"Total TV results: `{count}`\n"
+                f"{trained}\n"
+                f"_Dashboard will update on next refresh._"
+            )
+        except Exception as e:
+            return f"Error: {e}\n\nUsage: `/ml learn <strategy> <asset> <cagr%> <wr%> <pf> <gdd%>`"
+
+    def _ml_insights(self) -> str:
+        """Show what ML has learned from TV results — which features predict success."""
+        try:
+            from src.ml_online import load_feedback
+        except ImportError:
+            from ml_online import load_feedback
+
+        feedback = load_feedback()
+        if not feedback:
+            return "No TV results yet. Use `/ml learn` to feed results."
+
+        # Analyze patterns
+        profitable = [f for f in feedback if f.get("tv_result", {}).get("profitable")]
+        unprofitable = [f for f in feedback if not f.get("tv_result", {}).get("profitable")]
+
+        # Extract winning patterns
+        win_strategies = {}
+        win_assets = {}
+        for f in profitable:
+            s = f.get("strategy", "unknown")
+            a = f.get("asset", "unknown")
+            roi = f.get("tv_result", {}).get("net_profit_pct", 0)
+            win_strategies[s] = win_strategies.get(s, 0) + 1
+            win_assets[a] = max(win_assets.get(a, 0), roi)
+
+        # Top features from model
+        import pickle
+        model_file = os.path.join(_ROOT, "storage", "ml_online_model.pkl")
+        cols_file = model_file + ".cols"
+        top_feat = []
+        try:
+            model = pickle.load(open(model_file, "rb"))
+            cols = pickle.load(open(cols_file, "rb"))
+            imp = sorted(zip(cols, model.feature_importances_), key=lambda x: -x[1])[:8]
+            top_feat = imp
+        except:
+            pass
+
+        msg = (
+            f"*ML Insights — What Works on TV*\n\n"
+            f"Total TV results: `{len(feedback)}`\n"
+            f"Profitable: `{len(profitable)}` | Unprofitable: `{len(unprofitable)}`\n\n"
+        )
+
+        if win_strategies:
+            msg += "*Winning Strategy Types:*\n"
+            for s, count in sorted(win_strategies.items(), key=lambda x: -x[1])[:7]:
+                msg += f"  `{s}` — {count} wins\n"
+
+        if win_assets:
+            msg += "\n*Best Assets (by ROI):*\n"
+            for a, roi in sorted(win_assets.items(), key=lambda x: -x[1])[:7]:
+                msg += f"  `{a}` — {roi:.0f}% ROI\n"
+
+        if top_feat:
+            msg += "\n*Top Predictive Features:*\n"
+            for name, imp_val in top_feat:
+                bar = "█" * int(imp_val * 30)
+                msg += f"  `{name}`: {bar} ({imp_val:.1%})\n"
+
+        msg += "\n_Feed more TV results with `/ml learn` to improve predictions._"
+        return msg
+
+    def _ml_generate(self) -> str:
+        """Generate new strategy ideas based on what ML learned from TV results."""
+        try:
+            from src.ml_online import load_feedback
+        except ImportError:
+            from ml_online import load_feedback
+
+        feedback = load_feedback()
+        if len(feedback) < 5:
+            return f"Need at least 5 TV results to generate. Currently: {len(feedback)}. Use `/ml learn` first."
+
+        # Analyze what works
+        profitable = [f for f in feedback if f.get("tv_result", {}).get("profitable")]
+
+        # Find winning feature patterns
+        winning_signals = {}
+        winning_params = {"tp": [], "sl": [], "trail": []}
+        winning_assets = {}
+
+        for f in profitable:
+            signals = f.get("params", {}).get("signals", "")
+            for sig in signals.split("+"):
+                sig = sig.strip()
+                if sig:
+                    winning_signals[sig] = winning_signals.get(sig, 0) + 1
+
+            tp = f.get("params", {}).get("tp", 0)
+            sl = f.get("params", {}).get("sl", 0)
+            if tp: winning_params["tp"].append(tp)
+            if sl: winning_params["sl"].append(sl)
+
+            asset = f.get("asset", "")
+            roi = f.get("tv_result", {}).get("net_profit_pct", 0)
+            if asset not in winning_assets or roi > winning_assets[asset]:
+                winning_assets[asset] = roi
+
+        # Sort signals by frequency
+        top_signals = sorted(winning_signals.items(), key=lambda x: -x[1])[:10]
+
+        # Generate recommendations
+        msg = "*ML-Generated Strategy Recommendations*\n\n"
+        msg += "*Most profitable signal combinations:*\n"
+
+        # Suggest combos of top signals
+        if len(top_signals) >= 2:
+            for i in range(min(5, len(top_signals))):
+                for j in range(i+1, min(5, len(top_signals))):
+                    s1 = top_signals[i][0]
+                    s2 = top_signals[j][0]
+                    score = top_signals[i][1] + top_signals[j][1]
+                    msg += f"  `{s1} + {s2}` (score: {score})\n"
+
+        # Best params
+        avg_tp = sum(winning_params["tp"]) / len(winning_params["tp"]) if winning_params["tp"] else 12
+        avg_sl = sum(winning_params["sl"]) / len(winning_params["sl"]) if winning_params["sl"] else 1.5
+
+        msg += f"\n*Optimal params (from winners):*\n"
+        msg += f"  TP: `{avg_tp:.1f}%` | SL: `{avg_sl:.1f}%`\n"
+
+        # Best assets to target
+        msg += f"\n*Best assets to target:*\n"
+        for asset, roi in sorted(winning_assets.items(), key=lambda x: -x[1])[:5]:
+            msg += f"  `{asset}` — best ROI: {roi:.0f}%\n"
+
+        msg += f"\n*Next steps:*\n"
+        msg += f"1. Create Pine Scripts with top signal combos\n"
+        msg += f"2. Test on best assets listed above\n"
+        msg += f"3. Feed results back with `/ml learn`\n"
+        msg += f"4. ML gets smarter with each iteration\n"
+
+        return msg
 
     def _ml_status(self) -> str:
         """Show ML scanner progress."""
