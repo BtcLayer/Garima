@@ -31,33 +31,44 @@ def load_json(path):
 ml_results = load_json(os.path.join(STORAGE, "ml_results.json"))
 gen_results = load_json(os.path.join(STORAGE, "generate_results.json"))
 autohunt_results = load_json(os.path.join(STORAGE, "autohunt_results.json"))
+top10 = load_json(os.path.join(STORAGE, "top10_strategies.json"))
 
-strategies = [
-    {"Strategy": "PSAR_EMA_ST_TP8", "Asset": "ETH", "TF": "4h", "PF": 1.87, "WR": 62.4, "ROI_yr": 112.3, "ROI_day": 0.308, "GDD": 16.7, "Trades": 338, "Tier": "TIER_1", "Signals": "PSAR+EMA+ST+MA50+Vol", "Method": "Rule-based"},
-    {"Strategy": "PSAR_Volume_Surge", "Asset": "BTC", "TF": "4h", "PF": 1.87, "WR": 46.1, "ROI_yr": 107.7, "ROI_day": 0.295, "GDD": 14.2, "Trades": 3151, "Tier": "TIER_1", "Signals": "PSAR+Vol+EMA+ST+MA50", "Method": "Rule-based"},
-    {"Strategy": "PSAR_EMA_ST_TP6", "Asset": "ETH", "TF": "4h", "PF": 1.73, "WR": 52.4, "ROI_yr": 109.6, "ROI_day": 0.300, "GDD": 20.8, "Trades": 339, "Tier": "TIER_2_D", "Signals": "PSAR+EMA+ST+MA50+Vol", "Method": "Rule-based"},
-    {"Strategy": "PSAR_EMA_Vol_OBV", "Asset": "ADA", "TF": "4h", "PF": 1.72, "WR": 52.5, "ROI_yr": 102.4, "ROI_day": 0.281, "GDD": 22.6, "Trades": 370, "Tier": "TIER_2_D", "Signals": "PSAR+EMA+Vol+OBV", "Method": "Rule-based"},
-    {"Strategy": "PSAR_EMA_ST_TP5", "Asset": "ETH", "TF": "4h", "PF": 1.73, "WR": 50.0, "ROI_yr": 106.0, "ROI_day": 0.290, "GDD": 23.6, "Trades": 367, "Tier": "TIER_2_D", "Signals": "PSAR+EMA+ST+MA50+Vol", "Method": "Rule-based"},
-    {"Strategy": "PSAR_EMA_ST_TP4", "Asset": "ETH", "TF": "4h", "PF": 1.73, "WR": 50.0, "ROI_yr": 102.0, "ROI_day": 0.280, "GDD": 22.6, "Trades": 340, "Tier": "TIER_2_D", "Signals": "PSAR+EMA+ST+MA50+Vol", "Method": "Rule-based"},
-    {"Strategy": "PSAR_EMA_ST_TP8", "Asset": "ADA", "TF": "4h", "PF": 1.73, "WR": 50.0, "ROI_yr": 100.0, "ROI_day": 0.274, "GDD": 25.0, "Trades": 340, "Tier": "TIER_2_D", "Signals": "PSAR+EMA+ST+MA50+Vol", "Method": "Rule-based"},
-    {"Strategy": "PSAR_Vol_Tight", "Asset": "ETH", "TF": "4h", "PF": 1.68, "WR": 61.1, "ROI_yr": 93.0, "ROI_day": 0.255, "GDD": 18.0, "Trades": 342, "Tier": "TIER_2_D", "Signals": "PSAR+Vol+EMA+ST", "Method": "Rule-based"},
-    {"Strategy": "PSAR_Vol_Ultra", "Asset": "ETH", "TF": "4h", "PF": 1.63, "WR": 63.4, "ROI_yr": 69.1, "ROI_day": 0.189, "GDD": 12.0, "Trades": 161, "Tier": "TIER_2_D", "Signals": "PSAR+Vol+EMA+ST", "Method": "Rule-based"},
-    {"Strategy": "PSAR_EMA_ST_TP9", "Asset": "ADA", "TF": "4h", "PF": 1.50, "WR": 52.3, "ROI_yr": 112.1, "ROI_day": 0.307, "GDD": 22.6, "Trades": 367, "Tier": "TIER_2_T", "Signals": "PSAR+EMA+ST+MA50+Vol", "Method": "Rule-based"},
-    {"Strategy": "Ichimoku_PSAR_Pro", "Asset": "ETH", "TF": "4h", "PF": 1.56, "WR": 55.0, "ROI_yr": 55.8, "ROI_day": 0.153, "GDD": 15.0, "Trades": 346, "Tier": "TIER_2_T", "Signals": "Ichi+PSAR+ADX+OBV+EMA+ST", "Method": "Rule-based"},
-    {"Strategy": "PSAR_Vol_Tight", "Asset": "BTC", "TF": "4h", "PF": 1.51, "WR": 50.8, "ROI_yr": 48.0, "ROI_day": 0.132, "GDD": 20.0, "Trades": 315, "Tier": "TIER_2_T", "Signals": "PSAR+Vol+EMA+ST", "Method": "Rule-based"},
-    {"Strategy": "PSAR_EMA_ST_TP8", "Asset": "LINK", "TF": "4h", "PF": 1.25, "WR": 48.9, "ROI_yr": 35.0, "ROI_day": 0.096, "GDD": 30.0, "Trades": 321, "Tier": "TIER_2_T", "Signals": "PSAR+EMA+ST+MA50+Vol", "Method": "Rule-based"},
-    {"Strategy": "PSAR_EMA_ST_TP6", "Asset": "BTC", "TF": "4h", "PF": 1.20, "WR": 47.0, "ROI_yr": 30.0, "ROI_day": 0.082, "GDD": 28.0, "Trades": 313, "Tier": "TIER_2_T", "Signals": "PSAR+EMA+ST+MA50+Vol", "Method": "Rule-based"},
-]
-df_strat = pd.DataFrame(strategies)
+# ── Load full CAGR results CSV if available ──
+_cagr_csv = os.path.join(STORAGE, "tv_cagr_results.csv")
+if os.path.exists(_cagr_csv):
+    _cagr_df = pd.read_csv(_cagr_csv)
+    _cagr_df = _cagr_df[_cagr_df["CAGR_Percent"] > 0].sort_values("CAGR_Percent", ascending=False)
+else:
+    _cagr_df = pd.DataFrame()
 
-# Add ML results to combined view
+# ── Build strategies from CSV (dynamic, not hardcoded) ──
+strategies = []
+if len(_cagr_df) > 0:
+    for _, row in _cagr_df.iterrows():
+        strategies.append({
+            "Strategy": str(row.get("Strategy", "")).split(" BINANCE")[0].strip(),
+            "Asset": row.get("Asset", ""),
+            "TF": row.get("Timeframe", "4h"),
+            "PF": round(row.get("Profit_Factor", 0), 2),
+            "WR": round(row.get("Win_Rate_Percent", 0), 1),
+            "CAGR": round(row.get("CAGR_Percent", 0), 2),
+            "ROI_day": round(row.get("ROI_Per_Day_Pct", 0), 4),
+            "GDD": round(abs(row.get("Gross_Drawdown_Percent", 0)), 2),
+            "Trades": int(row.get("Total_Trades", 0)),
+            "Tier": row.get("Deployment_Status", ""),
+            "Signals": "",
+            "Method": "TV-Validated",
+        })
+df_strat = pd.DataFrame(strategies) if strategies else pd.DataFrame()
+
+# Add ML/gen results to combined view
 all_strategies = list(strategies)
 for r in ml_results:
     all_strategies.append({
         "Strategy": f"ML_{r.get('model','').upper()}_{r.get('asset','')[:3]}",
         "Asset": r.get("asset", "")[:3] if r.get("asset","").endswith("USDT") else r.get("asset",""),
         "TF": r.get("tf", "4h"), "PF": r.get("pf", 0), "WR": r.get("wr", 0),
-        "ROI_yr": r.get("roi_yr", 0), "ROI_day": r.get("roi_day", 0),
+        "CAGR": r.get("roi_yr", 0), "ROI_day": r.get("roi_day", 0),
         "GDD": r.get("gdd", 0), "Trades": r.get("trades", 0),
         "Tier": "ML", "Signals": f"ML {r.get('model','').upper()} ({r.get('accuracy',0)}% acc)",
         "Method": "ML",
@@ -68,7 +79,7 @@ for r in gen_results:
             "Strategy": f"GEN_{r.get('method','')[:8]}_{r.get('asset','')[:3]}",
             "Asset": r.get("asset", ""),
             "TF": "4h", "PF": r.get("pf", 0), "WR": r.get("wr", 0),
-            "ROI_yr": r.get("roi_yr", 0), "ROI_day": r.get("roi_day", 0),
+            "CAGR": r.get("roi_yr", 0), "ROI_day": r.get("roi_day", 0),
             "GDD": r.get("gdd", 0), "Trades": r.get("trades", 0),
             "Tier": "Generated", "Signals": r.get("signals", ""),
             "Method": r.get("method", "Generated"),
@@ -91,23 +102,25 @@ with st.sidebar:
     st.markdown("---")
 
     # Pine Scripts — clean list, scripts in Pine Script Gen tab
-    with st.expander("📜 Pine Scripts"):
+    with st.expander("📜 Pine Scripts (16)"):
         st.markdown(
             "<span style='font-size:11px;'>"
-            "<b>Rule-based:</b><br>"
-            "- PSAR_EMA_ST_TP8 (ETH)<br>"
-            "- PSAR_Volume_Surge (BTC)<br>"
-            "- PSAR_EMA_Vol_OBV (ADA)<br>"
-            "- PSAR_Vol_Tight (ETH)<br>"
-            "- Ichimoku_PSAR_Pro (ETH)<br>"
-            "- PSAR_EMA_ST_TP6 (ETH)<br>"
-            "- PSAR_EMA_ST_TP9 (ADA)<br><br>"
-            "<b>Genetic (OOS):</b><br>"
-            "- Genetic_Supertrend (LINK)<br>"
-            "- Genetic_Supertrend (ADA)<br>"
-            "- Genetic_Supertrend (SOL)"
-            "</span><br>"
-            "<i style='font-size:10px;'>Open 'Pine Script Gen' tab for code</i>",
+            "<b>TIER_1 (TV-Validated):</b><br>"
+            "- Donchian Trend (ETH/BTC/LDO/SUI/LINK/AVAX/ADA/XRP)<br>"
+            "- CCI Trend (LDO/ETH/BTC/ADA/SOL)<br>"
+            "- KC Breakout (ETH)<br><br>"
+            "<b>TIER_2 (TV-Validated):</b><br>"
+            "- HA Trend (ETH/LDO/DOT/BTC)<br>"
+            "- Momentum V2 (ETH/DOT/LDO)<br>"
+            "- Breakout Retest (DOT/LDO)<br>"
+            "- PSAR Trend (ETH)<br>"
+            "- Aroon Trend (ETH)<br>"
+            "- BB Squeeze V2 (LDO/SUI)<br>"
+            "- ADX DI Cross (ETH)<br>"
+            "- Williams %%R (LDO)<br>"
+            "- TRIX Signal (LDO)<br>"
+            "- Chandelier Exit (LDO)"
+            "</span>",
             unsafe_allow_html=True
         )
 
@@ -123,11 +136,11 @@ st.title("Crypto Algorithmic Trading System")
 # ── Top-level KPIs ──
 c1, c2, c3, c4, c5, c6 = st.columns(6)
 c1.metric("Total Strategies", len(df_all))
-c2.metric("Best ROI/day", f"{df_all['ROI_day'].max():.3f}%" if len(df_all) > 0 else "—")
-c3.metric("Best PF", f"{df_all['PF'].max():.2f}" if len(df_all) > 0 else "—")
-c4.metric("Best WR", f"{df_all['WR'].max():.1f}%" if len(df_all) > 0 else "—")
+c2.metric("Best CAGR", f"{df_all['CAGR'].max():.0f}%" if len(df_all) > 0 else "—")
+c3.metric("Best ROI/day", f"{df_all['ROI_day'].max():.3f}%" if len(df_all) > 0 else "—")
+c4.metric("Best PF", f"{df_all['PF'].max():.2f}" if len(df_all) > 0 else "—")
 c5.metric("Assets", df_all["Asset"].nunique() if len(df_all) > 0 else 0)
-c6.metric("Methods", df_all["Method"].nunique() if len(df_all) > 0 else 0)
+c6.metric("TIER_1+", len(df_all[df_all["Tier"].isin(["TIER_1", "TIER_1_DEPLOY"])]) if len(df_all) > 0 else 0)
 
 st.divider()
 
@@ -153,7 +166,7 @@ with tab1:
 
     # ── Combined leaderboard ──
     st.subheader("All Strategies — Ranked by ROI/day")
-    display_cols = ["Strategy", "Asset", "TF", "Method", "ROI_day", "ROI_yr", "PF", "WR", "GDD", "Trades", "Tier"]
+    display_cols = ["Strategy", "Asset", "TF", "Method", "CAGR", "ROI_day", "PF", "WR", "GDD", "Trades", "Tier"]
     st.dataframe(
         df_all[display_cols].head(30).style.background_gradient(subset=["ROI_day"], cmap="RdYlGn"),
         use_container_width=True, hide_index=True, height=400
@@ -222,7 +235,7 @@ with tab1:
         with st.expander(f"#{df_all.index.get_loc(i)+1} — {row['Strategy']} ({row['Asset']} {row['TF']}) — {row['ROI_day']:.3f}%/day"):
             c1, c2, c3, c4, c5, c6 = st.columns(6)
             c1.metric("ROI/day", f"{row['ROI_day']:.3f}%")
-            c2.metric("ROI/yr", f"{row['ROI_yr']:.1f}%")
+            c2.metric("CAGR%", f"{row['CAGR']:.1f}%")
             c3.metric("Profit Factor", f"{row['PF']:.2f}")
             c4.metric("Win Rate", f"{row['WR']:.1f}%")
             c5.metric("Max Drawdown", f"{row['GDD']:.1f}%")
@@ -750,7 +763,7 @@ with tab6:
         s = strategies[idx]
         n_trades = s["Trades"]
         wr = s["WR"] / 100
-        avg_win_pct = s.get("ROI_yr", 50) / s["Trades"] * 1.5 if s["Trades"] > 0 else 0.5
+        avg_win_pct = s.get("CAGR", 50) / s["Trades"] * 1.5 if s["Trades"] > 0 else 0.5
         avg_loss_pct = avg_win_pct / s["PF"] if s["PF"] > 0 else avg_win_pct
 
         # Simulate 1000 paths

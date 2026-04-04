@@ -1,0 +1,93 @@
+//@version=5
+// PARABOLIC SAR TREND — PSAR flip = trend reversal entry
+// PSAR is one of the most reliable trend-following indicators
+// Enter on PSAR flip + ADX confirmation, trail with PSAR itself
+// Test on: ETHUSDT, BTCUSDT, DOTUSDT, LDOUSDT, SOLUSDT, SUIUSDT — 4h
+strategy("PSAR Trend", overlay=true, initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=95,
+     commission_type=strategy.commission.percent, commission_value=0.1)
+
+// ── INPUTS ──
+psar_start = input.float(0.02, "PSAR Start")
+psar_inc = input.float(0.02, "PSAR Increment")
+psar_max = input.float(0.2, "PSAR Max")
+sl_pct = input.float(1.5, "SL %") / 100
+tp_pct = input.float(12.0, "TP %") / 100
+trail_pct = input.float(4.0, "Trail %") / 100
+
+// ── PSAR ──
+psar = ta.sar(psar_start, psar_inc, psar_max)
+psar_bull = close > psar
+psar_bear = close < psar
+psar_flip_up = psar_bull and not psar_bull[1]
+psar_flip_down = psar_bear and not psar_bear[1]
+
+// ── CONFIRMATION ──
+ema50 = ta.ema(close, 50)
+[diplus, diminus, adx] = ta.dmi(14, 14)
+atr14 = ta.atr(14)
+atr_ma = ta.sma(atr14, 100)
+vol_ok = atr14 < atr_ma * 2
+vol_confirm = volume > ta.sma(volume, 20) * 1.2
+rsi = ta.rsi(close, 14)
+
+// Tiered
+long_strong = psar_flip_up and close > ema50 and adx > 25 and vol_confirm and diplus > diminus
+long_medium = psar_flip_up and close > ema50 and adx > 20
+short_strong = psar_flip_down and close < ema50 and adx > 25 and vol_confirm and diminus > diplus
+short_medium = psar_flip_down and close < ema50 and adx > 20
+
+long_entry = long_strong or long_medium
+short_entry = short_strong or short_medium
+
+// ── EXIT ──
+long_exit = psar_flip_down or rsi > 80
+short_exit = psar_flip_up or rsi < 20
+
+// ── ANTI-OVERTRADING ──
+var int trades_today = 0
+var int consec_losses = 0
+var int cooldown = 0
+var float day_equity = strategy.equity
+is_new_day = ta.change(time("D")) != 0
+if is_new_day
+    trades_today := 0
+    day_equity := strategy.equity
+if cooldown > 0
+    cooldown -= 1
+was_closed = strategy.position_size[1] != 0 and strategy.position_size == 0
+if was_closed
+    trades_today += 1
+    if strategy.netprofit < strategy.netprofit[1]
+        consec_losses += 1
+        if consec_losses >= 3
+            cooldown := 6
+            consec_losses := 0
+    else
+        consec_losses := 0
+daily_pnl = (strategy.equity - day_equity) / day_equity
+can_trade = trades_today < 3 and cooldown == 0 and daily_pnl > -0.03
+
+// ── EXECUTION ──
+if long_entry and can_trade and vol_ok and strategy.position_size <= 0
+    strategy.entry("Long", strategy.long)
+    strategy.exit("L_X", "Long",
+         stop=close * (1 - sl_pct), limit=close * (1 + tp_pct),
+         trail_points=close * trail_pct / 100 / syminfo.mintick,
+         trail_offset=close * trail_pct / 100 / syminfo.mintick)
+if short_entry and can_trade and vol_ok and strategy.position_size >= 0
+    strategy.entry("Short", strategy.short)
+    strategy.exit("S_X", "Short",
+         stop=close * (1 + sl_pct), limit=close * (1 - tp_pct),
+         trail_points=close * trail_pct / 100 / syminfo.mintick,
+         trail_offset=close * trail_pct / 100 / syminfo.mintick)
+if long_exit and strategy.position_size > 0
+    strategy.close("Long")
+if short_exit and strategy.position_size < 0
+    strategy.close("Short")
+
+// ── VISUALS ──
+plot(psar, "PSAR", style=plot.style_circles, color=psar_bull ? color.green : color.red, linewidth=2)
+plot(ema50, "EMA50", color.blue, 2)
+plotshape(long_entry and can_trade, "Buy", shape.triangleup, location.belowbar, color.lime, size=size.small)
+plotshape(short_entry and can_trade, "Sell", shape.triangledown, location.abovebar, color.red, size=size.small)

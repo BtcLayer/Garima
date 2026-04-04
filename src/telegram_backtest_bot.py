@@ -5018,7 +5018,30 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
         )
 
     def _ml_results(self) -> str:
-        """Show ML scanner results."""
+        """Show ML scanner results — uses CAGR top10 + old ML results."""
+        # Try loading CAGR top 10 first
+        top10_path = os.path.join(_ROOT, "storage", "top10_strategies.json")
+        try:
+            with open(top10_path) as f:
+                top10 = json.load(f)
+        except:
+            top10 = []
+
+        if top10:
+            msg = "*TOP 10 STRATEGIES (CAGR-validated)*\n\n"
+            for s in top10:
+                tier_emoji = "🟢" if "DEPLOY" in s.get("tier", "") else "🔵" if "TIER_1" in s.get("tier", "") else "🟡"
+                msg += (
+                    f"\n{tier_emoji} `#{s['rank']}` *{s['strategy']}* on {s['asset']}\n"
+                    f"   CAGR: `{s['cagr_pct']}%/yr` | ROI/day: `{s['roi_per_day_pct']}%`\n"
+                    f"   WR: {s['win_rate']}% | PF: {s['profit_factor']} | Sharpe: {s['sharpe']}\n"
+                    f"   MaxDD: {s['max_dd_pct']}% | GDD: {s['gdd_pct']}%\n"
+                    f"   Trades: {s['trades']} | Tier: {s['tier']}\n"
+                )
+            msg += "\n_Params: SL=1.5% TP=12% Trail=4% ADX>20_"
+            return msg
+
+        # Fallback to old ML results
         ml_path = os.path.join(_ROOT, "storage", "ml_results.json")
         try:
             with open(ml_path) as f:
@@ -5029,7 +5052,6 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
         if not results:
             return "No ML results yet. Run `/ml` first."
 
-        # Sort by ROI/day
         results.sort(key=lambda x: -x.get("roi_day", 0))
 
         above1 = len([r for r in results if r.get("roi_day", 0) >= 1.0])
