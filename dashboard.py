@@ -142,6 +142,8 @@ c4.metric("Best PF", f"{df_all['PF'].max():.2f}" if len(df_all) > 0 else "—")
 c5.metric("Assets", df_all["Asset"].nunique() if len(df_all) > 0 else 0)
 c6.metric("TIER_1+", len(df_all[df_all["Tier"].isin(["TIER_1", "TIER_1_DEPLOY"])]) if len(df_all) > 0 else 0)
 
+st.warning("All strategies tested on **4h timeframe** only (except EMA Ribbon on 1h). Position sizing: 95% equity (backtester default) — live deployment should use 5-15% per trade.")
+
 st.divider()
 
 # ── Tabs ──
