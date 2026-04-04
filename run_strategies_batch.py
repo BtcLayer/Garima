@@ -201,6 +201,49 @@ def calculate_indicators(df):
     # Williams %R (period=14)
     df["williams_r"] = ((high14 - df["close"]) / (high14 - low14)) * -100
 
+    # ── New indicators for winning strategies (Donchian, Aroon, TRIX, Chandelier, HA) ──
+
+    # Donchian Channel (20-bar high/low breakout — Turtle Trading)
+    df["donchian_upper"] = df["high"].rolling(20).max()
+    df["donchian_lower"] = df["low"].rolling(20).min()
+    df["donchian_mid"] = (df["donchian_upper"] + df["donchian_lower"]) / 2
+    df["donchian_width"] = (df["donchian_upper"] - df["donchian_lower"]) / df["close"]
+
+    # Aroon (measures time since highest high / lowest low)
+    aroon_len = 14
+    df["aroon_up"] = df["high"].rolling(aroon_len + 1).apply(lambda x: x.argmax() / aroon_len * 100, raw=True)
+    df["aroon_down"] = df["low"].rolling(aroon_len + 1).apply(lambda x: x.argmin() / aroon_len * 100, raw=True)
+    df["aroon_osc"] = df["aroon_up"] - df["aroon_down"]
+
+    # TRIX (triple smoothed EMA momentum)
+    trix_ema1 = df["close"].ewm(span=14).mean()
+    trix_ema2 = trix_ema1.ewm(span=14).mean()
+    trix_ema3 = trix_ema2.ewm(span=14).mean()
+    df["trix"] = trix_ema3.pct_change() * 10000
+    df["trix_signal"] = df["trix"].ewm(span=9).mean()
+
+    # Chandelier Exit (ATR-based trailing stop)
+    ce_atr = tr.rolling(22).mean()
+    df["chandelier_long"] = df["high"].rolling(22).max() - 3 * ce_atr
+    df["chandelier_short"] = df["low"].rolling(22).min() + 3 * ce_atr
+
+    # Heikin Ashi (smoothed candles)
+    df["ha_close"] = (df["open"] + df["high"] + df["low"] + df["close"]) / 4
+    ha_open = pd.Series(np.nan, index=df.index)
+    ha_open.iloc[0] = (df["open"].iloc[0] + df["close"].iloc[0]) / 2
+    for i in range(1, len(df)):
+        ha_open.iloc[i] = (ha_open.iloc[i-1] + df["ha_close"].iloc[i-1]) / 2
+    df["ha_open"] = ha_open
+    df["ha_green"] = (df["ha_close"] > df["ha_open"]).astype(int)
+
+    # DI+ / DI- (for ADX DI Cross strategy)
+    df["di_plus"] = 100 * plus_dm.rolling(14).mean() / df["atr"]
+    df["di_minus"] = 100 * minus_dm.rolling(14).mean() / df["atr"]
+
+    # ROC (Rate of Change — for Momentum V2)
+    df["roc_12"] = df["close"].pct_change(12) * 100
+    df["roc_6"] = df["close"].pct_change(6) * 100
+
     return df
 
 

@@ -93,6 +93,41 @@ def build_features(df):
     f["lower_wick"] = (df[["close", "open"]].min(axis=1) - df["low"]) / df["close"]
     f["is_green"] = (df["close"] > df["open"]).astype(int)
 
+    # ── Features from winning strategies (Donchian, Aroon, TRIX, Chandelier, HA, ROC) ──
+
+    # Donchian breakout signals
+    if "donchian_upper" in df.columns:
+        f["donchian_pos"] = (df["close"] - df["donchian_lower"]) / (df["donchian_upper"] - df["donchian_lower"]).replace(0, np.nan)
+        f["donchian_width"] = df.get("donchian_width", 0)
+        f["donchian_break_up"] = (df["close"] > df["donchian_upper"].shift(1)).astype(int)
+
+    # Aroon trend strength
+    if "aroon_up" in df.columns:
+        f["aroon_osc"] = df.get("aroon_osc", 0)
+        f["aroon_up"] = df.get("aroon_up", 0)
+
+    # TRIX momentum
+    if "trix" in df.columns:
+        f["trix"] = df["trix"]
+        f["trix_above_signal"] = (df["trix"] > df["trix_signal"]).astype(int)
+
+    # Chandelier distance
+    if "chandelier_long" in df.columns:
+        f["chandelier_dist"] = (df["close"] - df["chandelier_long"]) / df["close"]
+
+    # Heikin Ashi trend
+    if "ha_green" in df.columns:
+        f["ha_green"] = df["ha_green"]
+
+    # DI cross
+    if "di_plus" in df.columns:
+        f["di_diff"] = df["di_plus"] - df["di_minus"]
+
+    # ROC momentum
+    if "roc_12" in df.columns:
+        f["roc_12"] = df["roc_12"]
+        f["roc_6"] = df.get("roc_6", 0)
+
     return f
 
 

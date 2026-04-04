@@ -4970,7 +4970,7 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
                   "BNBUSDT", "XRPUSDT", "AVAXUSDT", "DOTUSDT", "LTCUSDT",
                   "SUIUSDT", "LDOUSDT", "NEARUSDT", "OPUSDT", "INJUSDT",
                   "DOGEUSDT", "APTUSDT", "ARBUSDT", "UNIUSDT", "FILUSDT"]
-        tf_list = ["4h"]
+        tf_list = ["4h", "1h"]
         if args:
             if args[0] in ("1h", "4h", "15m"):
                 tf_list = [args[0]]
@@ -5123,6 +5123,9 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
             (0.04, 0.02, 12), (0.05, 0.025, 18), (0.06, 0.03, 18),
             (0.08, 0.04, 24), (0.10, 0.05, 24), (0.15, 0.07, 30),
             (0.20, 0.10, 36),
+            # New wider params for Donchian/CCI style strategies
+            (0.12, 0.015, 24), (0.10, 0.015, 18), (0.14, 0.02, 24),
+            (0.08, 0.015, 18), (0.15, 0.015, 30),
         ]
         models = ["rf", "gbm"]
         results = []
@@ -5135,7 +5138,7 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
         if USE_PERSISTENT:
             try:
                 ml_memory = PersistentML()
-                # Load existing results so we don't lose them
+                # Load existing results but DON'T block new assets from testing
                 results = ml_memory.results.copy()
                 best_daily = results[0]["roi_day"] if results else 0
             except:
@@ -5215,35 +5218,15 @@ plotshape(entryCondition and strategy.position_size == 0 and canTrade, "Entry", 
         above1 = [r for r in results if r["roi_day"] >= 1.0]
         above05 = [r for r in results if r["roi_day"] >= 0.5]
 
+        new_found = [r for r in results if r.get("roi_day", 0) > 0.1]
         msg = (
             f"*ML Scanner COMPLETE*\n\n"
-            f"Total tested: `{total}`\n"
-            f"Profitable: `{len(results)}`\n\n"
-            f"*>= 1.0%/day: `{len(above1)}`*\n"
+            f"New tested: `{total}` | Skipped: `{skipped}`\n"
+            f"Total profitable: `{len(new_found)}`\n"
+            f">= 1.0%/day: `{len(above1)}`\n"
             f">= 0.5%/day: `{len(above05)}`\n\n"
+            f"_Use `/ml results` to see top 10._"
         )
-
-        if results:
-            msg += "*TOP 5 (OUT-OF-SAMPLE):*\n"
-            seen = set()
-            n = 0
-            for r in results:
-                k = (r["asset"], r["model"])
-                if k in seen:
-                    continue
-                seen.add(k)
-                n += 1
-                if n > 5:
-                    break
-                msg += (
-                    f"\n`{n}. {r['roi_day']:.3f}%/day` ({r['roi_yr']:.0f}%/yr)\n"
-                    f"   {r['model'].upper()} | {r['asset']} {r['tf']}\n"
-                    f"   PF={r['pf']} WR={r['wr']}% Trades={r['trades']}\n"
-                    f"   TP={r['tp_pct']*100}% SL={r['sl_pct']*100}%\n"
-                    f"   Acc={r['accuracy']}% Prec={r['precision']}%\n"
-                )
-
-        msg += f"\nResults synced to dashboard + bot."
         self.send_message(msg)
 
     # ------------------------------------------------------------------ #
