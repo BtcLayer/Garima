@@ -173,6 +173,9 @@ def _candidate_from_row(row: dict, source_csv_path: str) -> dict:
         "requires_manual_review": any(
             flag in {"EXTREME_CAGR", "LOWER_TIMEFRAME", "MISSING_SHARPE"} for flag in flags
         ),
+        "oos_status": "PENDING_WALK_FORWARD",
+        "promotion_gate": "BLOCKED_PENDING_OOS",
+        "paper_trade_recommendation": "YES" if timeframe.lower() == "4h" else "NO",
         "status": "PENDING",
         "reviewed_by": None,
         "review_date": None,
@@ -387,6 +390,14 @@ def get_approved_strategies() -> list[dict]:
 
 def get_pending_candidates() -> list[dict]:
     return [item for item in load_json(CANDIDATES_FILE, default=[]) if item.get("status") == "PENDING"]
+
+
+def can_promote_live(strategy_id: str) -> bool:
+    for item in load_json(CANDIDATES_FILE, default=[]):
+        if item.get("id") != strategy_id:
+            continue
+        return item.get("oos_status") in {"PASS", "STRONG"} and item.get("promotion_gate") == "LIVE_ELIGIBLE"
+    return False
 
 
 def get_promotion_report() -> str:

@@ -3,10 +3,10 @@ Run strategies from batch files on historical candle data
 Uses pagination to process data in chunks
 """
 
+import os
 import pandas as pd
 import numpy as np
 from strategies import get_all_strategies, get_strategies_by_batch
-import os
 
 # Data directory
 DATA_DIR = "storage/historical_data"
@@ -35,6 +35,40 @@ for _sym in _SYMBOLS:
 # Trading parameters
 INITIAL_CAPITAL = 10000
 FEE = 0.0003  # 0.03% per side = 0.06% round-trip (matches TradingView 0.06%)
+BACKTEST_SIZING_MODE = os.getenv("BACKTEST_SIZING_MODE", "fixed_notional").lower()
+BACKTEST_FIXED_NOTIONAL_USD = float(os.getenv("BACKTEST_FIXED_NOTIONAL_USD", "1000"))
+BACKTEST_MAX_POSITION_PCT = float(os.getenv("BACKTEST_MAX_POSITION_PCT", "0.10"))
+BACKTEST_DEFAULT_SLIPPAGE_PCT = float(os.getenv("BACKTEST_SLIPPAGE_PCT", "0.0"))
+BACKTEST_REALISM_SLIPPAGE_PCT = float(os.getenv("BACKTEST_REALISM_SLIPPAGE_PCT", "0.0005"))
+
+
+def _position_notional(
+    capital: float,
+    entry_price: float,
+    sizing_mode: str | None = None,
+    fixed_notional_usd: float | None = None,
+    max_position_pct: float | None = None,
+) -> float:
+    """Return deployable notional instead of compounding full equity."""
+    if capital <= 0 or entry_price <= 0:
+        return 0.0
+
+    sizing_mode = (sizing_mode or "full_equity").lower()
+    fixed_notional_usd = (
+        BACKTEST_FIXED_NOTIONAL_USD if fixed_notional_usd is None else fixed_notional_usd
+    )
+    max_position_pct = (
+        BACKTEST_MAX_POSITION_PCT if max_position_pct is None else max_position_pct
+    )
+
+    capped_notional = max(0.0, capital * max_position_pct)
+    if sizing_mode == "full_equity":
+        return capital
+    if sizing_mode == "capped_equity":
+        return min(capital, capped_notional)
+
+    # Default: fixed notional, still capped to a max % of current equity.
+    return min(capital, fixed_notional_usd, capped_notional)
 
 
 def load_data(symbol_key):
@@ -585,8 +619,18 @@ def apply_strategy(df, strategy_combo, min_agreement=1):
     return df
 
 
-def run_backtest(df, stop_loss=0, take_profit=0, trailing_stop=0, use_tight=False,
-                 side="both", slippage_pct=0.0):
+def run_backtest(
+    df,
+    stop_loss=0,
+    take_profit=0,
+    trailing_stop=0,
+    use_tight=False,
+    side="both",
+    slippage_pct=None,
+    sizing_mode=None,
+    fixed_notional_usd=None,
+    max_position_pct=None,
+):
     """Run backtest matching TradingView execution — long+short with signal-based exits.
 
     Key behaviors (matching TV):
@@ -604,6 +648,7 @@ def run_backtest(df, stop_loss=0, take_profit=0, trailing_stop=0, use_tight=Fals
     do_long = side in ("long", "both")
     do_short = side in ("short", "both")
     fee = 0.001  # 0.1% per trade (matching working strategies)
+    slippage_pct = 0.0 if slippage_pct is None else max(0.0, slippage_pct)
 
     capital = INITIAL_CAPITAL
     position = 0     # 0=flat, 1=long, -1=short
@@ -623,12 +668,19 @@ def run_backtest(df, stop_loss=0, take_profit=0, trailing_stop=0, use_tight=Fals
         # Execute pending entry at this bar's open
         if pending_entry and position == 0:
             if pending_entry == "long":
-                entry_price = bar_open * (1 + fee)
+                entry_price = bar_open * (1 + fee + slippage_pct)
                 position = 1
             elif pending_entry == "short":
-                entry_price = bar_open * (1 - fee)
+                entry_price = bar_open * max(0.000001, (1 - fee - slippage_pct))
                 position = -1
-            position_size = capital / entry_price
+            notional = _position_notional(
+                capital,
+                entry_price,
+                sizing_mode=sizing_mode,
+                fixed_notional_usd=fixed_notional_usd,
+                max_position_pct=max_position_pct,
+            )
+            position_size = notional / entry_price if entry_price > 0 else 0
             peak_price = entry_price
             pending_entry = None
 
@@ -643,19 +695,21 @@ def run_backtest(df, stop_loss=0, take_profit=0, trailing_stop=0, use_tight=Fals
 
                 # Signal-based exit (primary — like working strategies)
                 if row.get("exit_signal", 0) == 1:
-                    exit_price = current_price * (1 - fee)
+                    exit_price = current_price * max(0.000001, (1 - fee - slippage_pct))
                     exit_reason = "SIGNAL"
                 # Backup: SL if set
                 elif stop_loss > 0 and low <= entry_price * (1 - stop_loss):
-                    exit_price = entry_price * (1 - stop_loss) * (1 - fee)
+                    exit_price = entry_price * (1 - stop_loss) * max(0.000001, (1 - slippage_pct))
+                    exit_price *= (1 - fee)
                     exit_reason = "SL"
                 # Backup: TP if set
                 elif take_profit > 0 and high >= entry_price * (1 + take_profit):
-                    exit_price = entry_price * (1 + take_profit) * (1 - fee)
+                    exit_price = entry_price * (1 + take_profit) * max(0.000001, (1 - slippage_pct))
+                    exit_price *= (1 - fee)
                     exit_reason = "TP"
                 # Instant flip: short entry while long → close long, open short
-                elif do_short and row.get("short_entry_signal", 0) == 1:
-                    exit_price = current_price * (1 - fee)
+                elif do_short and row.get("short_entry_signal", row.get("entry_signal", 0)) == 1:
+                    exit_price = current_price * max(0.000001, (1 - fee - slippage_pct))
                     exit_reason = "FLIP_SHORT"
 
                 if exit_price:
@@ -670,6 +724,7 @@ def run_backtest(df, stop_loss=0, take_profit=0, trailing_stop=0, use_tight=Fals
                         "exit_reason": exit_reason,
                         "exit_date": str(row.get("timestamp", ""))[:19],
                         "capital_after": round(capital, 2),
+                        "notional_usd": round(position_size * entry_price, 2),
                     })
                     position = 0
                     position_size = 0
@@ -682,17 +737,19 @@ def run_backtest(df, stop_loss=0, take_profit=0, trailing_stop=0, use_tight=Fals
                 if low < peak_price:
                     peak_price = low
 
-                if row.get("short_exit_signal", 0) == 1:
-                    exit_price = current_price * (1 + fee)
+                if row.get("short_exit_signal", row.get("exit_signal", 0)) == 1:
+                    exit_price = current_price * (1 + fee + slippage_pct)
                     exit_reason = "SIGNAL"
                 elif stop_loss > 0 and high >= entry_price * (1 + stop_loss):
-                    exit_price = entry_price * (1 + stop_loss) * (1 + fee)
+                    exit_price = entry_price * (1 + stop_loss) * (1 + slippage_pct)
+                    exit_price *= (1 + fee)
                     exit_reason = "SL"
                 elif take_profit > 0 and low <= entry_price * (1 - take_profit):
-                    exit_price = entry_price * (1 - take_profit) * (1 + fee)
+                    exit_price = entry_price * (1 - take_profit) * max(0.000001, (1 - slippage_pct))
+                    exit_price *= (1 + fee)
                     exit_reason = "TP"
                 elif do_long and row.get("entry_signal", 0) == 1:
-                    exit_price = current_price * (1 + fee)
+                    exit_price = current_price * (1 + fee + slippage_pct)
                     exit_reason = "FLIP_LONG"
 
                 if exit_price:
@@ -707,6 +764,7 @@ def run_backtest(df, stop_loss=0, take_profit=0, trailing_stop=0, use_tight=Fals
                         "exit_reason": exit_reason,
                         "exit_date": str(row.get("timestamp", ""))[:19],
                         "capital_after": round(capital, 2),
+                        "notional_usd": round(position_size * entry_price, 2),
                     })
                     position = 0
                     position_size = 0
@@ -718,7 +776,7 @@ def run_backtest(df, stop_loss=0, take_profit=0, trailing_stop=0, use_tight=Fals
         if position == 0 and pending_entry is None:
             if do_long and row.get("entry_signal", 0) == 1:
                 pending_entry = "long"
-            elif do_short and row.get("short_entry_signal", 0) == 1:
+            elif do_short and row.get("short_entry_signal", row.get("entry_signal", 0)) == 1:
                 pending_entry = "short"
 
     return capital, trades
@@ -1046,6 +1104,11 @@ def run_batch_strategies(data_key="BTCUSDT_15m", batch_num=None, params_override
             "Avg_Trade_Percent": round(avg_trade, 4),
             "Gross_DD_Percent": round(max_dd, 2),
             "Net_DD_Percent": round(net_dd, 2),
+            "Max_Drawdown_Percent": round(max_dd, 2),
+            "Sizing_Mode": BACKTEST_SIZING_MODE,
+            "Fixed_Notional_USD": round(BACKTEST_FIXED_NOTIONAL_USD, 2),
+            "Max_Position_Pct": round(BACKTEST_MAX_POSITION_PCT * 100, 2),
+            "Slippage_Pct": round(BACKTEST_REALISM_SLIPPAGE_PCT * 100, 4),
             "Performance_Grade": grade,
             "Deployment_Status": deploy,
             "Data_Source": "Binance Spot",
@@ -1082,7 +1145,11 @@ def run_batch_strategies(data_key="BTCUSDT_15m", batch_num=None, params_override
                 df_copy,
                 _override.get("stop_loss", strategy["stop_loss"]),
                 _override.get("take_profit", strategy["take_profit"]),
-                _override.get("trailing_stop", strategy["trailing_stop"])
+                _override.get("trailing_stop", strategy["trailing_stop"]),
+                slippage_pct=BACKTEST_REALISM_SLIPPAGE_PCT,
+                sizing_mode=BACKTEST_SIZING_MODE,
+                fixed_notional_usd=BACKTEST_FIXED_NOTIONAL_USD,
+                max_position_pct=BACKTEST_MAX_POSITION_PCT,
             )
 
             if len(trades) >= 5:
@@ -1101,7 +1168,11 @@ def run_batch_strategies(data_key="BTCUSDT_15m", batch_num=None, params_override
                         df_counter,
                         strategy["stop_loss"],
                         strategy["take_profit"],
-                        strategy["trailing_stop"]
+                        strategy["trailing_stop"],
+                        slippage_pct=BACKTEST_REALISM_SLIPPAGE_PCT,
+                        sizing_mode=BACKTEST_SIZING_MODE,
+                        fixed_notional_usd=BACKTEST_FIXED_NOTIONAL_USD,
+                        max_position_pct=BACKTEST_MAX_POSITION_PCT,
                     )
                     if len(counter_trades) >= 5:
                         counter_result = _build_result(strategy, counter_cap, counter_trades, is_counter=True)
@@ -1131,7 +1202,8 @@ def run_batch_strategies(data_key="BTCUSDT_15m", batch_num=None, params_override
             "Initial_Capital_USD", "Final_Capital_USD", "Net_Profit_USD",
             "ROI_per_annum", "ROI_Percent", "Total_Trades", "Winning_Trades",
             "Losing_Trades", "Win_Rate_Percent", "Profit_Factor", "Sharpe_Ratio",
-            "Avg_Trade_Percent", "Max_Drawdown_Percent", "Performance_Grade",
+            "Avg_Trade_Percent", "Max_Drawdown_Percent", "Sizing_Mode",
+            "Fixed_Notional_USD", "Max_Position_Pct", "Slippage_Pct", "Performance_Grade",
             "Deployment_Status", "Data_Source", "Time_Period", "Time_Start",
             "Time_End", "Fees_Exchange", "Candle_Period", "Parameters", "Is_Counter",
         ]
