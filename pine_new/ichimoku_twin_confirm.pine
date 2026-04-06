@@ -1,0 +1,79 @@
+//@version=5
+// ICHIMOKU CLOUD TWIN CONFIRM — Ichimoku + RSI/ATR confirmation
+// Cloud break + Tenkan/Kijun cross + momentum = high probability setup
+// Best for: BTC, ETH, BNB on 4h-1d timeframes
+strategy("Ichimoku Twin Confirm", overlay=true, initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=95,
+     commission_type=strategy.commission.percent, commission_value=0.1)
+
+tenkan_len = input.int(9, "Tenkan Period")
+kijun_len = input.int(26, "Kijun Period")
+senkou_b_len = input.int(52, "Senkou B Period")
+sl_pct = input.float(2.0, "SL %") / 100
+tp_pct = input.float(18.0, "TP %") / 100
+trail_pct = input.float(5.0, "Trail %") / 100
+
+tenkan = ta.sma(high+low, tenkan_len)
+kijun = ta.sma(high+low, kijun_len)
+senkou_a = ta.sma(high+low, kijun_len)
+senkou_b = ta.sma(high+low, senkou_b_len)
+
+tk_cross_up = ta.crossover(tenkan, kijun)
+tk_cross_down = ta.crossunder(tenkan, kijun)
+
+cloud_break_up = close > math.max(senkou_a, senkou_b) and close[1] <= math.max(senkou_a[1], senkou_b[1])
+cloud_break_down = close < math.min(senkou_a, senkou_b) and close[1] >= math.min(senkou_a[1], senkou_b[1])
+
+[diplus, diminus, adx] = ta.dmi(14, 14)
+rsi = ta.rsi(close, 14)
+atr = ta.atr(14)
+
+vol_ok = volume > ta.sma(volume, 20) * 1.2
+
+long_entry = (tk_cross_up or cloud_break_up) and adx > 22 and rsi > 30 and rsi < 70 and vol_ok
+short_entry = (tk_cross_down or cloud_break_down) and adx > 22 and rsi > 30 and rsi < 70 and vol_ok
+
+long_exit = tk_cross_down or rsi > 80 or adx < 18
+short_exit = tk_cross_up or rsi < 20 or adx < 18
+
+var int trades_today = 0
+var int consec_losses = 0
+var int cooldown = 0
+var float day_equity = strategy.equity
+is_new_day = ta.change(time("D")) != 0
+if is_new_day
+    trades_today := 0
+    day_equity := strategy.equity
+if cooldown > 0
+    cooldown -= 1
+was_closed = strategy.position_size[1] != 0 and strategy.position_size == 0
+if was_closed
+    trades_today += 1
+    if strategy.netprofit < strategy.netprofit[1]
+        consec_losses += 1
+        if consec_losses >= 3
+            cooldown := 6
+            consec_losses := 0
+    else
+        consec_losses := 0
+daily_pnl = (strategy.equity - day_equity) / day_equity
+can_trade = trades_today < 3 and cooldown == 0 and daily_pnl > -0.03
+
+if long_entry and can_trade and strategy.position_size <= 0
+    strategy.entry("Long", strategy.long)
+    strategy.exit("L_X", "Long", stop=close*(1-sl_pct), limit=close*(1+tp_pct),
+         trail_points=close*trail_pct/100/syminfo.mintick, trail_offset=close*trail_pct/100/syminfo.mintick)
+if short_entry and can_trade and strategy.position_size >= 0
+    strategy.entry("Short", strategy.short)
+    strategy.exit("S_X", "Short", stop=close*(1+sl_pct), limit=close*(1-tp_pct),
+         trail_points=close*trail_pct/100/syminfo.mintick, trail_offset=close*trail_pct/100/syminfo.mintick)
+if long_exit and strategy.position_size > 0
+    strategy.close("Long")
+if short_exit and strategy.position_size < 0
+    strategy.close("Short")
+
+plot(tenkan, "Tenkan", color.red, 2)
+plot(kijun, "Kijun", color.blue, 2)
+fill(plot(senkou_a), plot(senkou_b), color=senkou_a > senkou_b ? color.green : color.red, title="Cloud")
+plotshape(long_entry and can_trade, "Buy", shape.triangleup, location.belowbar, color.lime, size=size.small, text="ICH")
+plotshape(short_entry and can_trade, "Sell", shape.triangledown, location.abovebar, color.red, size=size.small, text="ICH")

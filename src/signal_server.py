@@ -12,12 +12,13 @@ Wires together:
 Run: uvicorn src.signal_server:app --host 0.0.0.0 --port 8000
 """
 
+import hmac
 import hashlib
 import json
 import os
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Optional
 
@@ -31,11 +32,13 @@ from src.metrics import Metrics
 from src.event_log import log_event
 from src.signal_queue import SignalQueue
 from src import manager
+from src.strategy_promotion import is_strategy_approved
 
 # ── Config ────────────────────────────────────────────────────────────
 
 WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "change-me-in-production")
 MAX_IDEMPOTENCY_CACHE = 10_000  # Max dedup keys in memory
+SIGNATURE_TTL_SECONDS = int(os.getenv("WEBHOOK_SIGNATURE_TTL_SECONDS", "300"))
 
 # ── App ───────────────────────────────────────────────────────────────
 
@@ -109,12 +112,85 @@ def _is_duplicate(key: str) -> bool:
     return False
 
 
+def _require_configured_secret() -> str:
+    secret = (WEBHOOK_SECRET or "").strip()
+    if not secret or secret == "change-me-in-production":
+        raise HTTPException(status_code=500, detail="Webhook secret is not configured")
+    return secret
+
+
+def _parse_signature_timestamp(raw_timestamp: str) -> datetime:
+    try:
+        timestamp = datetime.fromtimestamp(int(raw_timestamp), tz=timezone.utc)
+    except (TypeError, ValueError):
+        raise HTTPException(status_code=401, detail="Invalid signature timestamp")
+
+    now = datetime.now(timezone.utc)
+    if abs((now - timestamp).total_seconds()) > SIGNATURE_TTL_SECONDS:
+        raise HTTPException(status_code=401, detail="Stale signature timestamp")
+    return timestamp
+
+
+def _signature_payload(raw_timestamp: str, nonce: str, body: bytes) -> bytes:
+    return raw_timestamp.encode() + b"." + nonce.encode() + b"." + body
+
+
+def _compute_signature(secret: str, raw_timestamp: str, nonce: str, body: bytes) -> str:
+    return hmac.new(
+        secret.encode(),
+        _signature_payload(raw_timestamp, nonce, body),
+        hashlib.sha256,
+    ).hexdigest()
+
+
+def _verify_webhook_signature(secret: str, raw_timestamp: str, nonce: str, signature: str, body: bytes) -> None:
+    if not raw_timestamp or not nonce or not signature:
+        raise HTTPException(status_code=401, detail="Missing signature headers")
+
+    _parse_signature_timestamp(raw_timestamp)
+    expected = _compute_signature(secret, raw_timestamp, nonce, body)
+    if not hmac.compare_digest(expected, signature):
+        raise HTTPException(status_code=401, detail="Invalid signature")
+
+
+def _register_nonce(nonce: str, raw_timestamp: str) -> None:
+    if not nonce.strip():
+        raise HTTPException(status_code=401, detail="Missing nonce")
+
+    timestamp = _parse_signature_timestamp(raw_timestamp)
+    cutoff = (datetime.now(timezone.utc) - timedelta(seconds=SIGNATURE_TTL_SECONDS)).isoformat()
+    queue.purge_nonces_older_than(cutoff)
+    if not queue.register_nonce(nonce=nonce, created_at=timestamp.isoformat()):
+        raise HTTPException(status_code=409, detail="Replay detected")
+
+
+def _enforce_strategy_approval(signal: TradingViewSignal) -> None:
+    """
+    In live mode, only approved strategies should reach execution.
+
+    Paper mode remains open for research/testing, but live trading should only
+    run strategies that have passed Garima's offline review artifact.
+    """
+    if manager.PAPER_TRADING:
+        return
+
+    if is_strategy_approved(signal.strategy, asset=signal.symbol, timeframe=signal.timeframe):
+        return
+
+    raise HTTPException(
+        status_code=403,
+        detail=f"Strategy '{signal.strategy}' is not approved for live execution",
+    )
+
+
 # ── Endpoints ─────────────────────────────────────────────────────────
 
 @app.post("/tv/webhook")
 async def tradingview_webhook(
     request: Request,
-    x_webhook_token: Optional[str] = Header(None),
+    x_webhook_timestamp: Optional[str] = Header(None),
+    x_webhook_nonce: Optional[str] = Header(None),
+    x_webhook_signature: Optional[str] = Header(None),
 ):
     """
     TradingView webhook endpoint.
@@ -124,20 +200,42 @@ async def tradingview_webhook(
     start = time.time()
     metrics.record_signal()
 
-    # 1. Auth
-    if x_webhook_token != WEBHOOK_SECRET:
-        metrics.record_reject("auth_failed")
-        log_event("reject", {"reason": "auth_failed"}, source="webhook")
-        raise HTTPException(status_code=401, detail="Invalid token")
+    # 1. Read raw request for signature verification
+    raw_body = await request.body()
 
-    # 2. Parse JSON
+    # 2. Mandatory signed request auth
     try:
-        raw_payload = await request.json()
+        secret = _require_configured_secret()
+        _verify_webhook_signature(
+            secret=secret,
+            raw_timestamp=x_webhook_timestamp,
+            nonce=x_webhook_nonce,
+            signature=x_webhook_signature,
+            body=raw_body,
+        )
+        _register_nonce(x_webhook_nonce, x_webhook_timestamp)
+    except HTTPException as exc:
+        metrics.record_reject("auth_failed")
+        log_event(
+            "reject",
+            {
+                "reason": "auth_failed",
+                "detail": exc.detail,
+                "nonce": x_webhook_nonce,
+                "timestamp": x_webhook_timestamp,
+            },
+            source="webhook",
+        )
+        raise
+
+    # 3. Parse JSON
+    try:
+        raw_payload = json.loads(raw_body.decode("utf-8"))
     except Exception:
         metrics.record_reject("invalid_json")
         raise HTTPException(status_code=400, detail="Invalid JSON")
 
-    # 3. Validate with Pydantic
+    # 4. Validate with Pydantic
     try:
         signal = TradingViewSignal(**raw_payload)
     except Exception as e:
@@ -145,14 +243,31 @@ async def tradingview_webhook(
         log_event("reject", {"reason": "validation_failed", "error": str(e), "payload": raw_payload}, source="webhook")
         raise HTTPException(status_code=422, detail=f"Validation error: {e}")
 
-    # 4. Idempotency check
+    try:
+        _enforce_strategy_approval(signal)
+    except HTTPException as exc:
+        metrics.record_reject("unapproved_strategy")
+        log_event(
+            "reject",
+            {
+                "reason": "unapproved_strategy",
+                "detail": exc.detail,
+                "strategy": signal.strategy,
+                "symbol": signal.symbol,
+                "timeframe": signal.timeframe,
+            },
+            source="webhook",
+        )
+        raise
+
+    # 5. Idempotency check
     idem_key = _idempotency_key(raw_payload)
     if _is_duplicate(idem_key):
         metrics.record_duplicate()
         log_event("duplicate", {"key": idem_key, "symbol": signal.symbol}, source="webhook")
         return {"status": "ignored", "reason": "duplicate", "key": idem_key}
 
-    # 5. Persist to SQLite queue + log event
+    # 6. Persist to SQLite queue + log event
     signal_payload = {
         "strategy": signal.strategy,
         "symbol": signal.symbol,
@@ -166,7 +281,7 @@ async def tradingview_webhook(
     queue_id = queue.push(signal_payload, idempotency_key=idem_key)
     log_event("signal_received", {**signal_payload, "idempotency_key": idem_key, "queue_id": queue_id}, source="tradingview")
 
-    # 6. Forward to manager for execution
+    # 7. Forward to manager for execution
     try:
         manager.process_signal({
             "symbol": signal.symbol,
@@ -189,7 +304,7 @@ async def tradingview_webhook(
         log_event("execution_error", {"error": str(e), "symbol": signal.symbol}, source="manager")
         raise HTTPException(status_code=500, detail=f"Execution error: {e}")
 
-    # 7. Record latency
+    # 8. Record latency
     latency_ms = (time.time() - start) * 1000
     metrics.record_latency(latency_ms)
 

@@ -1,0 +1,80 @@
+//@version=5
+// CHANDELIER EXIT + SAR FUSION — Chandelier Exit with Parabolic SAR
+// Chandelier Exit for stop placement + SAR for exit signal
+// Best for: Trend-following on BTC, ETH, SOL on 4h-1d
+strategy("Chandelier Exit SAR Fusion", overlay=true, initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=95,
+     commission_type=strategy.commission.percent, commission_value=0.1)
+
+chandelier_len = input.int(22, "Chandelier Length")
+chandelier_mult = input.float(3.0, "Chandelier ATR Multiplier")
+sl_pct = input.float(2.5, "SL %") / 100
+tp_pct = input.float(20.0, "TP %") / 100
+trail_pct = input.float(6.0, "Trail %") / 100
+
+atr = ta.atr(chandelier_len)
+chandelier_long = ta.highest(high, chandelier_len) - chandelier_mult * atr
+chandelier_short = ta.lowest(low, chandelier_len) + chandelier_mult * atr
+
+psar = ta.sar(0.02, 0.2, 0.02)
+psar_bull = close > psar
+psar_bear = close < psar
+
+[diplus, diminus, adx] = ta.dmi(14, 14)
+rsi = ta.rsi(close, 14)
+ema50 = ta.ema(close, 50)
+ema200 = ta.ema(close, 200)
+
+vol_confirm = volume > ta.sma(volume, 20) * 1.25
+atr_rising = atr > atr[1] * 1.1
+
+bullish_trend = ema50 > ema200 and close > ema50
+bearish_trend = ema50 < ema200 and close < ema50
+
+long_entry = adx > 25 and rsi > 40 and rsi < 70 and vol_confirm and bullish_trend and atr_rising
+short_entry = adx > 25 and rsi > 30 and rsi < 60 and vol_confirm and bearish_trend and atr_rising
+
+long_exit = psar_bear or close < chandelier_long or adx < 18
+short_exit = psar_bull or close > chandelier_short or adx < 18
+
+var int trades_today = 0
+var int consec_losses = 0
+var int cooldown = 0
+var float day_equity = strategy.equity
+is_new_day = ta.change(time("D")) != 0
+if is_new_day
+    trades_today := 0
+    day_equity := strategy.equity
+if cooldown > 0
+    cooldown -= 1
+was_closed = strategy.position_size[1] != 0 and strategy.position_size == 0
+if was_closed
+    trades_today += 1
+    if strategy.netprofit < strategy.netprofit[1]
+        consec_losses += 1
+        if consec_losses >= 3
+            cooldown := 6
+            consec_losses := 0
+    else
+        consec_losses := 0
+daily_pnl = (strategy.equity - day_equity) / day_equity
+can_trade = trades_today < 3 and cooldown == 0 and daily_pnl > -0.03
+
+if long_entry and can_trade and strategy.position_size <= 0
+    strategy.entry("Long", strategy.long)
+    strategy.exit("L_X", "Long", stop=close*(1-sl_pct), limit=close*(1+tp_pct),
+         trail_points=close*trail_pct/100/syminfo.mintick, trail_offset=close*trail_pct/100/syminfo.mintick)
+if short_entry and can_trade and strategy.position_size >= 0
+    strategy.entry("Short", strategy.short)
+    strategy.exit("S_X", "Short", stop=close*(1+sl_pct), limit=close*(1-tp_pct),
+         trail_points=close*trail_pct/100/syminfo.mintick, trail_offset=close*trail_pct/100/syminfo.mintick)
+if long_exit and strategy.position_size > 0
+    strategy.close("Long")
+if short_exit and strategy.position_size < 0
+    strategy.close("Short")
+
+plot(chandelier_long, "Chandelier Long", color.red, 2)
+plot(chandelier_short, "Chandelier Short", color.green, 2)
+plot(psar, "PSAR", color=psar_bull ? color.green : color.red, style=plot.style_circles, linewidth=1)
+plotshape(long_entry and can_trade, "Buy", shape.triangleup, location.belowbar, color.lime, size=size.small, text="CES")
+plotshape(short_entry and can_trade, "Sell", shape.triangledown, location.abovebar, color.red, size=size.small, text="CES")

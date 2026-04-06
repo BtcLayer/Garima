@@ -1,0 +1,94 @@
+//@version=5
+// RSI DIVERGENCE + MACD FUSION — RSI divergence with MACD confirmation
+// Price makes lower low but RSI makes higher low = bullish divergence
+// MACD histogram confirms momentum shift
+// Best for: All assets on 1h-4h
+strategy("RSI Divergence MACD Fusion", overlay=true, initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=95,
+     commission_type=strategy.commission.percent, commission_value=0.1)
+
+rsi_len = input.int(14, "RSI Length")
+rsi_ma = input.int(14, "RSI MA")
+macd_fast = input.int(12, "MACD Fast")
+macd_slow = input.int(26, "MACD Slow")
+macd_signal = input.int(9, "MACD Signal")
+sl_pct = input.float(2.0, "SL %") / 100
+tp_pct = input.float(16.0, "TP %") / 100
+trail_pct = input.float(5.0, "Trail %") / 100
+
+rsi = ta.rsi(close, rsi_len)
+rsi_ma_val = ta.sma(rsi, rsi_ma)
+
+[macd_line, signal_line, hist] = ta.macd(close, macd_fast, macd_slow, macd_signal)
+
+ema50 = ta.ema(close, 50)
+ema200 = ta.ema(close, 200)
+
+rsi_bullish_div = false
+rsi_bearish_div = false
+
+lowest_low = ta.lowest(low, 20)
+highest_high = ta.highest(high, 20)
+lowest_rsi = ta.lowest(rsi, 20)
+highest_rsi = ta.rsi(close, rsi_len)
+
+rsi_bullish_div := (close < lowest_low[5] * 1.02) and (rsi > lowest_rsi[5]) and (rsi < 40)
+rsi_bearish_div := (close > highest_high[5] * 0.98) and (rsi < ta.highest(rsi, 5)) and (rsi > 60)
+
+macd_hist_positive = hist > 0
+macd_hist_rising = hist > hist[1]
+macd_cross_up = ta.crossover(macd_line, signal_line)
+macd_cross_down = ta.crossunder(macd_line, signal_line)
+
+[diplus, diminus, adx] = ta.dmi(14, 14)
+vol_confirm = volume > ta.sma(volume, 20) * 1.3
+
+bullish_trend = ema50 > ema200 and close > ema50
+bearish_trend = ema50 < ema200 and close < ema50
+
+long_entry = rsi_bullish_div and (macd_cross_up or (macd_hist_positive and macd_hist_rising)) and adx > 20 and bullish_trend and vol_confirm
+short_entry = rsi_bearish_div and (macd_cross_down or (not macd_hist_positive and not macd_hist_rising)) and adx > 20 and bearish_trend and vol_confirm
+
+long_exit = macd_cross_down or rsi > 75 or adx < 15
+short_exit = macd_cross_up or rsi < 25 or adx < 15
+
+var int trades_today = 0
+var int consec_losses = 0
+var int cooldown = 0
+var float day_equity = strategy.equity
+is_new_day = ta.change(time("D")) != 0
+if is_new_day
+    trades_today := 0
+    day_equity := strategy.equity
+if cooldown > 0
+    cooldown -= 1
+was_closed = strategy.position_size[1] != 0 and strategy.position_size == 0
+if was_closed
+    trades_today += 1
+    if strategy.netprofit < strategy.netprofit[1]
+        consec_losses += 1
+        if consec_losses >= 3
+            cooldown := 6
+            consec_losses := 0
+    else
+        consec_losses := 0
+daily_pnl = (strategy.equity - day_equity) / day_equity
+can_trade = trades_today < 3 and cooldown == 0 and daily_pnl > -0.03
+
+if long_entry and can_trade and strategy.position_size <= 0
+    strategy.entry("Long", strategy.long)
+    strategy.exit("L_X", "Long", stop=close*(1-sl_pct), limit=close*(1+tp_pct),
+         trail_points=close*trail_pct/100/syminfo.mintick, trail_offset=close*trail_pct/100/syminfo.mintick)
+if short_entry and can_trade and strategy.position_size >= 0
+    strategy.entry("Short", strategy.short)
+    strategy.exit("S_X", "Short", stop=close*(1+sl_pct), limit=close*(1-tp_pct),
+         trail_points=close*trail_pct/100/syminfo.mintick, trail_offset=close*trail_pct/100/syminfo.mintick)
+if long_exit and strategy.position_size > 0
+    strategy.close("Long")
+if short_exit and strategy.position_size < 0
+    strategy.close("Short")
+
+plot(ema50, "EMA50", color.blue, 2)
+plot(ema200, "EMA200", color.gray, 2)
+plotshape(long_entry and can_trade, "Buy", shape.triangleup, location.belowbar, color.lime, size=size.small, text="RDV")
+plotshape(short_entry and can_trade, "Sell", shape.triangledown, location.abovebar, color.red, size=size.small, text="RDV")

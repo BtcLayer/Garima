@@ -1,0 +1,77 @@
+//@version=5
+// AROON OSCILLATOR + VOLUME FUSION — Arron oscillator with volume
+// Aroon Up > Aroon Down = bullish, Aroon Down > Aroon Up = bearish
+// Add trend strength and volume for confirmation
+// Best for: All assets on 1h-4h
+strategy("Aroon Oscillator Fusion", overlay=true, initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=95,
+     commission_type=strategy.commission.percent, commission_value=0.1)
+
+aroon_len = input.int(25, "Aroon Length")
+sl_pct = input.float(2.0, "SL %") / 100
+tp_pct = input.float(14.0, "TP %") / 100
+trail_pct = input.float(4.5, "Trail %") / 100
+
+aroon_up = 100 * (aroon_len - ta.highestbars(high, aroon_len)) / aroon_len
+aroon_down = 100 * (aroon_len - ta.lowestbars(low, aroon_len)) / aroon_len
+aroon_osc = aroon_up - aroon_down
+
+aroon_cross_up = ta.crossover(aroon_up, aroon_down)
+aroon_cross_down = ta.crossunder(aroon_up, aroon_down)
+
+strong_bull = aroon_up > 70 and aroon_osc > 30
+strong_bear = aroon_down > 70 and aroon_osc < -30
+
+[diplus, diminus, adx] = ta.dmi(14, 14)
+rsi = ta.rsi(close, 14)
+ema50 = ta.ema(close, 50)
+
+vol_spike = volume > ta.sma(volume, 20) * 1.4
+vol_normal = volume > ta.sma(volume, 20) * 1.15
+
+long_entry = (aroon_cross_up or strong_bull) and adx > 20 and rsi > 35 and rsi < 70 and vol_normal
+short_entry = (aroon_cross_down or strong_bear) and adx > 20 and rsi > 30 and rsi < 65 and vol_normal
+
+long_exit = aroon_cross_down or rsi > 75 or adx < 15
+short_exit = aroon_cross_up or rsi < 25 or adx < 15
+
+var int trades_today = 0
+var int consec_losses = 0
+var int cooldown = 0
+var float day_equity = strategy.equity
+is_new_day = ta.change(time("D")) != 0
+if is_new_day
+    trades_today := 0
+    day_equity := strategy.equity
+if cooldown > 0
+    cooldown -= 1
+was_closed = strategy.position_size[1] != 0 and strategy.position_size == 0
+if was_closed
+    trades_today += 1
+    if strategy.netprofit < strategy.netprofit[1]
+        consec_losses += 1
+        if consec_losses >= 3
+            cooldown := 6
+            consec_losses := 0
+    else
+        consec_losses := 0
+daily_pnl = (strategy.equity - day_equity) / day_equity
+can_trade = trades_today < 3 and cooldown == 0 and daily_pnl > -0.03
+
+if long_entry and can_trade and strategy.position_size <= 0
+    strategy.entry("Long", strategy.long)
+    strategy.exit("L_X", "Long", stop=close*(1-sl_pct), limit=close*(1+tp_pct),
+         trail_points=close*trail_pct/100/syminfo.mintick, trail_offset=close*trail_pct/100/syminfo.mintick)
+if short_entry and can_trade and strategy.position_size >= 0
+    strategy.entry("Short", strategy.short)
+    strategy.exit("S_X", "Short", stop=close*(1+sl_pct), limit=close*(1-tp_pct),
+         trail_points=close*trail_pct/100/syminfo.mintick, trail_offset=close*trail_pct/100/syminfo.mintick)
+if long_exit and strategy.position_size > 0
+    strategy.close("Long")
+if short_exit and strategy.position_size < 0
+    strategy.close("Short")
+
+plot(aroon_up, "Aroon Up", color.green, 2)
+plot(aroon_down, "Aroon Down", color.red, 2)
+plotshape(long_entry and can_trade, "Buy", shape.triangleup, location.belowbar, color.lime, size=size.small, text="ARO")
+plotshape(short_entry and can_trade, "Sell", shape.triangledown, location.abovebar, color.red, size=size.small, text="ARO")

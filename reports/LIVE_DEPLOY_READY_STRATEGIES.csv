@@ -1,0 +1,18 @@
+source_file,strategy,asset,timeframe,annualized_return_pct,roi_per_day_pct,win_rate_percent,profit_factor,gross_drawdown_percent,total_trades,deployment_status
+combo_strategy_results_cagr.csv,1 Aroon Oscillator Fusion BINANCEUSDT.P 2026-04-06,LINK,4h,1806.06,0.8103,88.9,16.62,-6.4,1378,TIER_1_DEPLOY
+combo_strategy_results_cagr.csv,1 Aroon Oscillator Fusion BINANCEUSDT.P 2026-04-06,AVAX,4h,1112.06,0.6854,87.36,19.32,-5.46,1139,TIER_1_DEPLOY
+combo_strategy_results_cagr.csv,1 Aroon Oscillator Fusion BINANCEUSDT.P 2026-04-06,MAGIC,4h,942.11,0.6438,87.71,12.03,-9.06,537,TIER_1_DEPLOY
+combo_strategy_results_good.csv,Donchian Trend BINANCEUSDT.P 2026-04-03,SUI,4h,785.55,2.1522,84.66,9.86,-11.27,378,TIER_1
+combo_strategy_results_cagr.csv,1 Aroon Oscillator Fusion BINANCEUSDT.P 2026-04-06,SOL,4h,767.93,0.5934,76.9,13.97,-7.71,1182,TIER_1_DEPLOY
+combo_strategy_results_cagr.csv,1 Aroon Oscillator Fusion BINANCEUSDT.P 2026-04-06,ETH,4h,681.09,0.5644,87.95,12.13,-8.89,1295,TIER_1_DEPLOY
+combo_strategy_results_good.csv,Donchian Trend BINANCEUSDT.P 2026-04-03,LDO,4h,608.56,1.6673,83.97,7.68,-14.95,468,TIER_1
+combo_strategy_results_good.csv,CCI Trend BINANCEUSDT 2026-04-03,LDO,4h,519.41,1.423,82.61,10.67,-10.33,529,TIER_1
+combo_strategy_results_good.csv,Donchian Trend BINANCEUSDT.P 2026-04-03,AVAX,4h,483.32,1.3242,80.79,8.37,-13.55,807,TIER_1
+combo_strategy_results_good.csv,Donchian Trend BINANCEUSDT.P 2026-04-03,LINK,4h,475.83,1.3036,83.66,8.03,-14.11,875,TIER_1
+combo_strategy_results_good.csv,Donchian Trend BINANCEUSDT 2026-04-03,ETH,4h,435.74,1.1938,83.21,12.05,-9.05,1263,TIER_1
+combo_strategy_results_good.csv,Donchian Trend BINANCEUSDT.P 2026-04-03,ETH,4h,348.7,0.9553,84.19,15.25,-7.02,898,TIER_1
+combo_strategy_results_good.csv,Donchian Trend BINANCEUSDT.P 2026-04-03,ADA,4h,329.05,0.9015,74.31,8.98,-12.49,829,TIER_1
+combo_strategy_results_good.csv,CCI Trend BINANCEUSDT 2026-04-03,ETH,4h,294.25,0.8062,81.7,9.07,-12.39,1082,TIER_1
+combo_strategy_results_good.csv,Donchian Trend BINANCEUSDT 2026-04-03,BTC,4h,271.11,0.7428,82.13,10.16,-10.92,1237,TIER_1
+combo_strategy_results_good.csv,Donchian Trend BINANCEUSDT.P 2026-04-03,BTC,4h,223.87,0.6133,81.52,11.88,-9.18,871,TIER_1
+combo_strategy_results_good.csv,Donchian Trend BINANCEUSDT.P 2026-04-03,XRP,4h,221.77,0.6076,71.95,9.88,-11.25,688,TIER_1

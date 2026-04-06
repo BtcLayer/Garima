@@ -35,6 +35,12 @@ CREATE TABLE IF NOT EXISTS signals (
 );
 CREATE INDEX IF NOT EXISTS idx_status ON signals(status);
 CREATE INDEX IF NOT EXISTS idx_idem ON signals(idempotency_key);
+
+CREATE TABLE IF NOT EXISTS webhook_nonces (
+    nonce TEXT PRIMARY KEY,
+    created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_webhook_nonces_created_at ON webhook_nonces(created_at);
 """
 
 
@@ -123,6 +129,32 @@ class SignalQueue:
             row = conn.execute("SELECT COUNT(*) as c FROM signals WHERE status = 'pending'").fetchone()
             return row["c"]
 
+    def register_nonce(self, nonce: str, created_at: str | None = None) -> bool:
+        """Persist a nonce for replay protection. Returns False when already used."""
+        if not nonce:
+            raise ValueError("nonce is required")
+
+        timestamp = created_at or datetime.utcnow().isoformat()
+        with self._lock:
+            with self._connect() as conn:
+                try:
+                    conn.execute(
+                        "INSERT INTO webhook_nonces (nonce, created_at) VALUES (?, ?)",
+                        (nonce, timestamp)
+                    )
+                    return True
+                except sqlite3.IntegrityError:
+                    return False
+
+    def purge_nonces_older_than(self, cutoff_iso: str) -> int:
+        """Delete replay-protection nonces older than the provided ISO timestamp."""
+        with self._connect() as conn:
+            cursor = conn.execute(
+                "DELETE FROM webhook_nonces WHERE created_at < ?",
+                (cutoff_iso,)
+            )
+            return cursor.rowcount
+
     def stats(self) -> dict:
         """Queue statistics."""
         with self._connect() as conn:
@@ -131,7 +163,10 @@ class SignalQueue:
             ).fetchall()
             counts = {row["status"]: row["c"] for row in rows}
             total = sum(counts.values())
-            return {"total": total, **counts}
+            nonce_row = conn.execute(
+                "SELECT COUNT(*) as c FROM webhook_nonces"
+            ).fetchone()
+            return {"total": total, "nonce_count": nonce_row["c"], **counts}
 
     def recent(self, limit: int = 20) -> list:
         """Get recent signals (any status)."""

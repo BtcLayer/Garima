@@ -1,0 +1,76 @@
+//@version=5
+// VWAP MEAN REVERSION + PIVOT — VWAP with pivot point confirmation
+// Price reverts to VWAP after deviation, with pivot as support/resistance
+// Best for: Intraday on BTC, ETH on 15m-1h
+strategy("VWAP Mean Reversion Pivot", overlay=true, initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=95,
+     commission_type=strategy.commission.percent, commission_value=0.1)
+
+vwap_len = input.int(14, "VWAP Length")
+pivot_len = input.int(10, "Pivot Length")
+sl_pct = input.float(1.5, "SL %") / 100
+tp_pct = input.float(10.0, "TP %") / 100
+trail_pct = input.float(3.5, "Trail %") / 100
+
+vwap_val = ta.vwap(close)
+
+deviation = (close - vwap_val) / vwap_val * 100
+far_from_vwap = math.abs(deviation) > 1.5
+close_to_vwap = math.abs(deviation) < 0.5
+
+pivot_high = ta.pivothigh(pivot_len, pivot_len)
+pivot_low = ta.pivotlow(pivot_len, pivot_len)
+
+near_pivot = close < pivot_high * 1.02 and close > pivot_high * 0.98
+
+ema20 = ta.ema(close, 20)
+[diplus, diminus, adx] = ta.dmi(14, 14)
+rsi = ta.rsi(close, 14)
+
+vol_spike = volume > ta.sma(volume, 20) * 1.5
+
+long_entry = far_from_vwap and close < vwap_val and close[1] > vwap_val[1] and rsi < 45 and adx < 25 and vol_spike
+short_entry = far_from_vwap and close > vwap_val and close[1] < vwap_val[1] and rsi > 55 and adx < 25 and vol_spike
+
+long_exit = close > vwap_val or rsi > 70 or adx > 35
+short_exit = close < vwap_val or rsi < 30 or adx > 35
+
+var int trades_today = 0
+var int consec_losses = 0
+var int cooldown = 0
+var float day_equity = strategy.equity
+is_new_day = ta.change(time("D")) != 0
+if is_new_day
+    trades_today := 0
+    day_equity := strategy.equity
+if cooldown > 0
+    cooldown -= 1
+was_closed = strategy.position_size[1] != 0 and strategy.position_size == 0
+if was_closed
+    trades_today += 1
+    if strategy.netprofit < strategy.netprofit[1]
+        consec_losses += 1
+        if consec_losses >= 3
+            cooldown := 6
+            consec_losses := 0
+    else
+        consec_losses := 0
+daily_pnl = (strategy.equity - day_equity) / day_equity
+can_trade = trades_today < 3 and cooldown == 0 and daily_pnl > -0.03
+
+if long_entry and can_trade and strategy.position_size <= 0
+    strategy.entry("Long", strategy.long)
+    strategy.exit("L_X", "Long", stop=close*(1-sl_pct), limit=close*(1+tp_pct),
+         trail_points=close*trail_pct/100/syminfo.mintick, trail_offset=close*trail_pct/100/syminfo.mintick)
+if short_entry and can_trade and strategy.position_size >= 0
+    strategy.entry("Short", strategy.short)
+    strategy.exit("S_X", "Short", stop=close*(1+sl_pct), limit=close*(1-tp_pct),
+         trail_points=close*trail_pct/100/syminfo.mintick, trail_offset=close*trail_pct/100/syminfo.mintick)
+if long_exit and strategy.position_size > 0
+    strategy.close("Long")
+if short_exit and strategy.position_size < 0
+    strategy.close("Short")
+
+plot(vwap_val, "VWAP", color.purple, 2)
+plotshape(long_entry and can_trade, "Buy", shape.triangleup, location.belowbar, color.lime, size=size.small, text="VWR")
+plotshape(short_entry and can_trade, "Sell", shape.triangledown, location.abovebar, color.red, size=size.small, text="VWR")

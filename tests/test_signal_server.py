@@ -1,13 +1,29 @@
 """Tests for signal_server, metrics, and event_log modules."""
 
+import hashlib
+import hmac
 import json
 import os
+import shutil
 import sys
-import tempfile
+import time
+import uuid
 
 import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
+def make_test_dir(name: str) -> str:
+    root = os.path.join(os.path.dirname(__file__), ".tmp_runtime")
+    path = os.path.join(root, f"{name}_{uuid.uuid4().hex}")
+    os.makedirs(path, exist_ok=True)
+    return path
+
+
+def cleanup_test_dir(path: str) -> None:
+    if os.path.exists(path):
+        shutil.rmtree(path, ignore_errors=True)
 
 
 # ── Metrics tests ─────────────────────────────────────────────────────
@@ -78,48 +94,64 @@ class TestMetrics:
 # ── Event log tests ───────────────────────────────────────────────────
 
 class TestEventLog:
-    def test_log_and_read(self, tmp_path):
+    def test_log_and_read(self):
         import src.event_log as el
-        el.EVENT_LOG_PATH = str(tmp_path / "events.jsonl")
+        tmp_dir = make_test_dir("event_log_read")
+        try:
+            el.EVENT_LOG_PATH = os.path.join(tmp_dir, "events.jsonl")
 
-        el.log_event("test_signal", {"symbol": "BTCUSDT", "side": "BUY"})
-        el.log_event("test_signal", {"symbol": "ETHUSDT", "side": "SELL"})
+            el.log_event("test_signal", {"symbol": "BTCUSDT", "side": "BUY"})
+            el.log_event("test_signal", {"symbol": "ETHUSDT", "side": "SELL"})
 
-        events = el.read_events()
-        assert len(events) == 2
-        assert events[0]["payload"]["symbol"] == "BTCUSDT"
-        assert events[1]["payload"]["symbol"] == "ETHUSDT"
+            events = el.read_events()
+            assert len(events) == 2
+            assert events[0]["payload"]["symbol"] == "BTCUSDT"
+            assert events[1]["payload"]["symbol"] == "ETHUSDT"
+        finally:
+            cleanup_test_dir(tmp_dir)
 
-    def test_read_filtered(self, tmp_path):
+    def test_read_filtered(self):
         import src.event_log as el
-        el.EVENT_LOG_PATH = str(tmp_path / "events.jsonl")
+        tmp_dir = make_test_dir("event_log_filtered")
+        try:
+            el.EVENT_LOG_PATH = os.path.join(tmp_dir, "events.jsonl")
 
-        el.log_event("signal", {"symbol": "BTCUSDT"})
-        el.log_event("reject", {"reason": "auth"})
-        el.log_event("signal", {"symbol": "ETHUSDT"})
+            el.log_event("signal", {"symbol": "BTCUSDT"})
+            el.log_event("reject", {"reason": "auth"})
+            el.log_event("signal", {"symbol": "ETHUSDT"})
 
-        signals = el.read_events(event_type="signal")
-        assert len(signals) == 2
+            signals = el.read_events(event_type="signal")
+            assert len(signals) == 2
 
-        rejects = el.read_events(event_type="reject")
-        assert len(rejects) == 1
+            rejects = el.read_events(event_type="reject")
+            assert len(rejects) == 1
+        finally:
+            cleanup_test_dir(tmp_dir)
 
-    def test_count_events(self, tmp_path):
+    def test_count_events(self):
         import src.event_log as el
-        el.EVENT_LOG_PATH = str(tmp_path / "events.jsonl")
+        tmp_dir = make_test_dir("event_log_counts")
+        try:
+            el.EVENT_LOG_PATH = os.path.join(tmp_dir, "events.jsonl")
 
-        el.log_event("signal", {})
-        el.log_event("signal", {})
-        el.log_event("reject", {})
+            el.log_event("signal", {})
+            el.log_event("signal", {})
+            el.log_event("reject", {})
 
-        counts = el.count_events()
-        assert counts["signal"] == 2
-        assert counts["reject"] == 1
+            counts = el.count_events()
+            assert counts["signal"] == 2
+            assert counts["reject"] == 1
+        finally:
+            cleanup_test_dir(tmp_dir)
 
-    def test_read_empty(self, tmp_path):
+    def test_read_empty(self):
         import src.event_log as el
-        el.EVENT_LOG_PATH = str(tmp_path / "nonexistent.jsonl")
-        assert el.read_events() == []
+        tmp_dir = make_test_dir("event_log_empty")
+        try:
+            el.EVENT_LOG_PATH = os.path.join(tmp_dir, "nonexistent.jsonl")
+            assert el.read_events() == []
+        finally:
+            cleanup_test_dir(tmp_dir)
 
 
 # ── Signal validation tests ───────────────────────────────────────────
@@ -214,66 +246,175 @@ class TestIdempotency:
         assert not _is_duplicate(k2)
 
 
+class TestWebhookAuth:
+    def test_compute_signature_matches_reference(self):
+        from src.signal_server import _compute_signature
+
+        secret = "test-secret"
+        timestamp = "1712400000"
+        nonce = "nonce-123"
+        body = b'{"symbol":"BTCUSDT"}'
+
+        expected = hmac.new(
+            secret.encode(),
+            timestamp.encode() + b"." + nonce.encode() + b"." + body,
+            hashlib.sha256,
+        ).hexdigest()
+
+        assert _compute_signature(secret, timestamp, nonce, body) == expected
+
+    def test_verify_signature_accepts_valid_request(self):
+        from src.signal_server import _compute_signature, _verify_webhook_signature
+
+        secret = "test-secret"
+        timestamp = str(int(time.time()))
+        nonce = "nonce-123"
+        body = b'{"symbol":"BTCUSDT"}'
+        signature = _compute_signature(secret, timestamp, nonce, body)
+
+        _verify_webhook_signature(secret, timestamp, nonce, signature, body)
+
+    def test_verify_signature_rejects_stale_timestamp(self):
+        from src.signal_server import _compute_signature, _verify_webhook_signature
+
+        secret = "test-secret"
+        timestamp = str(int(time.time()) - 3600)
+        nonce = "nonce-123"
+        body = b'{"symbol":"BTCUSDT"}'
+        signature = _compute_signature(secret, timestamp, nonce, body)
+
+        with pytest.raises(Exception):
+            _verify_webhook_signature(secret, timestamp, nonce, signature, body)
+
+    def test_verify_signature_rejects_invalid_signature(self):
+        from src.signal_server import _verify_webhook_signature
+
+        with pytest.raises(Exception):
+            _verify_webhook_signature(
+                "test-secret",
+                str(int(time.time())),
+                "nonce-123",
+                "bad-signature",
+                b'{"symbol":"BTCUSDT"}',
+            )
+
+
 # ── Signal Queue tests ───────────────────────────────────────────────
 
 class TestSignalQueue:
-    def test_push_and_pop(self, tmp_path):
+    def test_push_and_pop(self):
         from src.signal_queue import SignalQueue
-        q = SignalQueue(str(tmp_path / "test.db"))
-        q.push({"symbol": "BTCUSDT", "side": "BUY", "price": 50000})
-        sig = q.pop()
-        assert sig is not None
-        assert sig["payload"]["symbol"] == "BTCUSDT"
+        tmp_dir = make_test_dir("queue_push_pop")
+        try:
+            q = SignalQueue(os.path.join(tmp_dir, "test.db"))
+            q.push({"symbol": "BTCUSDT", "side": "BUY", "price": 50000})
+            sig = q.pop()
+            assert sig is not None
+            assert sig["payload"]["symbol"] == "BTCUSDT"
+        finally:
+            cleanup_test_dir(tmp_dir)
 
-    def test_fifo_order(self, tmp_path):
+    def test_fifo_order(self):
         from src.signal_queue import SignalQueue
-        q = SignalQueue(str(tmp_path / "test.db"))
-        q.push({"symbol": "BTCUSDT"})
-        q.push({"symbol": "ETHUSDT"})
-        first = q.pop()
-        assert first["payload"]["symbol"] == "BTCUSDT"
-        second = q.pop()
-        assert second["payload"]["symbol"] == "ETHUSDT"
+        tmp_dir = make_test_dir("queue_fifo")
+        try:
+            q = SignalQueue(os.path.join(tmp_dir, "test.db"))
+            q.push({"symbol": "BTCUSDT"})
+            q.push({"symbol": "ETHUSDT"})
+            first = q.pop()
+            assert first["payload"]["symbol"] == "BTCUSDT"
+            second = q.pop()
+            assert second["payload"]["symbol"] == "ETHUSDT"
+        finally:
+            cleanup_test_dir(tmp_dir)
 
-    def test_pop_empty(self, tmp_path):
+    def test_pop_empty(self):
         from src.signal_queue import SignalQueue
-        q = SignalQueue(str(tmp_path / "test.db"))
-        assert q.pop() is None
+        tmp_dir = make_test_dir("queue_empty")
+        try:
+            q = SignalQueue(os.path.join(tmp_dir, "test.db"))
+            assert q.pop() is None
+        finally:
+            cleanup_test_dir(tmp_dir)
 
-    def test_duplicate_rejected(self, tmp_path):
+    def test_duplicate_rejected(self):
         from src.signal_queue import SignalQueue
-        q = SignalQueue(str(tmp_path / "test.db"))
-        id1 = q.push({"symbol": "BTCUSDT"}, idempotency_key="abc123")
-        id2 = q.push({"symbol": "BTCUSDT"}, idempotency_key="abc123")
-        assert id1 > 0
-        assert id2 == -1  # duplicate
+        tmp_dir = make_test_dir("queue_duplicate")
+        try:
+            q = SignalQueue(os.path.join(tmp_dir, "test.db"))
+            id1 = q.push({"symbol": "BTCUSDT"}, idempotency_key="abc123")
+            id2 = q.push({"symbol": "BTCUSDT"}, idempotency_key="abc123")
+            assert id1 > 0
+            assert id2 == -1  # duplicate
+        finally:
+            cleanup_test_dir(tmp_dir)
 
-    def test_mark_done(self, tmp_path):
+    def test_mark_done(self):
         from src.signal_queue import SignalQueue
-        q = SignalQueue(str(tmp_path / "test.db"))
-        q.push({"symbol": "BTCUSDT"})
-        sig = q.pop()
-        q.mark_done(sig["id"])
-        stats = q.stats()
-        assert stats.get("done", 0) == 1
-        assert stats.get("pending", 0) == 0
+        tmp_dir = make_test_dir("queue_done")
+        try:
+            q = SignalQueue(os.path.join(tmp_dir, "test.db"))
+            q.push({"symbol": "BTCUSDT"})
+            sig = q.pop()
+            q.mark_done(sig["id"])
+            stats = q.stats()
+            assert stats.get("done", 0) == 1
+            assert stats.get("pending", 0) == 0
+        finally:
+            cleanup_test_dir(tmp_dir)
 
-    def test_mark_failed_and_retry(self, tmp_path):
+    def test_mark_failed_and_retry(self):
         from src.signal_queue import SignalQueue
-        q = SignalQueue(str(tmp_path / "test.db"))
-        q.push({"symbol": "BTCUSDT"})
-        sig = q.pop()
-        q.mark_failed(sig["id"], "timeout")
-        assert q.stats().get("failed", 0) == 1
-        retried = q.retry_failed()
-        assert retried == 1
-        assert q.pending_count() == 1
+        tmp_dir = make_test_dir("queue_retry")
+        try:
+            q = SignalQueue(os.path.join(tmp_dir, "test.db"))
+            q.push({"symbol": "BTCUSDT"})
+            sig = q.pop()
+            q.mark_failed(sig["id"], "timeout")
+            assert q.stats().get("failed", 0) == 1
+            retried = q.retry_failed()
+            assert retried == 1
+            assert q.pending_count() == 1
+        finally:
+            cleanup_test_dir(tmp_dir)
 
-    def test_stats(self, tmp_path):
+    def test_stats(self):
         from src.signal_queue import SignalQueue
-        q = SignalQueue(str(tmp_path / "test.db"))
-        q.push({"a": 1})
-        q.push({"b": 2})
-        stats = q.stats()
-        assert stats["total"] == 2
-        assert stats["pending"] == 2
+        tmp_dir = make_test_dir("queue_stats")
+        try:
+            q = SignalQueue(os.path.join(tmp_dir, "test.db"))
+            q.push({"a": 1})
+            q.push({"b": 2})
+            stats = q.stats()
+            assert stats["total"] == 2
+            assert stats["pending"] == 2
+        finally:
+            cleanup_test_dir(tmp_dir)
+
+    def test_register_nonce_rejects_replay(self):
+        from src.signal_queue import SignalQueue
+
+        tmp_dir = make_test_dir("queue_nonce")
+        try:
+            q = SignalQueue(os.path.join(tmp_dir, "test.db"))
+            assert q.register_nonce("nonce-123")
+            assert not q.register_nonce("nonce-123")
+        finally:
+            cleanup_test_dir(tmp_dir)
+
+    def test_purge_nonces(self):
+        from src.signal_queue import SignalQueue
+
+        tmp_dir = make_test_dir("queue_nonce_purge")
+        try:
+            q = SignalQueue(os.path.join(tmp_dir, "test.db"))
+            assert q.register_nonce("old-nonce", created_at="2020-01-01T00:00:00+00:00")
+            assert q.register_nonce("fresh-nonce", created_at="2030-01-01T00:00:00+00:00")
+
+            deleted = q.purge_nonces_older_than("2025-01-01T00:00:00+00:00")
+            stats = q.stats()
+
+            assert deleted == 1
+            assert stats["nonce_count"] == 1
+        finally:
+            cleanup_test_dir(tmp_dir)

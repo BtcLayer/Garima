@@ -1,0 +1,82 @@
+//@version=5
+// MOMENTUM VOLATILITY BREAKOUT — ATR-based volatility expansion entry
+// ATR breakout above moving average = explosive move beginning
+// Add EMA trend filter for directional bias
+// Best for: BTC, ETH, SOL on 15m-4h
+strategy("Momentum Volatility Breakout", overlay=true, initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=95,
+     commission_type=strategy.commission.percent, commission_value=0.1)
+
+atr_len = input.int(14, "ATR Length")
+atr_mult = input.float(2.5, "ATR Multiplier")
+atr_ma_len = input.int(50, "ATR MA Length")
+sl_pct = input.float(1.5, "SL %") / 100
+tp_pct = input.float(14.0, "TP %") / 100
+trail_pct = input.float(4.5, "Trail %") / 100
+
+atr = ta.atr(atr_len)
+atr_ma = ta.sma(atr, atr_ma_len)
+atr_expansion = atr > atr_ma * 1.5
+
+ema20 = ta.ema(close, 20)
+ema50 = ta.ema(close, 50)
+ema200 = ta.ema(close, 200)
+
+ema_cross_up = ta.crossover(ema20, ema50)
+ema_cross_down = ta.crossunder(ema20, ema50)
+
+[diplus, diminus, adx] = ta.dmi(14, 14)
+rsi = ta.rsi(close, 14)
+
+vol_confirm = volume > ta.sma(volume, 20) * 1.3
+atr_spike = atr > atr[1] * 1.3
+
+bullish = close > ema50 and ema50 > ema200
+bearish = close < ema50 and ema50 < ema200
+
+long_entry = atr_expansion and ema_cross_up and adx > 22 and vol_confirm and rsi < 70 and rsi > 30
+short_entry = atr_expansion and ema_cross_down and adx > 22 and vol_confirm and rsi > 30 and rsi < 70
+
+long_exit = ema_cross_down or rsi > 85 or adx < 15
+short_exit = ema_cross_up or rsi < 15 or adx < 15
+
+var int trades_today = 0
+var int consec_losses = 0
+var int cooldown = 0
+var float day_equity = strategy.equity
+is_new_day = ta.change(time("D")) != 0
+if is_new_day
+    trades_today := 0
+    day_equity := strategy.equity
+if cooldown > 0
+    cooldown -= 1
+was_closed = strategy.position_size[1] != 0 and strategy.position_size == 0
+if was_closed
+    trades_today += 1
+    if strategy.netprofit < strategy.netprofit[1]
+        consec_losses += 1
+        if consec_losses >= 3
+            cooldown := 6
+            consec_losses := 0
+    else
+        consec_losses := 0
+daily_pnl = (strategy.equity - day_equity) / day_equity
+can_trade = trades_today < 3 and cooldown == 0 and daily_pnl > -0.03
+
+if long_entry and can_trade and strategy.position_size <= 0
+    strategy.entry("Long", strategy.long)
+    strategy.exit("L_X", "Long", stop=close*(1-sl_pct), limit=close*(1+tp_pct),
+         trail_points=close*trail_pct/100/syminfo.mintick, trail_offset=close*trail_pct/100/syminfo.mintick)
+if short_entry and can_trade and strategy.position_size >= 0
+    strategy.entry("Short", strategy.short)
+    strategy.exit("S_X", "Short", stop=close*(1+sl_pct), limit=close*(1-tp_pct),
+         trail_points=close*trail_pct/100/syminfo.mintick, trail_offset=close*trail_pct/100/syminfo.mintick)
+if ema_cross_down and strategy.position_size > 0
+    strategy.close("Long")
+if ema_cross_up and strategy.position_size < 0
+    strategy.close("Short")
+
+plot(ema20, "EMA20", color.blue, 2)
+plot(ema50, "EMA50", color.orange, 2)
+plotshape(long_entry and can_trade, "Buy", shape.triangleup, location.belowbar, color.lime, size=size.small, text="MVB")
+plotshape(short_entry and can_trade, "Sell", shape.triangledown, location.abovebar, color.red, size=size.small, text="MVB")

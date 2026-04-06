@@ -1,0 +1,80 @@
+//@version=5
+// TRIX DIVERGENCE + SIGNAL — TRIX momentum with signal line crossover
+// TRIX crossing above zero = bullish momentum, below zero = bearish
+// Add RSI filter for entries
+// Best for: ETH, BNB on 4h-1d
+strategy("TRIX Divergence Signal", overlay=true, initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=95,
+     commission_type=strategy.commission.percent, commission_value=0.1)
+
+trix_len = input.int(12, "TRIX Length")
+signal_len = input.int(9, "Signal Length")
+sl_pct = input.float(2.0, "SL %") / 100
+tp_pct = input.float(16.0, "TP %") / 100
+trail_pct = input.float(5.0, "Trail %") / 100
+
+trix_1 = ta.ema(ta.ema(ta.ema(close, trix_len), trix_len), trix_len)
+trix_2 = ta.ema(ta.ema(ta.ema(close[1], trix_len), trix_len), trix_len)
+trix_val = (trix_1 - trix_2) / trix_2 * 10000
+trix_signal = ta.sma(trix_val, signal_len)
+
+trix_cross_up = ta.crossover(trix_val, trix_signal) and trix_val < 0
+trix_cross_down = ta.crossunder(trix_val, trix_signal) and trix_val > 0
+
+[diplus, diminus, adx] = ta.dmi(14, 14)
+rsi = ta.rsi(close, 14)
+ema50 = ta.ema(close, 50)
+ema200 = ta.ema(close, 200)
+
+vol_confirm = volume > ta.sma(volume, 20) * 1.3
+
+bullish = close > ema50 and ema50 > ema200
+bearish = close < ema50 and ema50 < ema200
+
+long_entry = trix_cross_up and adx > 22 and rsi > 35 and rsi < 65 and vol_confirm and bullish
+short_entry = trix_cross_down and adx > 22 and rsi > 35 and rsi < 65 and vol_confirm and bearish
+
+long_exit = trix_cross_down or rsi > 75 or adx < 15
+short_exit = trix_cross_up or rsi < 25 or adx < 15
+
+var int trades_today = 0
+var int consec_losses = 0
+var int cooldown = 0
+var float day_equity = strategy.equity
+is_new_day = ta.change(time("D")) != 0
+if is_new_day
+    trades_today := 0
+    day_equity := strategy.equity
+if cooldown > 0
+    cooldown -= 1
+was_closed = strategy.position_size[1] != 0 and strategy.position_size == 0
+if was_closed
+    trades_today += 1
+    if strategy.netprofit < strategy.netprofit[1]
+        consec_losses += 1
+        if consec_losses >= 3
+            cooldown := 6
+            consec_losses := 0
+    else
+        consec_losses := 0
+daily_pnl = (strategy.equity - day_equity) / day_equity
+can_trade = trades_today < 3 and cooldown == 0 and daily_pnl > -0.03
+
+if long_entry and can_trade and strategy.position_size <= 0
+    strategy.entry("Long", strategy.long)
+    strategy.exit("L_X", "Long", stop=close*(1-sl_pct), limit=close*(1+tp_pct),
+         trail_points=close*trail_pct/100/syminfo.mintick, trail_offset=close*trail_pct/100/syminfo.mintick)
+if short_entry and can_trade and strategy.position_size >= 0
+    strategy.entry("Short", strategy.short)
+    strategy.exit("S_X", "Short", stop=close*(1+sl_pct), limit=close*(1-tp_pct),
+         trail_points=close*trail_pct/100/syminfo.mintick, trail_offset=close*trail_pct/100/syminfo.mintick)
+if long_exit and strategy.position_size > 0
+    strategy.close("Long")
+if short_exit and strategy.position_size < 0
+    strategy.close("Short")
+
+plot(trix_val, "TRIX", color.blue, 2)
+plot(trix_signal, "Signal", color.orange, 2)
+hline(0, "Zero", color.gray)
+plotshape(long_entry and can_trade, "Buy", shape.triangleup, location.belowbar, color.lime, size=size.small, text="TRIX")
+plotshape(short_entry and can_trade, "Sell", shape.triangledown, location.abovebar, color.red, size=size.small, text="TRIX")
