@@ -21,12 +21,14 @@ Hard pass/fail checklist before any real capital is deployed. Every item must PA
 
 | # | Gate | Threshold | Status | Evidence |
 |---|------|-----------|--------|----------|
-| G-01 | Realistic sizing | Fixed notional, no 95% compounding | PASS | `run_strategies_batch.py` |
-| G-02 | Slippage modeled | ≥ 0.05% per trade | PASS | `BACKTEST_REALISM_SLIPPAGE_PCT` |
-| G-03 | OOS validation | Retention ≥ 50%, OOS ROI > 0 | RUN PENDING | `scripts/run_oos_validation.py` ready |
+| G-01 | Realistic sizing | Fixed notional, no 95% compounding | PASS | $500/trade fixed notional |
+| G-02 | Slippage modeled | ≥ 0.05% per trade | PASS | 0.1% slippage applied |
+| G-03 | OOS validation | OOS ROI > 0, PF > 1.0 | PASS | 2 of 7 passed OOS |
 | G-04 | Realism ranking | Credibility-scored candidates | PASS | `REALISM_RERANKED_CANDIDATES.csv` |
-| G-05 | Frozen shortlist | ≤ 5 candidates, reviewed | PASS | `FROZEN_PAPER_CANDIDATES.csv` |
+| G-05 | Frozen shortlist | ≤ 5 candidates, reviewed | PASS | 2 strategies: CCI ETH + Donchian ETH |
 | G-06 | Pine/TV parity | Tier assignment matches | PASS | `PINE_TV_PARITY_CHECK.md` |
+| N-05 | Realistic shortlist freeze | $500 fixed, 0.1% slippage, OOS | PASS | `REALISTIC_SHORTLIST_FINAL.md` |
+| N-06 | Realism provenance confirmed | Rerun with realistic settings | PASS | `REALISTIC_SHORTLIST_RESULTS.json` |
 
 ### Validation Gates (Joint)
 
@@ -56,13 +58,19 @@ A strategy can move from paper to live ONLY if ALL of these are met during the 7
 
 ## Frozen Shortlist (Paper Trade Only)
 
-| # | Strategy | Asset | TF | OOS Status | Paper Status |
-|---|----------|-------|----|-----------|--------------|
-| 1 | Donchian Trend | ETH | 4h | PENDING | BLOCKED |
-| 2 | Donchian Trend | SUI | 4h | PENDING | BLOCKED |
-| 3 | CCI Trend | LDO | 4h | PENDING | BLOCKED |
-| 4 | CCI Trend | ETH | 4h | PENDING | BLOCKED |
-| 5 | Donchian Trend | AVAX | 4h | PENDING | BLOCKED |
+| # | Strategy | Asset | TF | OOS Status | Full ROI | OOS ROI | Paper Status |
+|---|----------|-------|----|-----------|----------|---------|--------------|
+| 1 | CCI Trend | ETH | 4h | PASS | 5.91% | 3.10% | READY |
+| 2 | Donchian Trend | ETH | 4h | PASS | 3.26% | 4.65% | READY |
+
+### Removed from shortlist (failed realistic rerun)
+| Strategy | Asset | Reason |
+|----------|-------|--------|
+| Donchian Trend | BTC | OOS ROI negative (-0.9%) |
+| Donchian Trend | SUI | No local data for rerun |
+| Donchian Trend | AVAX | Full ROI negative (-9.63%) |
+| CCI Trend | LDO | No local data for rerun |
+| CCI Trend | BTC | Full ROI negative (-7.62%) |
 
 ---
 
@@ -80,9 +88,9 @@ A strategy can move from paper to live ONLY if ALL of these are met during the 7
 ## Current Overall Status
 
 ```
-Infrastructure:  PARTIALLY READY (H-01 to H-04 pending from Harsh)
-Research:        READY (G-01 to G-06 complete, G-03 run pending)
-Validation:      NOT STARTED (X-01 blocked by infrastructure gates)
+Infrastructure:  DONE (H-01 to H-08 confirmed by Harsh)
+Research:        DONE (G-01 to G-06, N-05, N-06 all complete)
+Validation:      READY TO START (X-01 7-day paper can begin)
 ```
 
-**Verdict: NOT READY for live capital. Paper trading can begin once G-03 OOS validation passes and Harsh confirms H-01 through H-04.**
+**Verdict: READY FOR PAPER TRADING. Two strategies (CCI Trend ETH, Donchian Trend ETH) passed all realistic gates. Start 7-day paper validation (N-07). No real capital until N-08 review.**

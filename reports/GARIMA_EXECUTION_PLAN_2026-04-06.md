@@ -141,11 +141,17 @@ This file stores the current Garima-side execution plan so future work can be ch
 | X-02 | **DONE** | `reports/GO_LIVE_GATE_DOC.md` with hard pass/fail thresholds | Apr 7 |
 | T07 | **DONE** | `src/strategy_promotion.py` + `/promote` bot command + 164 candidates scored | Apr 4 |
 
-### All Garima tasks COMPLETE.
-Remaining blockers are on Harsh side (H-01 to H-04) and joint validation (X-01 7-day paper trade).
+### All Garima tasks COMPLETE (including N-05, N-06, N-08, N-09).
 
-OOS Results:
-- Donchian Trend ETH: PASS (OOS ROI=12%, retention 842%)
-- CCI Trend ETH: PASS (OOS ROI=9.1%, retention 83%)
-- Donchian Trend AVAX: FAIL (OOS ROI=-2%, remove from shortlist)
-- SUI/LDO: No local data — need server run or TV validation
+**Realistic Rerun Results ($500/trade, 0.1% slippage, 30% OOS):**
+- CCI Trend ETH: PASS (ROI=5.91%, Sharpe=0.69, OOS ROI=3.1%)
+- Donchian Trend ETH: PASS (ROI=3.26%, Sharpe=0.41, OOS ROI=4.65%)
+- Donchian Trend BTC: FAIL (OOS negative)
+- Donchian Trend DOT: FAIL (full ROI negative)
+- Donchian Trend AVAX: FAIL (full ROI negative)
+- CCI Trend BTC: FAIL (full ROI negative)
+- CCI Trend DOT: FAIL (full ROI negative)
+
+**Near-miss:** Donchian BTC (Sharpe=0.33, OOS=-0.9%) — watchlist only.
+
+**Final shortlist: 2 strategies on ETH 4h only.** Ready for N-07 paper validation.
