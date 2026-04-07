@@ -1,0 +1,177 @@
+[
+  {
+    "name": "Donchian_Trend",
+    "asset": "ETHUSDT",
+    "tf": "4h",
+    "signal": "donchian_breakout",
+    "sl": 0.015,
+    "tp": 0.12,
+    "ts": 0.04,
+    "full": {
+      "roi": 3.26,
+      "wr": 17.4,
+      "pf": 1.08,
+      "trades": 586,
+      "mdd": 5.77,
+      "sharpe": 0.41
+    },
+    "oos": {
+      "roi": 4.65,
+      "wr": 23.3,
+      "pf": 1.49,
+      "trades": 150,
+      "mdd": 1.47,
+      "sharpe": 2.1
+    }
+  },
+  {
+    "name": "CCI_Trend",
+    "asset": "ETHUSDT",
+    "tf": "4h",
+    "signal": "cci_breakout",
+    "sl": 0.015,
+    "tp": 0.12,
+    "ts": 0.04,
+    "full": {
+      "roi": 5.91,
+      "wr": 20.7,
+      "pf": 1.14,
+      "trades": 644,
+      "mdd": 2.82,
+      "sharpe": 0.69
+    },
+    "oos": {
+      "roi": 3.1,
+      "wr": 23.6,
+      "pf": 1.25,
+      "trades": 195,
+      "mdd": 1.85,
+      "sharpe": 1.19
+    }
+  },
+  {
+    "name": "Donchian_Trend",
+    "asset": "BTCUSDT",
+    "tf": "4h",
+    "signal": "donchian_breakout",
+    "sl": 0.015,
+    "tp": 0.12,
+    "ts": 0.04,
+    "full": {
+      "roi": 2.09,
+      "wr": 20.3,
+      "pf": 1.06,
+      "trades": 488,
+      "mdd": 3.65,
+      "sharpe": 0.33
+    },
+    "oos": {
+      "roi": -0.9,
+      "wr": 22.8,
+      "pf": 0.9,
+      "trades": 136,
+      "mdd": 2.15,
+      "sharpe": -0.58
+    }
+  },
+  {
+    "name": "Donchian_Trend",
+    "asset": "DOTUSDT",
+    "tf": "4h",
+    "signal": "donchian_breakout",
+    "sl": 0.015,
+    "tp": 0.12,
+    "ts": 0.04,
+    "full": {
+      "roi": -4.89,
+      "wr": 14.0,
+      "pf": 0.89,
+      "trades": 602,
+      "mdd": 9.24,
+      "sharpe": -0.62
+    },
+    "oos": {
+      "roi": 3.55,
+      "wr": 17.9,
+      "pf": 1.3,
+      "trades": 173,
+      "mdd": 1.95,
+      "sharpe": 1.38
+    }
+  },
+  {
+    "name": "Donchian_Trend",
+    "asset": "AVAXUSDT",
+    "tf": "4h",
+    "signal": "donchian_breakout",
+    "sl": 0.015,
+    "tp": 0.12,
+    "ts": 0.04,
+    "full": {
+      "roi": -9.63,
+      "wr": 11.8,
+      "pf": 0.79,
+      "trades": 638,
+      "mdd": 9.63,
+      "sharpe": -1.22
+    },
+    "oos": {
+      "roi": -2.0,
+      "wr": 13.2,
+      "pf": 0.85,
+      "trades": 182,
+      "mdd": 2.6,
+      "sharpe": -0.87
+    }
+  },
+  {
+    "name": "CCI_Trend",
+    "asset": "BTCUSDT",
+    "tf": "4h",
+    "signal": "cci_breakout",
+    "sl": 0.015,
+    "tp": 0.12,
+    "ts": 0.04,
+    "full": {
+      "roi": -7.62,
+      "wr": 22.4,
+      "pf": 0.8,
+      "trades": 602,
+      "mdd": 11.4,
+      "sharpe": -1.19
+    },
+    "oos": {
+      "roi": -1.58,
+      "wr": 26.9,
+      "pf": 0.84,
+      "trades": 175,
+      "mdd": 2.69,
+      "sharpe": -0.98
+    }
+  },
+  {
+    "name": "CCI_Trend",
+    "asset": "DOTUSDT",
+    "tf": "4h",
+    "signal": "cci_breakout",
+    "sl": 0.015,
+    "tp": 0.12,
+    "ts": 0.04,
+    "full": {
+      "roi": -8.6,
+      "wr": 16.6,
+      "pf": 0.81,
+      "trades": 625,
+      "mdd": 10.21,
+      "sharpe": -1.14
+    },
+    "oos": {
+      "roi": -1.27,
+      "wr": 16.0,
+      "pf": 0.9,
+      "trades": 194,
+      "mdd": 2.54,
+      "sharpe": -0.53
+    }
+  }
+]
