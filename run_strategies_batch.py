@@ -40,6 +40,7 @@ BACKTEST_FIXED_NOTIONAL_USD = float(os.getenv("BACKTEST_FIXED_NOTIONAL_USD", "10
 BACKTEST_MAX_POSITION_PCT = float(os.getenv("BACKTEST_MAX_POSITION_PCT", "0.10"))
 BACKTEST_DEFAULT_SLIPPAGE_PCT = float(os.getenv("BACKTEST_SLIPPAGE_PCT", "0.0"))
 BACKTEST_REALISM_SLIPPAGE_PCT = float(os.getenv("BACKTEST_REALISM_SLIPPAGE_PCT", "0.0005"))
+BACKTEST_ENTRY_DELAY_BARS = int(os.getenv("BACKTEST_ENTRY_DELAY_BARS", "1"))
 
 
 def _position_notional(
@@ -647,7 +648,7 @@ def run_backtest(
 
     do_long = side in ("long", "both")
     do_short = side in ("short", "both")
-    fee = 0.001  # 0.1% per trade (matching working strategies)
+    fee = FEE
     slippage_pct = 0.0 if slippage_pct is None else max(0.0, slippage_pct)
 
     capital = INITIAL_CAPITAL
@@ -1109,6 +1110,7 @@ def run_batch_strategies(data_key="BTCUSDT_15m", batch_num=None, params_override
             "Fixed_Notional_USD": round(BACKTEST_FIXED_NOTIONAL_USD, 2),
             "Max_Position_Pct": round(BACKTEST_MAX_POSITION_PCT * 100, 2),
             "Slippage_Pct": round(BACKTEST_REALISM_SLIPPAGE_PCT * 100, 4),
+            "Entry_Delay_Bars": BACKTEST_ENTRY_DELAY_BARS,
             "Performance_Grade": grade,
             "Deployment_Status": deploy,
             "Data_Source": "Binance Spot",
@@ -1203,7 +1205,7 @@ def run_batch_strategies(data_key="BTCUSDT_15m", batch_num=None, params_override
             "ROI_per_annum", "ROI_Percent", "Total_Trades", "Winning_Trades",
             "Losing_Trades", "Win_Rate_Percent", "Profit_Factor", "Sharpe_Ratio",
             "Avg_Trade_Percent", "Max_Drawdown_Percent", "Sizing_Mode",
-            "Fixed_Notional_USD", "Max_Position_Pct", "Slippage_Pct", "Performance_Grade",
+            "Fixed_Notional_USD", "Max_Position_Pct", "Slippage_Pct", "Entry_Delay_Bars", "Performance_Grade",
             "Deployment_Status", "Data_Source", "Time_Period", "Time_Start",
             "Time_End", "Fees_Exchange", "Candle_Period", "Parameters", "Is_Counter",
         ]

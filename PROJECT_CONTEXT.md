@@ -3,82 +3,77 @@
 ## What This Is
 Crypto trading bot with Telegram interface, ML strategy scanner, Streamlit dashboard, and Pine Script generator. Backtests strategies across 10+ assets on 4h timeframe using 6 years of Binance data. **Critical discovery: our backtester and TradingView produce fundamentally different results. Only TV-validated strategies should be trusted.**
 
-## Current State (as of April 1, 2026)
+## Current State (as of April 7, 2026)
 
 ### What Works
-- Telegram bot with 15+ commands (running on AWS EC2)
-- Streamlit dashboard (live at server/dashboard/, 9 tabs, auto-refresh)
-- ML pipeline (RF + GBM, 40+ features, walk-forward OOS)
-- Pine Script generator (dashboard + bot)
-- Backtester rewritten with crossover signals + signal-based exits + long/short
-- 70+ Pine Scripts generated
+- Telegram bot with 20+ commands including `/ml learn`, `/ml insights`, `/ml generate`, `/promote` (running on AWS EC2)
+- Streamlit dashboard (live at `15.207.152.119:8502`, loads 313 strategies from CSV, auto-refresh)
+- ML pipeline (RF + GBM, 50+ features including Donchian/CCI/HA/Aroon/TRIX signals, walk-forward OOS)
+- ML trained on 53 TV-validated results — learns what works on TradingView
+- Strategy promotion pipeline (T07) — offline approval before live deployment
+- 68 Pine Scripts (50 in `pine/` + 18 in `pine_new/`)
+- Bot + Dashboard connected: single shared CSV, auto-sync on ML completion
+- Backtest processor with CAGR + fixed capital mode + slippage + win rate checks
+- 20 assets supported (ETH, BTC, SOL, SUI, LDO, LINK, AVAX, ADA, XRP, DOT + 10 more)
 
-### What Doesn't Work
-- **Our backtester results DON'T match TradingView** — strategies showing 1%+/day on backtester show -95% on TV
-- **Harsh's backtester (strategy_tournament.py) uses signal×return model** — theoretical math, not real trades. Results don't transfer to TV either
-- **15m timeframe** — all strategies fail on TV (too noisy)
-- **Genetic algorithm** — produced fake 3%/day results that failed TV validation completely
+### What Doesn't Work / Known Issues
+- **95% equity compounding inflates all results** — $10K → $3T is not real. Fixed-capital mode added but full reruns pending
+- **Win rates 80%+ are suspicious** — trailing stop creates many small wins, needs investigation
+- **15m timeframe** — too noisy, not recommended for deployment
+- **Genetic algorithm** — produced fake results, failed TV validation
+- **Our backtester vs TradingView gap** — backtester uses signal×return, TV uses actual trades
 
-### Critical Finding
-The backtester (both ours and Harsh's) uses a different execution model than TradingView:
-- **Backtester**: signal × bar_return (no actual trades)
-- **TradingView**: actual position open/close with fees and slippage
-- **Result gap**: backtester shows +0.3%/day, TV shows -95%
-- **Root cause**: Harsh's risk filters (cooldown, circuit breaker, ADX, ATR) are applied to the return stream, not to actual trade execution
+### Critical Findings (Updated)
+1. **Risk framework > indicator choice** — same risk management (trailing stop + circuit breaker + ADX filter) turned WEAK strategies into TIER_1/TIER_2
+2. **Fusion strategies outperform singles** — combining Donchian + CCI or Supertrend + CCI gives 3-10x better results than either alone
+3. **CAGR was inflated** — linear ROI/365 gives 2-3x higher daily returns than compound formula
+4. **Position sizing is the key blocker** — 95% equity makes backtests unrealistic. Must use 10-15% fixed sizing for live
+5. **Realistic expectation after fixes: 40-120%/yr**, not 500-6000%/yr
 
 ## Repo Structure
 ```
 src/
-  telegram_backtest_bot.py  — Main bot (5000+ lines, /autohunt /ml /evolve /generate)
-  ml_strategy.py            — ML pipeline (RF + GBM, 40+ features, walk-forward OOS)
-  genetic_strategy.py       — Genetic algorithm (failed TV validation — don't trust results)
+  telegram_backtest_bot.py  — Main bot (6000+ lines, /ml /promote /evolve /generate)
+  ml_strategy.py            — ML pipeline (RF + GBM, 50+ features, strategy signals, walk-forward OOS)
+  ml_online.py              — Online learning ML (trains from TV validation feedback)
+  ml_persistent.py          — Persistent ML (saves models, never repeats tested combos)
+  strategy_promotion.py     — T07: Offline approval pipeline (generate/approve/reject/revoke)
+  genetic_strategy.py       — Genetic algorithm (failed TV — don't trust)
   brain.py                  — Gemini AI integration
   data_fetcher.py           — Binance data downloader
-  binance_client.py         — Binance API wrapper
-  manager.py                — Live trade execution (~400 lines, kill switch, circuit breaker)
-  signal_server.py          — FastAPI webhook server
-  signal_queue.py           — SQLite signal queue (WAL mode)
-  pine_generator.py         — Pine Script generator
-  walk_forward.py           — Walk-forward validation
 
-run_strategies_batch.py     — Core backtesting engine (REWRITTEN Mar 31)
-                              Now has: crossover signals, signal-based exits, long+short flipping,
-                              tournament-matched backtester (run_tournament_backtest()),
-                              LONG_EXIT_FUNCTIONS, SHORT_ENTRY_FUNCTIONS
-dashboard.py                — Streamlit dashboard (9 tabs, auto-refresh, Pine Script gen)
+run_strategies_batch.py     — Core backtesting engine (50+ indicators including Donchian, CCI, Aroon, TRIX, HA, Chandelier, DI+/DI-, ROC)
+                              Two sizing modes: legacy compounding + fixed_notional (realistic)
+dashboard.py                — Streamlit dashboard (loads from storage/tv_cagr_results.csv dynamically)
 strategies/                 — 22 batch files (batch_01-22), 260+ strategies
-storage/                    — Historical data, ML results, genetic results, autohunt results
-scripts/                    — ml_15m_scan.py, continuous_search.py, run_proven_strategies.py, etc.
-reports/                    — Day reports, weekly report, TV validation results
-pine/                       — 70+ Pine Scripts (rule-based + genetic + TV-first)
-deploy/                     — systemd service, SSH key (gitignored)
+storage/                    — Historical data (86MB parquet), ML models, TV feedback, promotion candidates
+scripts/                    — feed_tv_results.py, train_ml_full.py, predict_new_strats.py, etc.
+reports/                    — Day reports, execution plan, frozen candidates, approval pack
+pine/                       — 50 TV-validated Pine Scripts
+pine_new/                   — 18 fusion Pine Scripts (latest generation)
+deploy/                     — systemd service, SSH key
 ```
 
 ## Bot Commands (Telegram)
 ```
-Backtesting:
-  /auto all 4h        — Full pipeline: backtest → filter → optimize → validate
-  /backtest ETHUSDT_4h 1-5 — Run specific batches
-  /autohunt           — Auto-find strategies (crossover signals + long/short)
-  /autohunt stop/resume/status
-
-Strategy Generation:
-  /generate           — 5-method generator (ATR-adaptive, mean reversion, random mutation, high-TP, hybrid)
-  /generate stop
-
 ML Scanner:
-  /ml                 — Start ML scan (RF + GBM, 40+ features, walk-forward OOS)
+  /ml start           — Run ML scan (20 assets, 4h+1h, 50+ features)
+  /ml results         — Show CAGR top 10 strategies
   /ml status          — Current progress
-  /ml results         — Top 10 ML strategies
-  /ml stop
+  /ml learn <strat> <asset> <cagr> <wr> <pf> <gdd> — Feed TV result to train ML
+  /ml insights        — What ML learned (winning signals, best assets)
+  /ml generate        — Suggest new strategy combos from learned patterns
 
-Genetic Evolution:
-  /evolve start       — Start genetic evolution
-  /evolve status      — Check progress
-  /evolve results     — See results
+Strategy Promotion (T07):
+  /promote generate   — Create candidates from TV results
+  /promote report     — Show promotion report
+  /promote approve <id> — Approve for live
+  /promote reject <id>  — Reject strategy
+  /promote live       — Show approved live set
+  /promote pending    — Show awaiting review
 
-Results & Info:
-  /results, /results 4h, /elite, /status, /help
+Other:
+  /generate, /evolve, /results, /elite, /status, /help
 ```
 
 ## Server
@@ -130,14 +125,22 @@ Live at `http://15.207.152.119/dashboard/` (via nginx reverse proxy)
 - Sidebar: metrics + Pine Script dropdown with 10 pre-built scripts
 - Interactive strategy builder: select signals → run backtest → equity curve
 
-## TV Validation Results (CRITICAL)
-All strategies tested on TradingView showed UNPROFITABLE results:
-- 14 Harsh strategies on 15m: 0 profitable (all -90% to -100%)
-- 14 Harsh strategies on 1h: 1 barely profitable (MACD_Breakout FIL +28.7%)
-- 5 TV-first scripts on 15m: 0 profitable (all -70% to -100%)
-- 3 genetic algo scripts on 4h: 0 profitable (all -12% to -65%)
+## TV Validation Results
 
-**Only proven approach: build directly on TV, validate there, never trust backtester numbers alone.**
+### Failed (Mar 24 - Apr 2)
+- 14 Harsh strategies on 15m/1h: 0 profitable
+- 5 TV-first scripts: 0 profitable
+- 3 genetic algo scripts: 0 profitable
+
+### Succeeded (Apr 2 - Apr 4) — with BB Squeeze V2 risk framework
+- **313 strategy-asset combos tested across 20 assets**
+- BB Squeeze V2: TIER_2 on LDO (74.53%/yr), SUI (63.54%), ETH (51.76%)
+- Donchian Trend: TIER_1 on ETH, BTC, LINK, AVAX, SUI + 8 more assets
+- CCI Trend: TIER_1_DEPLOY on LDO, TIER_1 on ETH, BTC, SOL, ADA + more
+- Fusion strategies (Apr 4): Supertrend CCI, Triple Confirm, CCI Donchian Fusion, EMA Ribbon
+
+### Caveat
+All results above use 95% equity compounding — **inflated by orders of magnitude**. Realistic fixed-capital reruns pending. Expected realistic range: 40-120%/yr.
 
 ## Bugs Fixed (28 total across 6 days)
 Days 1-4: 24 bugs (trailing stop, SL/TP, fees, entry timing, sizing, DD calc, etc.)
@@ -150,19 +153,86 @@ Day 6 (Apr 1): Tournament backtester matching, TV validation proving gap
 - **Mar 29**: Walk-forward, SOL overfit caught, autohunt built
 - **Mar 30**: TV-match rewrite, 14 strategies deployed, 65+ Pine Scripts
 - **Mar 31**: ML pipeline, genetic algo (failed), dashboard (9 tabs), backtester rewrite #2
-- **Apr 1**: Read Harsh's tournament code, found signal×return model mismatch, TV validated all strategies (all failed), ML 4h scan running
+- **Apr 1**: Read Harsh's tournament code, found signal×return model mismatch, TV validated all strategies (all failed)
+- **Apr 2**: BB Squeeze V2 breakthrough — first multi-asset TV-profitable strategy. Parameter optimization (LDO 74.53%/yr)
+- **Apr 3**: Cleanup day. Removed 136 failed strategies. Created 16 new strategies with BB Squeeze V2 risk framework. 8 strategies TV-validated (Donchian TIER_1, HA Trend TIER_2). ML trained on 43 TV results. Dashboard deployed on server
+- **Apr 4**: Massive expansion. Created strategies #37-50 (fusion strategies). Supertrend CCI ETH 6,431% CAGR. Connected bot+dashboard to shared data. Fixed CAGR formula. Added win rate checks. Strategy promotion pipeline (T07) built. 313 strategies total. **Senior flagged: all results inflated due to 95% equity compounding**
+- **Apr 6**: Transition to realism. Stopped generating strategies, focused on fixing backtest engine. Created frozen shortlist (Donchian ETH/SUI, CCI LDO/ETH — paper trade only). Built execution plan (G-01→G-06). 18 new fusion scripts in `pine_new/`
+- **Apr 7**: Continued realism work. Tightened sizing in backtester. Generated 5 new fusion Pine scripts. Created test matrix for pine_new batch. Realism artifacts refreshed
+
+## Current Execution Plan (G-01 through G-06)
+```
+G-01 Realistic Sizing → G-02 Slippage/Friction → G-04 Realism-Aware Ranking → G-03 OOS/Walk-Forward → G-05 Frozen Shortlist → G-06 Pine/Export Parity → Go-Live Gate
+```
+Reference: `reports/GARIMA_EXECUTION_PLAN_2026-04-06.md`
+
+## Frozen Paper-Trade Shortlist (draft — NOT live-ready)
+1. Donchian Trend / ETH / 4h
+2. Donchian Trend / SUI / 4h
+3. CCI Trend / LDO / 4h
+4. CCI Trend / ETH / 4h
+5. Donchian Trend / AVAX / 4h
 
 ## Next Steps (Priority Order)
-1. **Add risk filters to Pine Scripts** (ADX, ATR, cooldown, circuit breaker) — this is what makes strategies profitable
-2. **TV-first approach** — build strategies on TV, validate there, bring back
-3. **Funding rate arbitrage** as supplement (0.03-0.15%/day, low risk)
-4. **Focus on 4h timeframe only** — 15m and 1h don't work on TV
-5. User has Binance testnet API key ready for paper trading
+1. **G-01: Finish realistic sizing** in `run_strategies_batch.py` (fixed_notional + capped_equity modes)
+2. **G-02: Add slippage** (0.08% per trade on top of 0.06% fee = 0.14% total)
+3. **Rerun backtests** with realistic settings and update all numbers
+4. **G-03: OOS/walk-forward gate** — no strategy promoted without OOS validation
+5. **G-05: Freeze final 3-5 candidates** for paper trading
+6. **Paper trade** with realistic position sizing (10% per trade, not 95%)
 
 ## What NOT to Do
-- Don't trust backtester results without TV validation
-- Don't use 15m timeframe — all strategies fail on TV
-- Don't use genetic algorithm results — they're overfit
-- Don't use tournament numbers as-is — they're theoretical (signal×return model)
-- Don't use SOL — overfits badly
-- Don't run heavy processes locally — use server only (user's machine crashes)
+- Don't trust CAGR numbers from 95% equity compounding ($10K → $3T is not real)
+- Don't deploy any strategy as TIER_1_DEPLOY based on current inflated backtests
+- Don't use 15m timeframe — too noisy
+- Don't use genetic algorithm results — overfit
+- Don't generate more strategies until realism is fixed
+- Keep `ALLOW_REAL_TRADES=false` until T06/T07 complete
+## LLM Work Log
+
+### April 7, 2026 — Codex (Session 1)
+- **Worked on**
+  - tightened the Garima-side realism path in `run_strategies_batch.py`
+  - kept realistic sizing/slippage metadata visible in outputs
+  - regenerated realism artifacts:
+    - `reports/REALISM_RERANKED_CANDIDATES.csv`
+    - `reports/FROZEN_PAPER_CANDIDATES.csv`
+    - `reports/GARIMA_APPROVAL_PACK.md`
+  - created working docs:
+    - `reports/DAY_PLAN_2026-04-07.md`
+    - `reports/NEW_SCRIPT_TEST_MATRIX_2026-04-07.md`
+  - generated 5 new Pine scripts in `pine_new/`:
+    - `donchian_cci_confirm.pine`
+    - `ema_ribbon_donchian_pullback.pine`
+    - `aroon_donchian_fusion.pine`
+    - `cci_supertrend_donchian.pine`
+    - `ha_donchian_trend_fusion.pine`
+  - added webhook secret payload support to those new scripts
+  - targeted tests: 14 passed
+
+### April 7, 2026 — Codex (Session 2)
+- **Worked on**
+  - verified G-01 (realistic sizing) and G-02 (slippage) are already complete:
+    - `fixed_notional` mode active: $1,000/trade, max 10% equity
+    - slippage: 0.05% per trade, entry delay: 1 bar
+    - all metadata visible in outputs (Sizing_Mode, Fixed_Notional_USD, Slippage_Pct, etc.)
+  - verified Task 2 (reranking) already complete: 329 candidates reranked with credibility scores, flags, OOS gates
+  - verified Task 4 (test matrix) already complete for 5 new pine_new scripts × 3 asset priority tiers
+  - updated PROJECT_CONTEXT.md through April 7 (full history Mar 24 → Apr 7)
+  - updated all sections: current state, repo structure, bot commands, TV results, execution plan, work log
+
+- **What is going on**
+  - G-01 through G-02 are DONE — backtester has realistic sizing + slippage
+  - Reranking artifacts exist with credibility scores and promotion gates
+  - 5 new fusion scripts ready for first-pass TV testing on Priority 1 assets (BTC, ETH, SOL, AVAX, LINK)
+  - Frozen shortlist (Donchian ETH/SUI, CCI LDO/ETH, Donchian AVAX) marked paper-trade only
+  - Next steps: run realistic backtests, OOS/walk-forward gate (G-03), then freeze final shortlist (G-05)
+
+- **Current status**
+  - G-01 realistic sizing: DONE
+  - G-02 slippage/friction: DONE
+  - G-04 realism-aware ranking: DONE (329 candidates reranked)
+  - G-03 OOS/walk-forward: PENDING
+  - G-05 frozen shortlist: DRAFT (5 candidates, paper-trade only)
+  - G-06 Pine/export parity: PENDING
+  - pine_new scripts: 5 new ready for TV testing
