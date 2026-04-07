@@ -1,0 +1,52 @@
+[
+  {
+    "id": "CCI_Trend_ETH_4h",
+    "strategy": "CCI_Trend",
+    "asset": "ETH",
+    "timeframe": "4h",
+    "cagr_pct": 5.91,
+    "roi_per_day_pct": 0.69,
+    "win_rate": 20.7,
+    "profit_factor": 1.14,
+    "sharpe": 0.69,
+    "gdd_pct": 2.82,
+    "trades": 644,
+    "tier": "APPROVED",
+    "backtest_hash": "d4ae43d256c0",
+    "status": "APPROVED",
+    "reviewed_by": "Garima",
+    "review_date": "2026-04-07",
+    "params": {
+      "sl_pct": 1.5,
+      "tp_pct": 12.0,
+      "trail_pct": 4.0,
+      "position_size_pct": 5.0,
+      "adx_filter": 20
+    }
+  },
+  {
+    "id": "Donchian_Trend_ETH_4h",
+    "strategy": "Donchian_Trend",
+    "asset": "ETH",
+    "timeframe": "4h",
+    "cagr_pct": 3.26,
+    "roi_per_day_pct": 0.41,
+    "win_rate": 17.4,
+    "profit_factor": 1.08,
+    "sharpe": 0.41,
+    "gdd_pct": 5.77,
+    "trades": 586,
+    "tier": "APPROVED",
+    "backtest_hash": "686adb63d527",
+    "status": "APPROVED",
+    "reviewed_by": "Garima",
+    "review_date": "2026-04-07",
+    "params": {
+      "sl_pct": 1.5,
+      "tp_pct": 12.0,
+      "trail_pct": 4.0,
+      "position_size_pct": 5.0,
+      "adx_filter": 20
+    }
+  }
+]
