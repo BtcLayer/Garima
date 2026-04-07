@@ -44,8 +44,8 @@ vol_ok = atr14 < atr_ma * 2
 vol_confirm = volume > ta.sma(volume, 20) * 1.2
 rsi = ta.rsi(close, 14)
 
-long_entry = pullback_long and breakout_long and close > ema50 and ema50 > ema200 and adx > 20 and vol_confirm
-short_entry = pullback_short and breakout_short and close < ema50 and ema50 < ema200 and adx > 20 and vol_confirm
+long_entry = pullback_long and breakout_long and close > ema50 and adx > 20 and vol_ok
+short_entry = pullback_short and breakout_short and close < ema50 and adx > 20 and vol_ok
 
 long_exit = close < ema21 or rsi > 80
 short_exit = close > ema21 or rsi < 20

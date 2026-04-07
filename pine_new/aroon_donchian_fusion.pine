@@ -40,8 +40,8 @@ atr_ma = ta.sma(atr14, 100)
 vol_ok = atr14 < atr_ma * 2
 vol_confirm = volume > ta.sma(volume, 20) * 1.2
 
-long_entry = breakout_up and strong_bull and close > ema50 and ema50 > ema200 and adx > 20 and rsi > 35 and rsi < 70 and vol_confirm
-short_entry = breakout_down and strong_bear and close < ema50 and ema50 < ema200 and adx > 20 and rsi > 30 and rsi < 65 and vol_confirm
+long_entry = breakout_up and strong_bull and close > ema50 and adx > 20 and rsi > 35 and rsi < 70 and vol_ok
+short_entry = breakout_down and strong_bear and close < ema50 and adx > 20 and rsi > 30 and rsi < 65 and vol_ok
 
 long_exit = ta.crossunder(aroon_up, aroon_down) or close < ema50 or rsi > 75
 short_exit = ta.crossover(aroon_up, aroon_down) or close > ema50 or rsi < 25

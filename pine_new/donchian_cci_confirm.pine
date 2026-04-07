@@ -39,8 +39,9 @@ atr_ma = ta.sma(atr14, 100)
 vol_ok = atr14 < atr_ma * 2
 vol_confirm = volume > ta.sma(volume, 20) * 1.2
 
-long_entry = breakout_up and cci > cci_thresh and close > ema50 and ema50 > ema200 and adx > 20 and vol_confirm
-short_entry = breakout_down and cci < -cci_thresh and close < ema50 and ema50 < ema200 and adx > 20 and vol_confirm
+// Long: breakout + CCI momentum + trend + ADX (no ema200 gate — kills longs in sideways)
+long_entry = breakout_up and cci > cci_thresh and close > ema50 and adx > 20 and vol_ok
+short_entry = breakout_down and cci < -cci_thresh and close < ema50 and adx > 20 and vol_ok
 
 long_exit = close < exit_lower[1] or cci < 0 or rsi > 80
 short_exit = close > exit_upper[1] or cci > 0 or rsi < 20

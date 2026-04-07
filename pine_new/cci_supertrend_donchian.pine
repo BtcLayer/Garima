@@ -40,8 +40,8 @@ vol_ok = atr14 < atr_ma * 2
 vol_confirm = volume > ta.sma(volume, 20) * 1.2
 rsi = ta.rsi(close, 14)
 
-long_entry = don_bull and cci_bull and st_bull and close > ema50 and ema50 > ema200 and adx > 20 and vol_confirm
-short_entry = don_bear and cci_bear and st_bear and close < ema50 and ema50 < ema200 and adx > 20 and vol_confirm
+long_entry = don_bull and cci_bull and st_bull and close > ema50 and adx > 20 and vol_ok
+short_entry = don_bear and cci_bear and st_bear and close < ema50 and adx > 20 and vol_ok
 
 long_exit = st_bear or cci < 0 or rsi > 80
 short_exit = st_bull or cci > 0 or rsi < 20
