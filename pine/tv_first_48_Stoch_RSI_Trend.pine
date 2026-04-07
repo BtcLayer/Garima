@@ -26,9 +26,9 @@ atr14 = ta.atr(14)
 vol_ok = atr14 < ta.sma(atr14, 100) * 2
 vol_confirm = volume > ta.sma(volume, 20) * 1.2
 
-long_strong = cross_up and close > ema50 and ema50 > ema200 and adx > 25 and vol_confirm
+long_strong = cross_up and close > ema50 and adx > 25 and vol_confirm
 long_medium = cross_up and close > ema50 and adx > 18
-short_strong = cross_down and close < ema50 and ema50 < ema200 and adx > 25 and vol_confirm
+short_strong = cross_down and close < ema50 and adx > 25 and vol_confirm
 short_medium = cross_down and close < ema50 and adx > 18
 
 long_entry = long_strong or long_medium

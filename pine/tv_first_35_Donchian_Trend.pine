@@ -40,9 +40,9 @@ vol_confirm = volume > ta.sma(volume, 20) * 1.2
 rsi = ta.rsi(close, 14)
 
 // Tiered entry
-long_strong = breakout_up and close > ema50 and ema50 > ema200 and adx > 25 and vol_confirm
+long_strong = breakout_up and close > ema50 and adx > 25 and vol_confirm
 long_medium = breakout_up and close > ema50 and adx > 20
-short_strong = breakout_down and close < ema50 and ema50 < ema200 and adx > 25 and vol_confirm
+short_strong = breakout_down and close < ema50 and adx > 25 and vol_confirm
 short_medium = breakout_down and close < ema50 and adx > 20
 
 long_entry = long_strong or long_medium

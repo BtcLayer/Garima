@@ -30,9 +30,9 @@ vol_ok = atr14 < atr_ma * 2
 vol_confirm = volume > ta.sma(volume, 20) * 1.2
 
 // Tiered
-long_strong = wr_cross_up and close > ema50 and adx > 25 and vol_confirm and ema50 > ema200
+long_strong = wr_cross_up and close > ema50 and adx > 25 and vol_confirm
 long_medium = wr_cross_up and close > ema50 and adx > 18
-short_strong = wr_cross_down and close < ema50 and adx > 25 and vol_confirm and ema50 < ema200
+short_strong = wr_cross_down and close < ema50 and adx > 25 and vol_confirm
 short_medium = wr_cross_down and close < ema50 and adx > 18
 
 long_entry = long_strong or long_medium

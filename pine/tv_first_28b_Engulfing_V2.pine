@@ -37,8 +37,8 @@ vol_ok = atr14 < atr_ma * 2
 
 // ── TIERED ENTRY (strong vs medium — like BB Squeeze V2) ──
 // Strong: engulfing + high volume + trend aligned + ADX strong
-long_strong = bull_engulf and high_vol and close > ema50 and ema50 > ema200 and adx > 25 and rsi < 65
-short_strong = bear_engulf and high_vol and close < ema50 and ema50 < ema200 and adx > 25 and rsi > 35
+long_strong = bull_engulf and high_vol and close > ema50 and adx > 25 and rsi < 65
+short_strong = bear_engulf and high_vol and close < ema50 and adx > 25 and rsi > 35
 
 // Medium: engulfing + medium volume + basic trend
 long_medium = bull_engulf and med_vol and close > ema50 and adx > 20 and rsi < 70
