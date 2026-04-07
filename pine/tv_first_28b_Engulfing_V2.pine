@@ -7,6 +7,12 @@ strategy("Engulfing V2", overlay=true, initial_capital=10000,
      default_qty_type=strategy.percent_of_equity, default_qty_value=95,
      commission_type=strategy.commission.percent, commission_value=0.1)
 
+WEBHOOK_SECRET = "squeeze_tradingview_cluster_2026_secure"
+long_alert = '{"secret":"' + WEBHOOK_SECRET + '","strategy":"Engulfing V2","action":"BUY","ticker":"{{ticker}}","interval":"{{interval}}","price":"{{close}}"}'
+short_alert = '{"secret":"' + WEBHOOK_SECRET + '","strategy":"Engulfing V2","action":"SELL","ticker":"{{ticker}}","interval":"{{interval}}","price":"{{close}}"}'
+close_long_alert = '{"secret":"' + WEBHOOK_SECRET + '","strategy":"Engulfing V2","action":"CLOSE_LONG","ticker":"{{ticker}}","interval":"{{interval}}","price":"{{close}}"}'
+close_short_alert = '{"secret":"' + WEBHOOK_SECRET + '","strategy":"Engulfing V2","action":"CLOSE_SHORT","ticker":"{{ticker}}","interval":"{{interval}}","price":"{{close}}"}'
+
 // ── INPUTS ──
 sl_pct = input.float(1.5, "SL %") / 100
 tp_pct = input.float(10.0, "TP %") / 100
@@ -78,7 +84,7 @@ can_trade = trades_today < 3 and cooldown == 0 and daily_pnl > -0.03
 
 // ── EXECUTION with TRAILING STOP ──
 if long_entry and can_trade and vol_ok and strategy.position_size <= 0
-    strategy.entry("Long", strategy.long)
+    strategy.entry("Long", strategy.long, alert_message=long_alert)
     strategy.exit("L_X", "Long",
          stop=close * (1 - sl_pct),
          limit=close * (1 + tp_pct),
@@ -86,7 +92,7 @@ if long_entry and can_trade and vol_ok and strategy.position_size <= 0
          trail_offset=close * trail_pct / 100 / syminfo.mintick)
 
 if short_entry and can_trade and vol_ok and strategy.position_size >= 0
-    strategy.entry("Short", strategy.short)
+    strategy.entry("Short", strategy.short, alert_message=short_alert)
     strategy.exit("S_X", "Short",
          stop=close * (1 + sl_pct),
          limit=close * (1 - tp_pct),
@@ -95,15 +101,15 @@ if short_entry and can_trade and vol_ok and strategy.position_size >= 0
 
 // ── MOMENTUM REVERSAL EXIT ──
 if long_momentum_fade and strategy.position_size > 0
-    strategy.close("Long")
+    strategy.close("Long", alert_message=close_long_alert)
 if short_momentum_fade and strategy.position_size < 0
-    strategy.close("Short")
+    strategy.close("Short", alert_message=close_short_alert)
 
 // ── RSI EXTREME EXIT ──
 if rsi > 80 and strategy.position_size > 0
-    strategy.close("Long")
+    strategy.close("Long", alert_message=close_long_alert)
 if rsi < 20 and strategy.position_size < 0
-    strategy.close("Short")
+    strategy.close("Short", alert_message=close_short_alert)
 
 // ── VISUALS ──
 plot(ema50, "EMA50", color.blue, 2)

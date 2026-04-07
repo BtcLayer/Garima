@@ -6,6 +6,12 @@ strategy("Stoch RSI Trend", overlay=true, initial_capital=10000,
      default_qty_type=strategy.percent_of_equity, default_qty_value=95,
      commission_type=strategy.commission.percent, commission_value=0.1)
 
+WEBHOOK_SECRET = "squeeze_tradingview_cluster_2026_secure"
+long_alert = '{"secret":"' + WEBHOOK_SECRET + '","strategy":"Stoch RSI Trend","action":"BUY","ticker":"{{ticker}}","interval":"{{interval}}","price":"{{close}}"}'
+short_alert = '{"secret":"' + WEBHOOK_SECRET + '","strategy":"Stoch RSI Trend","action":"SELL","ticker":"{{ticker}}","interval":"{{interval}}","price":"{{close}}"}'
+close_long_alert = '{"secret":"' + WEBHOOK_SECRET + '","strategy":"Stoch RSI Trend","action":"CLOSE_LONG","ticker":"{{ticker}}","interval":"{{interval}}","price":"{{close}}"}'
+close_short_alert = '{"secret":"' + WEBHOOK_SECRET + '","strategy":"Stoch RSI Trend","action":"CLOSE_SHORT","ticker":"{{ticker}}","interval":"{{interval}}","price":"{{close}}"}'
+
 rsi_len = input.int(14, "RSI Length")
 stoch_len = input.int(14, "Stoch Length")
 sl_pct = input.float(1.5, "SL %") / 100
@@ -61,17 +67,17 @@ daily_pnl = (strategy.equity - day_equity) / day_equity
 can_trade = trades_today < 3 and cooldown == 0 and daily_pnl > -0.03
 
 if long_entry and can_trade and vol_ok and strategy.position_size <= 0
-    strategy.entry("Long", strategy.long)
+    strategy.entry("Long", strategy.long, alert_message=long_alert)
     strategy.exit("L_X", "Long", stop=close*(1-sl_pct), limit=close*(1+tp_pct),
          trail_points=close*trail_pct/100/syminfo.mintick, trail_offset=close*trail_pct/100/syminfo.mintick)
 if short_entry and can_trade and vol_ok and strategy.position_size >= 0
-    strategy.entry("Short", strategy.short)
+    strategy.entry("Short", strategy.short, alert_message=short_alert)
     strategy.exit("S_X", "Short", stop=close*(1+sl_pct), limit=close*(1-tp_pct),
          trail_points=close*trail_pct/100/syminfo.mintick, trail_offset=close*trail_pct/100/syminfo.mintick)
 if long_exit and strategy.position_size > 0
-    strategy.close("Long")
+    strategy.close("Long", alert_message=close_long_alert)
 if short_exit and strategy.position_size < 0
-    strategy.close("Short")
+    strategy.close("Short", alert_message=close_short_alert)
 
 plot(ema50, "EMA50", color.blue, 2)
 plot(ema200, "EMA200", color.gray, 2)
