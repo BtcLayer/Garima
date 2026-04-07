@@ -125,3 +125,23 @@ This file stores the current Garima-side execution plan so future work can be ch
 - Harsh-side blockers are separate and not included in Garima implementation time.
 - Current shortlist and approval-pack artifacts are drafts, not final deliverables.
 - The 7-day paper validation is outside Garima’s active build-time estimate.
+
+---
+
+## Task Completion Status (Updated April 7, 2026)
+
+| Task | Status | Evidence | Date |
+|------|--------|----------|------|
+| G-01 | **DONE** | `fixed_notional` mode + `_position_notional()` in `run_strategies_batch.py` | Apr 7 |
+| G-02 | **DONE** | `BACKTEST_REALISM_SLIPPAGE_PCT` wired into entry/exit prices | Apr 7 |
+| G-04 | **DONE** | `reports/REALISM_RERANKED_CANDIDATES.csv` (329 rows, credibility scores) | Apr 6 |
+| G-03 | **PARTIAL** | `oos_split` exists in tournament backtester; trade-based `run_backtest()` missing OOS | Pending |
+| G-05 | **DONE (draft)** | `reports/FROZEN_PAPER_CANDIDATES.csv` (5 candidates, all `BLOCKED_PENDING_OOS`) | Apr 6 |
+| G-06 | **NOT DONE** | Pine/export parity not validated for shortlisted strategies | Pending |
+| X-02 | **PARTIAL** | `reports/GARIMA_APPROVAL_PACK.md` exists as draft, needs hard thresholds | Pending |
+| T07 | **DONE** | `src/strategy_promotion.py` + `/promote` bot command + 164 candidates scored | Apr 4 |
+
+### Remaining blockers before live:
+1. G-03: Add OOS to trade-based backtester → rerun shortlist → update OOS status
+2. G-06: Compare TV vs engine metrics for 5 frozen candidates
+3. X-02: Finalize go-live gate doc with pass/fail thresholds
