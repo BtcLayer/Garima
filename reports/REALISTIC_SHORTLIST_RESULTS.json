@@ -22,6 +22,25 @@
       "trades": 150,
       "mdd": 1.47,
       "sharpe": 2.1
+    },
+    "provenance": {
+      "sizing_mode": "fixed_notional",
+      "fixed_notional_usd": 500,
+      "slippage_pct": 0.1,
+      "fee_pct": 0.06,
+      "oos_ratio": 0.3,
+      "oos_roi_pct": 4.65,
+      "oos_pf": 1.49,
+      "oos_wr": 23.3,
+      "full_roi_pct": 3.26,
+      "full_sharpe": 0.41,
+      "full_pf": 1.08,
+      "full_mdd_pct": 5.77,
+      "full_trades": 586,
+      "backtest_hash": "686adb63d527",
+      "rerun_date": "2026-04-07",
+      "data_source": "Binance 4h 2020-2026",
+      "passed_realism": true
     }
   },
   {
@@ -47,6 +66,25 @@
       "trades": 195,
       "mdd": 1.85,
       "sharpe": 1.19
+    },
+    "provenance": {
+      "sizing_mode": "fixed_notional",
+      "fixed_notional_usd": 500,
+      "slippage_pct": 0.1,
+      "fee_pct": 0.06,
+      "oos_ratio": 0.3,
+      "oos_roi_pct": 3.1,
+      "oos_pf": 1.25,
+      "oos_wr": 23.6,
+      "full_roi_pct": 5.91,
+      "full_sharpe": 0.69,
+      "full_pf": 1.14,
+      "full_mdd_pct": 2.82,
+      "full_trades": 644,
+      "backtest_hash": "d4ae43d256c0",
+      "rerun_date": "2026-04-07",
+      "data_source": "Binance 4h 2020-2026",
+      "passed_realism": true
     }
   },
   {
@@ -72,6 +110,25 @@
       "trades": 136,
       "mdd": 2.15,
       "sharpe": -0.58
+    },
+    "provenance": {
+      "sizing_mode": "fixed_notional",
+      "fixed_notional_usd": 500,
+      "slippage_pct": 0.1,
+      "fee_pct": 0.06,
+      "oos_ratio": 0.3,
+      "oos_roi_pct": -0.9,
+      "oos_pf": 0.9,
+      "oos_wr": 22.8,
+      "full_roi_pct": 2.09,
+      "full_sharpe": 0.33,
+      "full_pf": 1.06,
+      "full_mdd_pct": 3.65,
+      "full_trades": 488,
+      "backtest_hash": "6f4850dece5f",
+      "rerun_date": "2026-04-07",
+      "data_source": "Binance 4h 2020-2026",
+      "passed_realism": false
     }
   },
   {
@@ -97,6 +154,25 @@
       "trades": 173,
       "mdd": 1.95,
       "sharpe": 1.38
+    },
+    "provenance": {
+      "sizing_mode": "fixed_notional",
+      "fixed_notional_usd": 500,
+      "slippage_pct": 0.1,
+      "fee_pct": 0.06,
+      "oos_ratio": 0.3,
+      "oos_roi_pct": 3.55,
+      "oos_pf": 1.3,
+      "oos_wr": 17.9,
+      "full_roi_pct": -4.89,
+      "full_sharpe": -0.62,
+      "full_pf": 0.89,
+      "full_mdd_pct": 9.24,
+      "full_trades": 602,
+      "backtest_hash": "3a85d9acd4b6",
+      "rerun_date": "2026-04-07",
+      "data_source": "Binance 4h 2020-2026",
+      "passed_realism": false
     }
   },
   {
@@ -122,6 +198,25 @@
       "trades": 182,
       "mdd": 2.6,
       "sharpe": -0.87
+    },
+    "provenance": {
+      "sizing_mode": "fixed_notional",
+      "fixed_notional_usd": 500,
+      "slippage_pct": 0.1,
+      "fee_pct": 0.06,
+      "oos_ratio": 0.3,
+      "oos_roi_pct": -2.0,
+      "oos_pf": 0.85,
+      "oos_wr": 13.2,
+      "full_roi_pct": -9.63,
+      "full_sharpe": -1.22,
+      "full_pf": 0.79,
+      "full_mdd_pct": 9.63,
+      "full_trades": 638,
+      "backtest_hash": "f2b77007560e",
+      "rerun_date": "2026-04-07",
+      "data_source": "Binance 4h 2020-2026",
+      "passed_realism": false
     }
   },
   {
@@ -147,6 +242,25 @@
       "trades": 175,
       "mdd": 2.69,
       "sharpe": -0.98
+    },
+    "provenance": {
+      "sizing_mode": "fixed_notional",
+      "fixed_notional_usd": 500,
+      "slippage_pct": 0.1,
+      "fee_pct": 0.06,
+      "oos_ratio": 0.3,
+      "oos_roi_pct": -1.58,
+      "oos_pf": 0.84,
+      "oos_wr": 26.9,
+      "full_roi_pct": -7.62,
+      "full_sharpe": -1.19,
+      "full_pf": 0.8,
+      "full_mdd_pct": 11.4,
+      "full_trades": 602,
+      "backtest_hash": "bea7ddc7f383",
+      "rerun_date": "2026-04-07",
+      "data_source": "Binance 4h 2020-2026",
+      "passed_realism": false
     }
   },
   {
@@ -172,6 +286,25 @@
       "trades": 194,
       "mdd": 2.54,
       "sharpe": -0.53
+    },
+    "provenance": {
+      "sizing_mode": "fixed_notional",
+      "fixed_notional_usd": 500,
+      "slippage_pct": 0.1,
+      "fee_pct": 0.06,
+      "oos_ratio": 0.3,
+      "oos_roi_pct": -1.27,
+      "oos_pf": 0.9,
+      "oos_wr": 16.0,
+      "full_roi_pct": -8.6,
+      "full_sharpe": -1.14,
+      "full_pf": 0.81,
+      "full_mdd_pct": 10.21,
+      "full_trades": 625,
+      "backtest_hash": "a84c52b2eaf1",
+      "rerun_date": "2026-04-07",
+      "data_source": "Binance 4h 2020-2026",
+      "passed_realism": false
     }
   }
 ]

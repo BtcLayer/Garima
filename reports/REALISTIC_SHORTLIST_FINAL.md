@@ -50,5 +50,23 @@
 - These are conservative numbers — real returns depend on trade frequency and market conditions
 - Both strategies performed BETTER in OOS than in-sample (good sign, not overfit)
 
+## Provenance (U-02)
+
+Each shortlisted strategy includes full traceability:
+
+| Field | CCI Trend ETH | Donchian Trend ETH |
+|-------|--------------|-------------------|
+| Backtest Hash | `d4ae43d256c0` | `686adb63d527` |
+| Sizing Mode | fixed_notional | fixed_notional |
+| Notional | $500/trade | $500/trade |
+| Slippage | 0.1%/trade | 0.1%/trade |
+| Fee | 0.06%/trade | 0.06%/trade |
+| OOS Ratio | 30% holdout | 30% holdout |
+| Rerun Date | 2026-04-07 | 2026-04-07 |
+| Data Source | Binance 4h 2020-2026 | Binance 4h 2020-2026 |
+| Passed Realism | YES | YES |
+
+These hashes can be reproduced by rerunning `scripts/run_oos_validation.py` with the same parameters.
+
 ## Recommendation
 Both strategies are safe for paper trading. Neither is a "get rich quick" — they are modest edge strategies that survive realistic conditions. Start 7-day paper validation on these two only.
