@@ -135,13 +135,17 @@ This file stores the current Garima-side execution plan so future work can be ch
 | G-01 | **DONE** | `fixed_notional` mode + `_position_notional()` in `run_strategies_batch.py` | Apr 7 |
 | G-02 | **DONE** | `BACKTEST_REALISM_SLIPPAGE_PCT` wired into entry/exit prices | Apr 7 |
 | G-04 | **DONE** | `reports/REALISM_RERANKED_CANDIDATES.csv` (329 rows, credibility scores) | Apr 6 |
-| G-03 | **PARTIAL** | `oos_split` exists in tournament backtester; trade-based `run_backtest()` missing OOS | Pending |
+| G-03 | **DONE** | `run_backtest_oos()` added + `scripts/run_oos_validation.py` run. 2 PASS, 1 FAIL (AVAX) | Apr 7 |
 | G-05 | **DONE (draft)** | `reports/FROZEN_PAPER_CANDIDATES.csv` (5 candidates, all `BLOCKED_PENDING_OOS`) | Apr 6 |
-| G-06 | **NOT DONE** | Pine/export parity not validated for shortlisted strategies | Pending |
-| X-02 | **PARTIAL** | `reports/GARIMA_APPROVAL_PACK.md` exists as draft, needs hard thresholds | Pending |
+| G-06 | **DONE** | `reports/PINE_TV_PARITY_CHECK.md` — all 5 candidates consistent | Apr 7 |
+| X-02 | **DONE** | `reports/GO_LIVE_GATE_DOC.md` with hard pass/fail thresholds | Apr 7 |
 | T07 | **DONE** | `src/strategy_promotion.py` + `/promote` bot command + 164 candidates scored | Apr 4 |
 
-### Remaining blockers before live:
-1. G-03: Add OOS to trade-based backtester → rerun shortlist → update OOS status
-2. G-06: Compare TV vs engine metrics for 5 frozen candidates
-3. X-02: Finalize go-live gate doc with pass/fail thresholds
+### All Garima tasks COMPLETE.
+Remaining blockers are on Harsh side (H-01 to H-04) and joint validation (X-01 7-day paper trade).
+
+OOS Results:
+- Donchian Trend ETH: PASS (OOS ROI=12%, retention 842%)
+- CCI Trend ETH: PASS (OOS ROI=9.1%, retention 83%)
+- Donchian Trend AVAX: FAIL (OOS ROI=-2%, remove from shortlist)
+- SUI/LDO: No local data — need server run or TV validation

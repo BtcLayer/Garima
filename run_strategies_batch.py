@@ -783,6 +783,62 @@ def run_backtest(
     return capital, trades
 
 
+def run_backtest_oos(df, strategy_config, oos_ratio=0.3, **kwargs):
+    """Run backtest with in-sample / out-of-sample split.
+
+    Returns: {"is": metrics_dict, "oos": metrics_dict, "oos_ratio": float}
+    """
+    split_idx = int(len(df) * (1 - oos_ratio))
+    df_is = df.iloc[:split_idx].copy().reset_index(drop=True)
+    df_oos = df.iloc[split_idx:].copy().reset_index(drop=True)
+
+    def _metrics(capital_result, trades_list, n_bars):
+        if not trades_list:
+            return {"roi_pct": 0, "win_rate": 0, "pf": 0, "trades": 0, "gdd": 0, "sharpe": 0}
+        wins = [t for t in trades_list if t["pnl"] > 0]
+        losses = [t for t in trades_list if t["pnl"] <= 0]
+        wr = len(wins) / len(trades_list) * 100 if trades_list else 0
+        tw = sum(t["pnl"] for t in wins)
+        tl = abs(sum(t["pnl"] for t in losses))
+        pf = round(tw / tl, 2) if tl > 0 else 0
+
+        eq = INITIAL_CAPITAL
+        peak = eq
+        max_dd = 0
+        for t in trades_list:
+            eq += t["pnl"]
+            peak = max(peak, eq)
+            dd = (peak - eq) / peak * 100 if peak > 0 else 0
+            max_dd = max(max_dd, dd)
+
+        roi = (capital_result - INITIAL_CAPITAL) / INITIAL_CAPITAL * 100
+
+        rets = [t["pnl"] / INITIAL_CAPITAL for t in trades_list]
+        mean_r = sum(rets) / len(rets) if rets else 0
+        std_r = (sum((r - mean_r)**2 for r in rets) / len(rets))**0.5 if len(rets) > 1 else 0
+        sharpe = round((mean_r / std_r) * (252**0.5), 2) if std_r > 0 else 0
+
+        return {
+            "roi_pct": round(roi, 2),
+            "win_rate": round(wr, 1),
+            "pf": pf,
+            "trades": len(trades_list),
+            "gdd": round(max_dd, 2),
+            "sharpe": sharpe,
+        }
+
+    cap_is, trades_is = run_backtest(df_is, **kwargs)
+    cap_oos, trades_oos = run_backtest(df_oos, **kwargs)
+
+    return {
+        "is": _metrics(cap_is, trades_is, len(df_is)),
+        "oos": _metrics(cap_oos, trades_oos, len(df_oos)),
+        "oos_ratio": oos_ratio,
+        "is_bars": len(df_is),
+        "oos_bars": len(df_oos),
+    }
+
+
 # ══════════════════════════════════════════════════════════════════
 # TOURNAMENT-STYLE BACKTESTER — matches strategy_tournament.py exactly
 # Signal × bar_return model (no individual trade tracking)
