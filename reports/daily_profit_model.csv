@@ -1,4 +1,0 @@
-Elite_Rank,Strategy,Asset,Timeframe,trades_per_day,Win_Rate_Percent,Avg_Trade_Percent,expected_daily_pct,hits_2pct_daily,roi
-1,VWAP_Break_Entry,AVAXUSDT,4h,0.1927710843373494,53.12,1.62,0.1659,False,55.95
-2,Volume_Stochastic_MACD_ADX,BNBUSDT,4h,0.07692307692307693,32.14,2.22,0.0549,False,66.99
-3,Breakout_Retest_Pro,DOTUSDT,4h,0.3373493975903614,44.64,0.88,0.1325,False,52.27
