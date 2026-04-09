@@ -1,0 +1,84 @@
+//@version=5
+// RB02 - Research-only range-bound strategy
+// Donchian stretch + fade back to midline using RSI exhaustion
+strategy("RB02 Donchian Midline Fade", overlay=true, initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=95,
+     commission_type=strategy.commission.percent, commission_value=0.1)
+
+WEBHOOK_SECRET = "squeeze_tradingview_cluster_2026_secure"
+
+entry_len = input.int(20, "Channel Length")
+rsi_len = input.int(14, "RSI Length")
+sl_pct = input.float(1.5, "SL %") / 100
+tp_pct = input.float(9.0, "TP %") / 100
+trail_pct = input.float(2.0, "Trail %") / 100
+
+long_alert = '{"secret":"' + WEBHOOK_SECRET + '","strategy":"RB02 Donchian Midline Fade","action":"BUY","ticker":"{{ticker}}","interval":"{{interval}}","price":"{{close}}"}'
+short_alert = '{"secret":"' + WEBHOOK_SECRET + '","strategy":"RB02 Donchian Midline Fade","action":"SELL","ticker":"{{ticker}}","interval":"{{interval}}","price":"{{close}}"}'
+close_long_alert = '{"secret":"' + WEBHOOK_SECRET + '","strategy":"RB02 Donchian Midline Fade","action":"CLOSE_LONG","ticker":"{{ticker}}","interval":"{{interval}}","price":"{{close}}"}'
+close_short_alert = '{"secret":"' + WEBHOOK_SECRET + '","strategy":"RB02 Donchian Midline Fade","action":"CLOSE_SHORT","ticker":"{{ticker}}","interval":"{{interval}}","price":"{{close}}"}'
+
+upper = ta.highest(high, entry_len)
+lower = ta.lowest(low, entry_len)
+mid = math.avg(upper, lower)
+rsi = ta.rsi(close, rsi_len)
+atr14 = ta.atr(14)
+atr_ma = ta.sma(atr14, 100)
+vol_ok = atr14 < atr_ma * 2
+
+stretch_low = close < lower[1] * 1.01 and close > lower[1] * 0.985
+stretch_high = close > upper[1] * 0.99 and close < upper[1] * 1.015
+bull_reject = close > open and low < low[1]
+bear_reject = close < open and high > high[1]
+
+long_entry = stretch_low and bull_reject and rsi < 38
+short_entry = stretch_high and bear_reject and rsi > 62
+
+long_exit = close >= mid or rsi > 57
+short_exit = close <= mid or rsi < 43
+
+var int trades_today = 0
+var int consec_losses = 0
+var int cooldown = 0
+var float day_equity = strategy.equity
+is_new_day = ta.change(time("D")) != 0
+if is_new_day
+    trades_today := 0
+    day_equity := strategy.equity
+if cooldown > 0
+    cooldown -= 1
+was_closed = strategy.position_size[1] != 0 and strategy.position_size == 0
+if was_closed
+    trades_today += 1
+    if strategy.netprofit < strategy.netprofit[1]
+        consec_losses += 1
+        if consec_losses >= 3
+            cooldown := 6
+            consec_losses := 0
+    else
+        consec_losses := 0
+daily_pnl = (strategy.equity - day_equity) / day_equity
+can_trade = trades_today < 3 and cooldown == 0 and daily_pnl > -0.03
+
+if long_entry and can_trade and vol_ok and strategy.position_size <= 0
+    strategy.entry("Long", strategy.long, alert_message=long_alert)
+    strategy.exit("L_X", "Long",
+         stop=close * (1 - sl_pct),
+         limit=close * (1 + tp_pct),
+         trail_points=close * trail_pct / 100 / syminfo.mintick,
+         trail_offset=close * trail_pct / 100 / syminfo.mintick)
+if short_entry and can_trade and vol_ok and strategy.position_size >= 0
+    strategy.entry("Short", strategy.short, alert_message=short_alert)
+    strategy.exit("S_X", "Short",
+         stop=close * (1 + sl_pct),
+         limit=close * (1 - tp_pct),
+         trail_points=close * trail_pct / 100 / syminfo.mintick,
+         trail_offset=close * trail_pct / 100 / syminfo.mintick)
+if long_exit and strategy.position_size > 0
+    strategy.close("Long", alert_message=close_long_alert)
+if short_exit and strategy.position_size < 0
+    strategy.close("Short", alert_message=close_short_alert)
+
+plot(upper, "Upper", color.red)
+plot(lower, "Lower", color.green)
+plot(mid, "Mid", color.orange)

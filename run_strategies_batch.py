@@ -35,6 +35,8 @@ for _sym in _SYMBOLS:
 # Trading parameters
 INITIAL_CAPITAL = 10000
 FEE = 0.0003  # 0.03% per side = 0.06% round-trip (matches TradingView 0.06%)
+# NOTE: Default is fixed_notional (realistic). Pine scripts use 95% equity for TV
+# backtester compatibility, but our engine uses $500-1000 fixed per trade.
 BACKTEST_SIZING_MODE = os.getenv("BACKTEST_SIZING_MODE", "fixed_notional").lower()
 BACKTEST_FIXED_NOTIONAL_USD = float(os.getenv("BACKTEST_FIXED_NOTIONAL_USD", "1000"))
 BACKTEST_MAX_POSITION_PCT = float(os.getenv("BACKTEST_MAX_POSITION_PCT", "0.10"))

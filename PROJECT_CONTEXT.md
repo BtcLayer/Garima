@@ -3,7 +3,7 @@
 ## What This Is
 Crypto trading bot with Telegram interface, ML strategy scanner, Streamlit dashboard, and Pine Script generator. Backtests strategies across 10+ assets on 4h timeframe using 6 years of Binance data. **Critical discovery: our backtester and TradingView produce fundamentally different results. Only TV-validated strategies should be trusted.**
 
-## Current State (as of April 7, 2026)
+## Current State (as of April 8, 2026)
 
 ### What Works
 - Telegram bot with 20+ commands including `/ml learn`, `/ml insights`, `/ml generate`, `/promote` (running on AWS EC2)
@@ -11,7 +11,7 @@ Crypto trading bot with Telegram interface, ML strategy scanner, Streamlit dashb
 - ML pipeline (RF + GBM, 50+ features including Donchian/CCI/HA/Aroon/TRIX signals, walk-forward OOS)
 - ML trained on 53 TV-validated results — learns what works on TradingView
 - Strategy promotion pipeline (T07) — offline approval before live deployment
-- 68 Pine Scripts (50 in `pine/` + 18 in `pine_new/`)
+- 52 Pine Scripts in unified `all_strategies/` folder (pine/ and pine_new/ merged)
 - Bot + Dashboard connected: single shared CSV, auto-sync on ML completion
 - Backtest processor with CAGR + fixed capital mode + slippage + win rate checks
 - 20 assets supported (ETH, BTC, SOL, SUI, LDO, LINK, AVAX, ADA, XRP, DOT + 10 more)
@@ -49,8 +49,7 @@ strategies/                 — 22 batch files (batch_01-22), 260+ strategies
 storage/                    — Historical data (86MB parquet), ML models, TV feedback, promotion candidates
 scripts/                    — feed_tv_results.py, train_ml_full.py, predict_new_strats.py, etc.
 reports/                    — Day reports, execution plan, frozen candidates, approval pack
-pine/                       — 50 TV-validated Pine Scripts
-pine_new/                   — 18 fusion Pine Scripts (latest generation)
+all_strategies/             — 52 Pine Scripts (merged from pine/ + pine_new/, negatives removed)
 deploy/                     — systemd service, SSH key
 ```
 
@@ -229,6 +228,7 @@ Day 6 (Apr 1): Tournament backtester matching, TV validation proving gap
 - **Apr 4**: Massive expansion. Created strategies #37-50 (fusion strategies). Supertrend CCI ETH 6,431% CAGR. Connected bot+dashboard to shared data. Fixed CAGR formula. Added win rate checks. Strategy promotion pipeline (T07) built. 313 strategies total. **Senior flagged: all results inflated due to 95% equity compounding**
 - **Apr 6**: Transition to realism. Stopped generating strategies, focused on fixing backtest engine. Created frozen shortlist (Donchian ETH/SUI, CCI LDO/ETH — paper trade only). Built execution plan (G-01→G-06). 18 new fusion scripts in `pine_new/`
 - **Apr 7**: All Garima tasks completed (G-01→G-06, N-05, N-06, U-01, U-02, T07, X-02, P-08). Realistic rerun: 2 strategies PASS (CCI+Donchian ETH), 5 FAIL. Fixed BUY-trade blocking (ema200 gate removed from 9 scripts). Added webhook secret to 4 old pine scripts + 5 pine_new scripts. Harsh confirmed: manifest populated, inventory 2/2 LIVE_VERIFIED, 18/18 go-live gates PASS, 7-day paper validation started (Apr 7-14). Decision memo template created. 3 webhook-ready scripts converted (Aggressive Entry, PSAR Volume Surge, Ichimoku MACD Pro, Full Momentum).
+- **Apr 8**: Paper validation Day 2. Merged pine/ + pine_new/ + pine_scripts/ into single `all_strategies/` folder. Removed all negative ROI strategies from cagr3 results (VWAP RSI Mean Revert, OBV EMA, Chaikin MF, ROC MACD, Elder Impulse — all majority negative). Removed old strategies without risk framework. Created 12 new strategies (G11-G22) using proven Donchian/CCI winning DNA: SL 1.5%, TP 12%, Trail 4%, tiered entry (ADX+volume), anti-overtrading (3/day max, cooldown, -3% breaker), ATR volatility filter. Completed V-04 (shortlist-to-approval hash linkage verified), V-09 (prewritten 3 verdict branches in decision memo). Paper trading data from Google Sheet shows 4 approved trades (2× CCI Trend ETH BUY, 2× Donchian Trend ETH BUY). Trade frequency on track (~2-3/week). SELL path not yet observed. Flag: CCI_Trend also firing on AVAXUSDT (not in approved manifest).
 
 ## All Garima Tasks — Completion Status
 
@@ -247,6 +247,9 @@ Day 6 (Apr 1): Tournament backtester matching, TV validation proving gap
 | U-01 | Regenerate shortlist from realistic rerun | DONE | Apr 7 |
 | U-02 | Provenance fields + backtest hash | DONE | Apr 7 |
 | P-08 | Decision memo template | DONE | Apr 7 |
+| V-04 | Shortlist-to-approval provenance linkage | DONE | Apr 8 |
+| V-05 | Daily P-07 comparison table | IN PROGRESS | Apr 8+ |
+| V-09 | Prewrite Day-8 verdict branches | DONE | Apr 8 |
 | U-09 | Final decision memo | PENDING (Apr 14) |
 | P-07 | Daily paper review vs shortlist | IN PROGRESS |
 
@@ -258,7 +261,24 @@ Day 6 (Apr 1): Tournament backtester matching, TV validation proving gap
 
 Settings: $500 fixed/trade, 0.1% slippage, 30% OOS, SL=1.5%, TP=12%, Trail=4%
 
-## Current Phase: 7-Day Paper Validation (Apr 7-14)
+## Current Phase: 7-Day Paper Validation (Apr 7-14) — Day 2
+
+### Paper Trading Results (Live from Google Sheet)
+| Date | Strategy | Asset | Action | Qty | Price |
+|------|----------|-------|--------|-----|-------|
+| Apr 7 10:25 | CCI Trend | ETHUSDT | BUY | 0.116 | $2,120.38 |
+| Apr 7 10:25 | Donchian Trend | ETHUSDT | BUY | 0.110 | $2,120.13 |
+| Apr 8 00:00 | Donchian Trend | ETHUSDT | BUY | 0.095 | $2,242.86 |
+| Apr 8 00:00 | CCI Trend | ETHUSDT | BUY | 0.099 | $2,244.00 |
+
+### Paper Validation Status
+- Trade frequency: 4 in 2 days — ON TRACK (expected ~2-3/week)
+- BUY path: OBSERVED (4 signals)
+- SELL path: NOT YET OBSERVED
+- NO_GO triggers: NONE so far
+- Flag: CCI_Trend firing on AVAXUSDT (PnL -41.76) — not in approved manifest
+
+### Roles
 - Harsh: freeze code, daily reports, inventory/gate snapshots
 - Garima: review daily results vs shortlist, prepare Day-8 decision memo
 - **No code changes to execution logic during this window**
@@ -310,3 +330,80 @@ Settings: $500 fixed/trade, 0.1% slippage, 30% OOS, SL=1.5%, TP=12%, Trail=4%
   - Inventory: 2/2 LIVE_VERIFIED
   - Go-live gate: 18/18 PASS
   - Next action: daily P-07 review + U-09 decision memo on Apr 14
+
+### April 8, 2026 — Codex (Session 3)
+- **Worked on**
+  - Merged pine/ + pine_new/ + pine_scripts/ into unified `all_strategies/` folder
+  - Cross-checked all strategies against profitable_results_sheet CSVs (cagr, cagr2, cagr3, good)
+  - Removed 5 negative strategies from cagr3 batch (VWAP RSI Mean Revert, OBV EMA, Chaikin MF, ROC MACD, Elder Impulse)
+  - Removed 5 old strategies without risk framework (old G1/G5/G6/G8/G9)
+  - Created 12 new strategies (G11-G22) with proven Donchian/CCI winning DNA:
+    - G11 Donchian CCI Power, G12 SuperTrend Donchian, G13 MACD Donchian Trend
+    - G14 CCI RSI Double Momentum, G15 Aroon Donchian Breakout, G16 CCI Keltner Fusion
+    - G17 Donchian PSAR Trend, G18 CCI ADX Power Trend, G19 Donchian Volume Surge
+    - G20 Stoch Donchian Trend, G21 CCI Ichimoku Trend, G22 Donchian EMA Ribbon
+  - All new strategies include: SL 1.5%/TP 12%/Trail 4%, tiered entry, anti-overtrading, ATR filter, webhook secret
+  - Completed V-04: verified shortlist hash linkage (approved_strategies.json ↔ REALISTIC_SHORTLIST_RESULTS.json)
+  - Completed V-09: prewritten 3 verdict branches (NO_GO/PAPER_ONLY/READY_FOR_TINY_CAPITAL) in decision memo
+  - Fetched paper trading data from Google Sheet — 4 approved trades, both strategies active on ETHUSDT
+  - Updated PROJECT_CONTEXT.md with Apr 8 work
+
+- **Current status**
+  - all_strategies/: 52 scripts (cleaned + new)
+  - Paper validation: Day 2 of 7, ON TRACK
+  - V-04: DONE, V-05: IN PROGRESS, V-09: DONE
+  - Next: continue daily paper review, TV validate G11-G22 on ETH/BTC/SOL/AVAX/LINK 4h
+
+### April 8, 2026 — Codex (Session 3, Part 2)
+- **Worked on**
+  - Created G23-G28 (6 optimized strategies targeting 2%/day CAGR):
+    - G23 Donchian CCI Lite, G24 Donchian Pure HighTP, G25 CCI Pure HighTP
+    - G26 Donchian ADX Aggro, G27 CCI Donchian Wide, G28 Donchian Short14
+  - Key changes: wider TP (15-18%), tighter trail (3-3.5%), lighter filters, lower ADX threshold
+  - Analyzed cagr_good2 results — G23-G28 jumped to 0.6-0.96%/day vs 0.4%/day for G11-G22
+  - 4 strategies hit TIER_1_DEPLOY: G25 AVAX (0.58%/day), G25 SUI (0.56%/day), G26 SUI (0.77%/day), G27 AVAX (0.96%/day)
+  - Best result: G27 CCI Donchian Wide on AVAX — CAGR 3125%, daily 0.96%, WR 83.3%, PF 11.24
+  - Fixed G15 Aroon Donchian Breakout — ta.aroon doesn't exist in Pine v5, replaced with manual calculation
+  - Checked Google Sheet paper trading — no new signals since Apr 8 00:00
+
+- **Current status**
+  - all_strategies/: 58 scripts total (G11-G28 new + proven winners)
+  - Best daily CAGR: 0.96% (G27 AVAX) — up from 0.4%, still below 2% target
+  - Paper validation: Day 2 of 7, 4 approved trades, both strategies active
+  - Next: validate G23-G28 on SUI/LDO (highest volatility assets) to push toward 2%/day
+
+### April 9, 2026 — Codex (Session 4)
+- **Worked on**
+  - created `reports/DAY_PLAN_2026-04-09.md` for the frozen-paper-window + research-lane day
+  - created `reports/CLAUDE_TV_READINESS_2026-04-09.md` with one reference webhook shape, Claude use cases, and validation checklist
+  - opened a separate range-bound research note in `reports/RANGE_BOUND_RESEARCH_LANE_2026-04-09.md`
+  - created role task packs:
+    - `reports/PYTHON_ROLE_TASK_PACK_2026-04-09.md`
+    - `reports/ML_ROLE_TASK_PACK_2026-04-09.md`
+    - `reports/DEVELOPING_PERSONALITY_EVAL_2026-04-09.md`
+  - added 3 new research-only range-bound Pine strategies in `all_strategies/`:
+    - `RB01_BB_RSI_Range_Revert.pine`
+    - `RB02_Donchian_Midline_Fade.pine`
+    - `RB03_Squeeze_Fade_Retest.pine`
+  - kept all new work separate from the frozen paper manifest and active ETH 4h paper strategies
+
+- **Current status**
+  - paper lane remains unchanged
+  - Claude readiness pack is documented and ready for later access
+  - range-bound lane is now formalized as a separate research stream
+  - next action: TV test the RB01-RB03 batch on ETH, LINK, DOT, BNB, and SOL on 4h
+
+### April 9, 2026 â€” Codex (Session 5)
+- **Worked on**
+  - completed Garima-owned scope-tightening items from the latest cross-check
+  - updated `reports/DECISION_MEMO_TEMPLATE.md` so the Apr 14 verdict is explicitly limited to:
+    - `CCI Trend ETHUSDT 4h`
+    - `Donchian Trend ETHUSDT 4h`
+  - separated the AVAX leak from the production memo by labeling it research-only / out-of-scope unless it affects the current ETH pair or shared execution infrastructure
+  - updated `reports/RESEARCH_LANE_G23_G36.md` so G23-G36 cannot influence the Apr 14 decision and can only move through a later isolated paper window
+  - updated `reports/GO_LIVE_GATE_DOC.md` so it cannot be read as blanket approval for all manifest or research entries
+
+- **Current status**
+  - Garima-side memo and research-lane docs now match the latest scoped-decision guidance
+  - Apr 14 decision is documented as a verdict on the frozen ETH 4h pair only
+  - research winners remain separated from the current production paper lane

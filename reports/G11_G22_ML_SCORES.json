@@ -1,0 +1,422 @@
+[
+  {
+    "strategy": "G11_Donchian_CCI_Power",
+    "asset": "ETHUSDT",
+    "ml_score": 45.0,
+    "signals": "donchian+cci",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G12_SuperTrend_Donchian",
+    "asset": "ETHUSDT",
+    "ml_score": 37.5,
+    "signals": "supertrend+donchian",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G18_CCI_ADX_Power",
+    "asset": "ETHUSDT",
+    "ml_score": 37.5,
+    "signals": "cci+adx",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G13_MACD_Donchian_Trend",
+    "asset": "ETHUSDT",
+    "ml_score": 30.0,
+    "signals": "macd+donchian",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G14_CCI_RSI_Double",
+    "asset": "ETHUSDT",
+    "ml_score": 30.0,
+    "signals": "cci+rsi",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G15_Aroon_Donchian",
+    "asset": "ETHUSDT",
+    "ml_score": 30.0,
+    "signals": "aroon+donchian",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G16_CCI_Keltner_Fusion",
+    "asset": "ETHUSDT",
+    "ml_score": 30.0,
+    "signals": "cci+keltner",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G17_Donchian_PSAR",
+    "asset": "ETHUSDT",
+    "ml_score": 30.0,
+    "signals": "donchian+psar",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G19_Donchian_Volume_Surge",
+    "asset": "ETHUSDT",
+    "ml_score": 30.0,
+    "signals": "donchian+volume",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G21_CCI_Ichimoku",
+    "asset": "ETHUSDT",
+    "ml_score": 30.0,
+    "signals": "cci+ichimoku",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G22_Donchian_EMA_Ribbon",
+    "asset": "ETHUSDT",
+    "ml_score": 30.0,
+    "signals": "donchian+ema",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G11_Donchian_CCI_Power",
+    "asset": "BTCUSDT",
+    "ml_score": 27.0,
+    "signals": "donchian+cci",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G12_SuperTrend_Donchian",
+    "asset": "BTCUSDT",
+    "ml_score": 22.5,
+    "signals": "supertrend+donchian",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G18_CCI_ADX_Power",
+    "asset": "BTCUSDT",
+    "ml_score": 22.5,
+    "signals": "cci+adx",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G20_Stoch_Donchian",
+    "asset": "ETHUSDT",
+    "ml_score": 22.5,
+    "signals": "stoch+donchian",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G11_Donchian_CCI_Power",
+    "asset": "SOLUSDT",
+    "ml_score": 18.0,
+    "signals": "donchian+cci",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G11_Donchian_CCI_Power",
+    "asset": "LINKUSDT",
+    "ml_score": 18.0,
+    "signals": "donchian+cci",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G13_MACD_Donchian_Trend",
+    "asset": "BTCUSDT",
+    "ml_score": 18.0,
+    "signals": "macd+donchian",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G14_CCI_RSI_Double",
+    "asset": "BTCUSDT",
+    "ml_score": 18.0,
+    "signals": "cci+rsi",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G15_Aroon_Donchian",
+    "asset": "BTCUSDT",
+    "ml_score": 18.0,
+    "signals": "aroon+donchian",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G16_CCI_Keltner_Fusion",
+    "asset": "BTCUSDT",
+    "ml_score": 18.0,
+    "signals": "cci+keltner",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G17_Donchian_PSAR",
+    "asset": "BTCUSDT",
+    "ml_score": 18.0,
+    "signals": "donchian+psar",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G19_Donchian_Volume_Surge",
+    "asset": "BTCUSDT",
+    "ml_score": 18.0,
+    "signals": "donchian+volume",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G21_CCI_Ichimoku",
+    "asset": "BTCUSDT",
+    "ml_score": 18.0,
+    "signals": "cci+ichimoku",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G22_Donchian_EMA_Ribbon",
+    "asset": "BTCUSDT",
+    "ml_score": 18.0,
+    "signals": "donchian+ema",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G12_SuperTrend_Donchian",
+    "asset": "SOLUSDT",
+    "ml_score": 15.0,
+    "signals": "supertrend+donchian",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G12_SuperTrend_Donchian",
+    "asset": "LINKUSDT",
+    "ml_score": 15.0,
+    "signals": "supertrend+donchian",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G18_CCI_ADX_Power",
+    "asset": "SOLUSDT",
+    "ml_score": 15.0,
+    "signals": "cci+adx",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G18_CCI_ADX_Power",
+    "asset": "LINKUSDT",
+    "ml_score": 15.0,
+    "signals": "cci+adx",
+    "verdict": "TV_TEST"
+  },
+  {
+    "strategy": "G20_Stoch_Donchian",
+    "asset": "BTCUSDT",
+    "ml_score": 13.5,
+    "signals": "stoch+donchian",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G13_MACD_Donchian_Trend",
+    "asset": "SOLUSDT",
+    "ml_score": 12.0,
+    "signals": "macd+donchian",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G13_MACD_Donchian_Trend",
+    "asset": "LINKUSDT",
+    "ml_score": 12.0,
+    "signals": "macd+donchian",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G14_CCI_RSI_Double",
+    "asset": "SOLUSDT",
+    "ml_score": 12.0,
+    "signals": "cci+rsi",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G14_CCI_RSI_Double",
+    "asset": "LINKUSDT",
+    "ml_score": 12.0,
+    "signals": "cci+rsi",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G15_Aroon_Donchian",
+    "asset": "SOLUSDT",
+    "ml_score": 12.0,
+    "signals": "aroon+donchian",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G15_Aroon_Donchian",
+    "asset": "LINKUSDT",
+    "ml_score": 12.0,
+    "signals": "aroon+donchian",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G16_CCI_Keltner_Fusion",
+    "asset": "SOLUSDT",
+    "ml_score": 12.0,
+    "signals": "cci+keltner",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G16_CCI_Keltner_Fusion",
+    "asset": "LINKUSDT",
+    "ml_score": 12.0,
+    "signals": "cci+keltner",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G17_Donchian_PSAR",
+    "asset": "SOLUSDT",
+    "ml_score": 12.0,
+    "signals": "donchian+psar",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G17_Donchian_PSAR",
+    "asset": "LINKUSDT",
+    "ml_score": 12.0,
+    "signals": "donchian+psar",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G19_Donchian_Volume_Surge",
+    "asset": "SOLUSDT",
+    "ml_score": 12.0,
+    "signals": "donchian+volume",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G19_Donchian_Volume_Surge",
+    "asset": "LINKUSDT",
+    "ml_score": 12.0,
+    "signals": "donchian+volume",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G21_CCI_Ichimoku",
+    "asset": "SOLUSDT",
+    "ml_score": 12.0,
+    "signals": "cci+ichimoku",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G21_CCI_Ichimoku",
+    "asset": "LINKUSDT",
+    "ml_score": 12.0,
+    "signals": "cci+ichimoku",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G22_Donchian_EMA_Ribbon",
+    "asset": "SOLUSDT",
+    "ml_score": 12.0,
+    "signals": "donchian+ema",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G22_Donchian_EMA_Ribbon",
+    "asset": "LINKUSDT",
+    "ml_score": 12.0,
+    "signals": "donchian+ema",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G11_Donchian_CCI_Power",
+    "asset": "AVAXUSDT",
+    "ml_score": 9.0,
+    "signals": "donchian+cci",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G20_Stoch_Donchian",
+    "asset": "SOLUSDT",
+    "ml_score": 9.0,
+    "signals": "stoch+donchian",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G20_Stoch_Donchian",
+    "asset": "LINKUSDT",
+    "ml_score": 9.0,
+    "signals": "stoch+donchian",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G12_SuperTrend_Donchian",
+    "asset": "AVAXUSDT",
+    "ml_score": 7.5,
+    "signals": "supertrend+donchian",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G18_CCI_ADX_Power",
+    "asset": "AVAXUSDT",
+    "ml_score": 7.5,
+    "signals": "cci+adx",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G13_MACD_Donchian_Trend",
+    "asset": "AVAXUSDT",
+    "ml_score": 6.0,
+    "signals": "macd+donchian",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G14_CCI_RSI_Double",
+    "asset": "AVAXUSDT",
+    "ml_score": 6.0,
+    "signals": "cci+rsi",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G15_Aroon_Donchian",
+    "asset": "AVAXUSDT",
+    "ml_score": 6.0,
+    "signals": "aroon+donchian",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G16_CCI_Keltner_Fusion",
+    "asset": "AVAXUSDT",
+    "ml_score": 6.0,
+    "signals": "cci+keltner",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G17_Donchian_PSAR",
+    "asset": "AVAXUSDT",
+    "ml_score": 6.0,
+    "signals": "donchian+psar",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G19_Donchian_Volume_Surge",
+    "asset": "AVAXUSDT",
+    "ml_score": 6.0,
+    "signals": "donchian+volume",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G21_CCI_Ichimoku",
+    "asset": "AVAXUSDT",
+    "ml_score": 6.0,
+    "signals": "cci+ichimoku",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G22_Donchian_EMA_Ribbon",
+    "asset": "AVAXUSDT",
+    "ml_score": 6.0,
+    "signals": "donchian+ema",
+    "verdict": "SKIP"
+  },
+  {
+    "strategy": "G20_Stoch_Donchian",
+    "asset": "AVAXUSDT",
+    "ml_score": 4.5,
+    "signals": "stoch+donchian",
+    "verdict": "SKIP"
+  }
+]

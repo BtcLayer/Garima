@@ -1,0 +1,82 @@
+[
+  {
+    "strategy": "F06_Chandelier_Donchian_Wide",
+    "pine": "F06_Chandelier_Donchian_Wide.pine",
+    "oos_roi": 5.34,
+    "oos_pf": 1.42,
+    "oos_wr": 30.7,
+    "oos_gdd": 1.36,
+    "oos_trades": 244,
+    "status": "PASS"
+  },
+  {
+    "strategy": "F07_Ichimoku_Donchian_Wide",
+    "pine": "F07_Ichimoku_Donchian_Wide.pine",
+    "oos_roi": 3.57,
+    "oos_pf": 1.28,
+    "oos_wr": 23.0,
+    "oos_gdd": 1.59,
+    "oos_trades": 200,
+    "status": "PASS"
+  },
+  {
+    "strategy": "F08_BB_Squeeze_Donchian_Wide",
+    "pine": "F08_BB_Squeeze_Donchian_Wide.pine",
+    "oos_roi": 2.63,
+    "oos_pf": 1.21,
+    "oos_wr": 23.6,
+    "oos_gdd": 2.17,
+    "oos_trades": 191,
+    "status": "PASS"
+  },
+  {
+    "strategy": "F03_SuperTrend_Donchian_Wide",
+    "pine": "F03_SuperTrend_Donchian_Wide.pine",
+    "oos_roi": 1.58,
+    "oos_pf": 1.09,
+    "oos_wr": 18.4,
+    "oos_gdd": 2.56,
+    "oos_trades": 255,
+    "status": "PASS"
+  },
+  {
+    "strategy": "F02_ADX_DI_Donchian_Wide",
+    "pine": "F02_ADX_DI_Donchian_Wide.pine",
+    "oos_roi": 0.77,
+    "oos_pf": 1.04,
+    "oos_wr": 21.1,
+    "oos_gdd": 2.78,
+    "oos_trades": 270,
+    "status": "PASS"
+  },
+  {
+    "strategy": "F05_Williams_Donchian_Wide",
+    "pine": "F05_Williams_Donchian_Wide.pine",
+    "oos_roi": -0.31,
+    "oos_pf": 0.98,
+    "oos_wr": 29.8,
+    "oos_gdd": 3.23,
+    "oos_trades": 302,
+    "status": "FAIL"
+  },
+  {
+    "strategy": "F04_TRIX_Donchian_Wide",
+    "pine": "F04_TRIX_Donchian_Wide.pine",
+    "oos_roi": -0.4,
+    "oos_pf": 0.97,
+    "oos_wr": 19.8,
+    "oos_gdd": 2.74,
+    "oos_trades": 222,
+    "status": "FAIL"
+  },
+  {
+    "strategy": "F01_PSAR_Donchian_Wide",
+    "pine": "F01_PSAR_Donchian_Wide.pine",
+    "oos_roi": -2.04,
+    "oos_pf": 0.93,
+    "oos_wr": 24.5,
+    "oos_gdd": 3.54,
+    "oos_trades": 580,
+    "status": "FAIL"
+  }
+]

@@ -1,0 +1,98 @@
+//@version=5
+// SUPERTREND + DONCHIAN — SuperTrend direction + Donchian breakout
+// SuperTrend gives clean trend direction, Donchian gives breakout timing
+strategy("G12 SuperTrend Donchian [Webhook]", overlay=true, initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=95,
+     commission_type=strategy.commission.percent, commission_value=0.1)
+
+WEBHOOK_SECRET = "squeeze_tradingview_cluster_2026_secure"
+long_alert = '{"secret":"' + WEBHOOK_SECRET + '","strategy":"SuperTrend_Donchian","action":"BUY","ticker":"{{ticker}}","interval":"{{interval}}","price":"{{close}}"}'
+short_alert = '{"secret":"' + WEBHOOK_SECRET + '","strategy":"SuperTrend_Donchian","action":"SELL","ticker":"{{ticker}}","interval":"{{interval}}","price":"{{close}}"}'
+close_long_alert = '{"secret":"' + WEBHOOK_SECRET + '","strategy":"SuperTrend_Donchian","action":"CLOSE_LONG","ticker":"{{ticker}}","interval":"{{interval}}","price":"{{close}}"}'
+close_short_alert = '{"secret":"' + WEBHOOK_SECRET + '","strategy":"SuperTrend_Donchian","action":"CLOSE_SHORT","ticker":"{{ticker}}","interval":"{{interval}}","price":"{{close}}"}'
+
+// ── INPUTS ──
+dc_len    = input.int(20, "Donchian Length")
+dc_exit   = input.int(10, "Exit Channel Length")
+st_factor = input.float(3.0, "SuperTrend Factor")
+st_len    = input.int(10, "SuperTrend ATR Length")
+sl_pct    = input.float(1.5, "SL %") / 100
+tp_pct    = input.float(12.0, "TP %") / 100
+trail_pct = input.float(4.0, "Trail %") / 100
+
+// ── DONCHIAN ──
+dc_upper = ta.highest(high, dc_len)
+dc_lower = ta.lowest(low, dc_len)
+exit_lower = ta.lowest(low, dc_exit)
+exit_upper = ta.highest(high, dc_exit)
+breakout_up = close > dc_upper[1]
+breakout_down = close < dc_lower[1]
+
+// ── SUPERTREND ──
+[st_line, st_dir] = ta.supertrend(st_factor, st_len)
+st_bull = st_dir < 0
+st_bear = st_dir > 0
+
+// ── CONFIRMATION ──
+ema50 = ta.ema(close, 50)
+[diplus, diminus, adx] = ta.dmi(14, 14)
+atr14 = ta.atr(14)
+atr_ma = ta.sma(atr14, 100)
+vol_ok = atr14 < atr_ma * 2
+vol_confirm = volume > ta.sma(volume, 20) * 1.2
+rsi = ta.rsi(close, 14)
+
+// ── TIERED ENTRY ──
+long_strong = breakout_up and st_bull and close > ema50 and adx > 25 and vol_confirm
+long_medium = breakout_up and st_bull and close > ema50 and adx > 20
+short_strong = breakout_down and st_bear and close < ema50 and adx > 25 and vol_confirm
+short_medium = breakout_down and st_bear and close < ema50 and adx > 20
+
+long_entry = long_strong or long_medium
+short_entry = short_strong or short_medium
+
+// ── EXIT ──
+long_exit = close < exit_lower[1] or st_bear or rsi > 80
+short_exit = close > exit_upper[1] or st_bull or rsi < 20
+
+// ── ANTI-OVERTRADING ──
+var int trades_today = 0
+var int consec_losses = 0
+var int cooldown = 0
+var float day_equity = strategy.equity
+is_new_day = ta.change(time("D")) != 0
+if is_new_day
+    trades_today := 0
+    day_equity := strategy.equity
+if cooldown > 0
+    cooldown -= 1
+was_closed = strategy.position_size[1] != 0 and strategy.position_size == 0
+if was_closed
+    trades_today += 1
+    if strategy.netprofit < strategy.netprofit[1]
+        consec_losses += 1
+        if consec_losses >= 3
+            cooldown := 6
+            consec_losses := 0
+    else
+        consec_losses := 0
+daily_pnl = (strategy.equity - day_equity) / day_equity
+can_trade = trades_today < 3 and cooldown == 0 and daily_pnl > -0.03
+
+// ── EXECUTION ──
+if long_entry and can_trade and vol_ok and strategy.position_size <= 0
+    strategy.entry("Long", strategy.long, alert_message=long_alert)
+    strategy.exit("L_X", "Long", stop=close*(1-sl_pct), limit=close*(1+tp_pct),
+         trail_points=close*trail_pct/100/syminfo.mintick, trail_offset=close*trail_pct/100/syminfo.mintick)
+if short_entry and can_trade and vol_ok and strategy.position_size >= 0
+    strategy.entry("Short", strategy.short, alert_message=short_alert)
+    strategy.exit("S_X", "Short", stop=close*(1+sl_pct), limit=close*(1-tp_pct),
+         trail_points=close*trail_pct/100/syminfo.mintick, trail_offset=close*trail_pct/100/syminfo.mintick)
+if long_exit and strategy.position_size > 0
+    strategy.close("Long", alert_message=close_long_alert)
+if short_exit and strategy.position_size < 0
+    strategy.close("Short", alert_message=close_short_alert)
+
+plot(dc_upper, "DC Hi", color.green)
+plot(dc_lower, "DC Lo", color.red)
+plot(st_line, "ST", st_bull ? color.lime : color.red, 2)
